@@ -38,7 +38,7 @@ option(with_verbose "Verbose build" OFF)
 option(with_gcov "Add code coverage using gcov" OFF)
 option(with_gprof "Profile build" OFF)
 option(with_tests "Build tests" OFF)
-option(with_boost "Build with boost" OFF)
+option(with_boost "Build with boost" ON)
 option(coek_home "Installation of Coek")
 
 if (with_gcov)
@@ -77,13 +77,10 @@ else()
     endif()
 endif()
 
-if(with_boost)
-    find_package(Boost REQUIRED)
+if(coek_home)
+    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${coek_home})
 endif()
 
-if(coek_install_dir)
-    set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${coek_install_dir}")
-endif()
 #
 # Summarize configuration
 #
@@ -93,14 +90,14 @@ message("-- with_gcov: ${with_gcov}")
 message("-- with_gprof: ${with_gprof}")
 message("-- with_tests: ${with_tests}")
 message("-- with_boost: ${with_boost}")
-message("-- coek_install_dir: ${coek_home}")
+message("-- coek_home: ${coek_home}")
 
 #
 # Add subdirectories
 #
 add_subdirectory(chmmpp)
 #add_subdirectory(library)
-#add_subdirectory(examples)
+add_subdirectory(examples)
 if (with_tests)
     add_subdirectory(test)
 endif()

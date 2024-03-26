@@ -1,8 +1,8 @@
 //main.cpp
 
-#include "HMM.h"
 
-#include<unordered_set>
+#include <unordered_set>
+#include <chmmpp/HMM.h>
 
 //Could also make this a lambda fn, but this is easier
 //Checks if the hidden constraints form a tour
