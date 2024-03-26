@@ -15,7 +15,7 @@ foreach( exampleFile ${EXAMPLES} )
     
     target_link_libraries(${exampleName} #hmm.h
         PRIVATE
-        CHMM
+        chmmpp::chmmpp
     )
 
 endforeach( exampleFile ${EXAMPLES} )

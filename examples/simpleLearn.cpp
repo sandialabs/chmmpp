@@ -1,6 +1,6 @@
 //main.cpp
 
-#include "HMM.h"
+#include <chmmpp/HMM.h>
 
 int main() {
     //bool oracleConstraint(std::vector<int> hid, double numZeros);

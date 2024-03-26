@@ -1,6 +1,6 @@
 //main.cpp
 
-#include "HMM.h"
+#include <chmmpp/HMM.h>
 
 bool oracleConstraint(std::vector<int> hid, double numZeros) {
     return (numZeros == count(hid.begin(), hid.end(), 0));

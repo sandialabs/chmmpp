@@ -1,6 +1,6 @@
 //main.cpp
 
-#include "HMM.h"
+#include <chmmpp/HMM.h>
 
 
 int main() {

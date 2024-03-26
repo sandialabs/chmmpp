@@ -10,7 +10,9 @@ SET(sources
     )
 
 if (with_boost)
-    list(APPEND chmmpp_compile_options "-I${BOOST_INCLUDE_DIRS}")
+    find_package(Boost REQUIRED)
+    list(APPEND sources HMM.cpp)
+    list(APPEND chmmpp_link_libraries "Boost::boost")
 endif()
 
 # gcov
@@ -41,6 +43,24 @@ else()
     message("-- Building static libchmmpp library")
 endif()
 add_library(chmmpp::chmmpp ALIAS chmmpp)
+
+message("HERE ${chmmpp_include_directories}")
+message("HERE ${chmmpp_compile_options}")
+message("HERE ${chmmpp_link_libraries}")
+message("HERE ${chmmpp_link_directories}")
+
+target_compile_options(chmmpp PUBLIC ${chmmpp_compile_options})
+target_include_directories(chmmpp
+                           PUBLIC
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>"
+                           "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+                           )
+target_include_directories(chmmpp
+                           PUBLIC
+                           ${chmmpp_include_directories})
+target_link_libraries(chmmpp PUBLIC ${chmmpp_link_libraries})
+target_link_directories(chmmpp PUBLIC ${chmmpp_link_directories})
+set_property(TARGET chmmpp PROPERTY INTERFACE_LINK_LIBRARIES ${chmmpp_link_libraries})
 
 #
 # make install
