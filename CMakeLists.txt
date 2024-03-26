@@ -39,7 +39,14 @@ option(with_gcov "Add code coverage using gcov" OFF)
 option(with_gprof "Profile build" OFF)
 option(with_tests "Build tests" OFF)
 option(with_boost "Build with boost" ON)
-option(coek_home "Installation of Coek")
+option(coek_home "Installation of Coek" OFF)
+
+if(coek_home)
+    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${coek_home})
+else()
+    # Assume that Catch2 is installed with coek (for now)
+    set(with_tests OFF)
+endif()
 
 if (with_gcov)
   if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
@@ -75,10 +82,6 @@ else()
     if (MSVC)
         set(CMAKE_CXX_FLAGS_RELEASE "/permissive-")
     endif()
-endif()
-
-if(coek_home)
-    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${coek_home})
 endif()
 
 #
