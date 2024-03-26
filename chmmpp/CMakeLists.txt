@@ -1,0 +1,73 @@
+##################### Build Shared Library  #####################
+
+set(chmmpp_compile_options)
+set(chmmpp_link_libraries)
+set(chmmpp_include_directories)
+set(chmmpp_link_directories)
+
+SET(sources
+    mip/test.cpp
+    )
+
+if (with_boost)
+    list(APPEND chmmpp_compile_options "-I${BOOST_INCLUDE_DIRS}")
+endif()
+
+# gcov
+if(with_gcov)
+    list(APPEND chmmpp_compile_options -fprofile-arcs -ftest-coverage -g)
+    list(APPEND chmmpp_link_libraries gcov)
+endif()
+
+# gprof
+if (MSVC)
+else()
+    if(${with_gprof})
+        list(APPEND chmmpp_compile_options "-pg")
+    else()
+        list(APPEND chmmpp_compile_options "-Wall;-O3")
+    endif()
+endif()
+
+#
+# Build object library
+#
+if (build_shared_libs)
+    add_library(chmmpp SHARED ${sources})
+    message("-- Building shared libchmmpp library")
+    set_target_properties(chmmpp PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
+else()
+    add_library(chmmpp STATIC ${sources})
+    message("-- Building static libchmmpp library")
+endif()
+add_library(chmmpp::chmmpp ALIAS chmmpp)
+
+#
+# make install
+#
+install(TARGETS chmmpp
+        EXPORT chmmppTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+       )
+if (WIN32)
+    set_target_properties(chmmpp PROPERTIES OUTPUT_NAME libchmmpp)
+endif()
+
+install(FILES
+        chmmpp.hpp
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chmmpp
+        )
+
+#
+# Push the compile options to the parent scope
+#
+set(chmmpp_compile_options ${chmmpp_compile_options} PARENT_SCOPE)
+set(chmmpp_link_libraries ${chmmpp_link_libraries} PARENT_SCOPE)
+set(chmmpp_include_directories ${chmmpp_include_directories} PARENT_SCOPE)
+set(chmmpp_link_directories ${chmmpp_link_directories} PARENT_SCOPE)
+
+
+
