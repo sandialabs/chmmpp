@@ -1,7 +1,7 @@
 // main.cpp
 
 #include <iostream>
-#include <chmmpp/HMM.h>
+#include <chmmpp/HMM_inference.hpp>
 
 int main()
 {
@@ -13,7 +13,7 @@ int main()
 
     size_t T = 1000;  // Time Horizon
 
-    chmmpp::HMM myHMM(A, S, E, 0);
+    chmmpp::HMM_inference myHMM(A, S, E, 0);
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<int> obs;

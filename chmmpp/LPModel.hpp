@@ -4,7 +4,7 @@
 #include <map>
 #include <tuple>
 #include <coek/coek.hpp>
-#include "chmmpp/HMM.h"
+#include "chmmpp/HMM.hpp"
 
 namespace chmmpp {
 

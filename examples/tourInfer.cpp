@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <unordered_set>
-#include <chmmpp/HMM.h>
+#include <chmmpp/HMM_inference.hpp>
 
 // Could also make this a lambda fn, but this is easier
 // Checks if the hidden constraints form a tour
@@ -48,7 +48,7 @@ int main()
 
     size_t T = 20;  // Time Horizon
     int counter = 0;
-    chmmpp::HMM myHMM(A, S, E, 0);
+    chmmpp::HMM_inference myHMM(A, S, E, 0);
 
     // Store the observed and hidden variables
     std::vector<int> obs;

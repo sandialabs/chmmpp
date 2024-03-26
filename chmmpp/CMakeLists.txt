@@ -7,6 +7,7 @@ set(chmmpp_link_directories)
 
 SET(sources
     vectorhash.cpp
+    HMM.cpp
     )
 
 if (with_coek)
@@ -17,7 +18,7 @@ endif()
 
 if (with_boost)
     find_package(Boost REQUIRED)
-    list(APPEND sources HMM.cpp)
+    list(APPEND sources HMM_inference.cpp)
     list(APPEND chmmpp_link_libraries "Boost::boost")
 endif()
 

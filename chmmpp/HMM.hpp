@@ -6,15 +6,6 @@
 
 namespace chmmpp {
 
-/*
-TODO
-----
-
-- Simplify Baum-Welch Style Algorithms with repeated functions
-- Fix Monte Carlo method to not break when we have 0's in the transition matrix
-
-*/
-
 // This is the class for dealing with HMMs
 // It stores (as protected variables) the transition matrix (A), start probabilities (S), and
 // Emission Probabilities (E) as well as the number of hidden states (H) and observed states (O)
@@ -57,33 +48,7 @@ class HMM {
 
     void run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
 
-    // Inference
-    std::vector<int> aStar(const std::vector<int> &observations, double &logProb) const;
-    std::vector<int> aStar(const std::vector<int> &observations, double &logProb,
-                           const int numZeros) const;
-    std::vector<int> aStarOracle(
-        const std::vector<int> &observations, double &logProb,
-        const std::function<bool(std::vector<int>)> &constraintOracle) const;
-    std::vector<std::vector<int> > aStarMult(const std::vector<int> &observations, double &logProb,
-                                             const int numZeros, const int numSolns) const;
-    std::vector<std::vector<int> > aStarMult(
-        const std::vector<int> &observations, double &logProb,
-        const std::function<bool(std::vector<int>)> &constraintOracle, const int numSolns) const;
-
-    double logProb(const std::vector<int> obs, const std::vector<int> guess) const;
-
-    // Learning Algorithms
-    void learn(const std::vector<int> &obs, const int numZeros, const double eps = 10E-6);
-    void learn(const std::vector<std::vector<int> > &obs, const std::vector<int> &numZeros,
-               const double eps = 10E-6);
-    void learn(const std::vector<int> &obs, const double eps = 10E-6);
-    void learn(const std::vector<std::vector<int> > &obs, const double eps = 10E-6);
-    void learn(const std::vector<std::vector<int> > &obs,
-               const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
-               const double eps = 10E-6, const int C = 10E4);
-    void learnHard(const std::vector<std::vector<int> > &obs,
-                   const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
-                   const double eps = 10E-6, int numSolns = 1);
+    void load_from_json(const std::string &json_file);
 };
 
 }  // namespace chmmpp

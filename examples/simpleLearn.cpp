@@ -1,7 +1,7 @@
 // main.cpp
 
 #include <iostream>
-#include <chmmpp/HMM.h>
+#include <chmmpp/HMM_inference.hpp>
 
 int main()
 {
@@ -19,11 +19,11 @@ int main()
     std::vector<double> SInitial{0.51, 0.49};
     std::vector<std::vector<double> > EInitial{{0.91, 0.09}, {0.1, 0.9}};
 
-    chmmpp::HMM toLearn1(AInitial, SInitial, EInitial,
-                         0);  // 0 is the seed of the RNG, can remove and it seeds by time
-    chmmpp::HMM toLearn2(AInitial, SInitial, EInitial, 0);
-    chmmpp::HMM toLearn3(AInitial, SInitial, EInitial, 0);
-    chmmpp::HMM trueHMM(A, S, E, 0);
+    chmmpp::HMM_inference toLearn1(AInitial, SInitial, EInitial,
+                                   0);  // 0 is the seed of the RNG, can remove and it seeds by time
+    chmmpp::HMM_inference toLearn2(AInitial, SInitial, EInitial, 0);
+    chmmpp::HMM_inference toLearn3(AInitial, SInitial, EInitial, 0);
+    chmmpp::HMM_inference trueHMM(A, S, E, 0);
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<std::vector<int> > obs;

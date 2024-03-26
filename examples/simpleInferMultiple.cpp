@@ -1,7 +1,7 @@
 // main.cpp
 
 #include <iostream>
-#include <chmmpp/HMM.h>
+#include <chmmpp/HMM_inference.hpp>
 
 bool oracleConstraint(std::vector<int> hid, long int numZeros)
 {
@@ -19,7 +19,7 @@ int main()
     size_t T = 25;        // Time Horizon
     size_t numSolns = 5;  // Find top # of solutions
 
-    chmmpp::HMM myHMM(A, S, E, 1234);  // 1234 is the seed
+    chmmpp::HMM_inference myHMM(A, S, E, 1234);  // 1234 is the seed
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<int> obs;
