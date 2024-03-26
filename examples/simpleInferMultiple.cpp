@@ -1,5 +1,6 @@
 // main.cpp
 
+#include <iostream>
 #include <chmmpp/HMM.h>
 
 bool oracleConstraint(std::vector<int> hid, double numZeros)
@@ -18,7 +19,7 @@ int main()
     int T = 25;        // Time Horizon
     int numSolns = 5;  // Find top # of solutions
 
-    HMM myHMM(A, S, E, 1234);  // 1234 is the seed
+    chmmpp::HMM myHMM(A, S, E, 1234);  // 1234 is the seed
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<int> obs;

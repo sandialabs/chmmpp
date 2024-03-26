@@ -1,17 +1,11 @@
 // HMM.cpp
 
-#include "HMM.h"
-
-#include <vector>
-#include <iostream>
-#include <random>
 #include <queue>
-#include <map>
-#include <limits>
-#include <cstdint>
-#include <boost/functional/hash.hpp>  //Hash for pairs
-#include <time.h>                     //Used for seed
-#include <utility>                    //Pairs
+#include <iostream>
+#include "HMM.h"
+#include "vectorhash.hpp"
+
+namespace chmmpp {
 
 /*
 TODO
@@ -21,56 +15,6 @@ TODO
 - Fix Monte Carlo method to not break when we have 0's in the transition matrix
 
 */
-
-//--------------------------
-//-----Hash for Vectors-----
-//--------------------------
-
-// Taken for Stack Overflow
-// (https://stackoverflow.com/questions/35985960/c-why-is-boosthash-combine-the-best-way-to-combine-hash-values/50978188#50978188)
-template <typename T>
-T xorshift(const T &n, int i)
-{
-    return n ^ (n >> i);
-}
-
-// a hash function with another name as to not confuse with std::hash
-uint64_t distribute(const uint64_t &n)
-{
-    uint64_t p = 0x5555555555555555ull;    // pattern of alternating 0 and 1
-    uint64_t c = 17316035218449499591ull;  // random uneven integer constant;
-    return c * xorshift(p * xorshift(n, 32), 32);
-}
-
-// if c++20 rotl is not available:
-template <typename T, typename S>
-typename std::enable_if<std::is_unsigned<T>::value, T>::type constexpr rotl(const T n, const S i)
-{
-    const T m = (std::numeric_limits<T>::digits - 1);
-    const T c = i & m;
-    return (n << c)
-           | (n >> ((T(0) - c) & m));  // this is usually recognized by the compiler to mean
-                                       // rotation, also c++20 now gives us rotl directly
-}
-
-// call this function with the old seed and the new key to be hashed and combined into the new seed
-// value, respectively the final hash
-template <class T>
-inline size_t hash_combine(std::size_t &seed, const T &v)
-{
-    return rotl(seed, std::numeric_limits<size_t>::digits / 3) ^ distribute(std::hash<T>{}(v));
-}
-
-// Could also do this for containers which aren't vectors
-template <typename T>
-std::size_t vectorHash<T>::operator()(const std::vector<T> &vec) const
-{
-    std::size_t seed = vec.size();
-    for (auto &i : vec) {
-        seed = hash_combine(seed, i);
-    }
-    return seed;
-}
 
 // Return a random number from 0,1
 // Needs to be an internal function b/c we are calling random a bunch of different times in the run
@@ -89,7 +33,7 @@ HMM::HMM(const std::vector<std::vector<double> > &inputA, const std::vector<doub
         throw std::exception();
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         if (inputA[h].size() != H) {
             std::cout << "Error in constructor for HMM, A is not a square matrix." << std::endl;
             throw std::exception();
@@ -98,7 +42,7 @@ HMM::HMM(const std::vector<std::vector<double> > &inputA, const std::vector<doub
 
     O = inputE[0].size();
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         if (inputE[h].size() != O) {
             std::cout << "Error in constructor for HMM, E is not a matrix." << std::endl;
             throw std::exception();
@@ -107,9 +51,9 @@ HMM::HMM(const std::vector<std::vector<double> > &inputA, const std::vector<doub
 
     // Check if matrices represent probabilities
     double sum = 0;
-    for (int h1 = 0; h1 < H; ++h1) {
+    for (size_t h1 = 0; h1 < H; ++h1) {
         sum = 0;
-        for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h2 = 0; h2 < H; ++h2) {
             if (inputA[h1][h2] < 0.) {
                 std::cout << "Error in constructor for HMM, A cannot have negative entries."
                           << std::endl;
@@ -126,7 +70,7 @@ HMM::HMM(const std::vector<std::vector<double> > &inputA, const std::vector<doub
     }
 
     sum = 0;
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         if (inputS[h] < 0.) {
             std::cout << "Error in constructor for HMM, S cannot have negative entries."
                       << std::endl;
@@ -138,9 +82,9 @@ HMM::HMM(const std::vector<std::vector<double> > &inputA, const std::vector<doub
         std::cout << "Error in constructor for HMM, the entries of S must sum to 1." << std::endl;
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         sum = 0;
-        for (int o = 0; o < O; ++o) {
+        for (size_t o = 0; o < O; ++o) {
             if (inputE[h][o] < 0.) {
                 std::cout << "Error in constructor for HMM, E cannot have negative entries."
                           << std::endl;
@@ -196,7 +140,7 @@ double HMM::getEEntry(const int h, const int o) const { return E[h][o]; }
 void HMM::printS() const
 {
     std::cout << "Start vector:\n";
-    for (int i = 0; i < H; ++i) {
+    for (size_t i = 0; i < H; ++i) {
         std::cout << S[i] << " ";
     }
     std::cout << "\n\n";
@@ -206,8 +150,8 @@ void HMM::printS() const
 void HMM::printA() const
 {
     std::cout << "Transmission matrix:\n";
-    for (int i = 0; i < H; ++i) {
-        for (int j = 0; j < H; ++j) {
+    for (size_t i = 0; i < H; ++i) {
+        for (size_t j = 0; j < H; ++j) {
             std::cout << A[i][j] << " ";
         }
         std::cout << "\n";
@@ -219,8 +163,8 @@ void HMM::printA() const
 void HMM::printO() const
 {
     std::cout << "Emission matrix: (Columns are hidden states, rows are observed states)\n";
-    for (int h = 0; h < H; ++h) {
-        for (int o = 0; o < O; ++o) {
+    for (size_t h = 0; h < H; ++h) {
+        for (size_t o = 0; o < O; ++o) {
             std::cout << E[h][o] << " ";
         }
         std::cout << "\n";
@@ -243,7 +187,7 @@ void HMM::print() const
 
 // This generates the observed states and hidden states running the HMM for T time steps
 // Not const b/c of the random stuff
-void HMM::run(const int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates)
+void HMM::run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates)
 {
     observedStates.clear();
     hiddenStates.clear();
@@ -251,7 +195,7 @@ void HMM::run(const int T, std::vector<int> &observedStates, std::vector<int> &h
     // Initial Hidden State
     double startProb = getRandom();
     double prob = 0;
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         prob += S[h];
         if (startProb < prob) {
             hiddenStates.push_back(h);
@@ -262,7 +206,7 @@ void HMM::run(const int T, std::vector<int> &observedStates, std::vector<int> &h
     // Initial Observed State
     double obsProb = getRandom();
     prob = 0;
-    for (int o = 0; o < O; ++o) {
+    for (size_t o = 0; o < O; ++o) {
         prob += E[hiddenStates[0]][o];
         if (obsProb < prob) {
             observedStates.push_back(o);
@@ -274,7 +218,7 @@ void HMM::run(const int T, std::vector<int> &observedStates, std::vector<int> &h
     for (int t = 1; t < T; ++t) {
         startProb = getRandom();
         prob = 0;
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             prob += A[hiddenStates[t - 1]][h];
             if (startProb < prob) {
                 hiddenStates.push_back(h);
@@ -284,7 +228,7 @@ void HMM::run(const int T, std::vector<int> &observedStates, std::vector<int> &h
 
         obsProb = getRandom();
         prob = 0;
-        for (int o = 0; o < O; ++o) {
+        for (size_t o = 0; o < O; ++o) {
             prob += E[hiddenStates[t]][o];
             if (obsProb < prob) {
                 observedStates.push_back(o);
@@ -316,16 +260,16 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
     logA.resize(H);
     logE.resize(H);
 
-    for (int h1 = 0; h1 < H; ++h1) {
+    for (size_t h1 = 0; h1 < H; ++h1) {
         logA[h1].resize(H);
-        for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h2 = 0; h2 < H; ++h2) {
             logA[h1][h2] = std::log(A[h1][h2]);
         }
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         logE[h].resize(O);
-        for (int o = 0; o < O; ++o) {
+        for (size_t o = 0; o < O; ++o) {
             logE[h][o] = std::log(E[h][o]);
         }
     }
@@ -337,14 +281,14 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
         v[t].resize(H);
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         v[T - 1][h] = 0;
     }
 
     for (int t = T - 2; t >= 0; --t) {
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             double temp = -10E12;
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 temp = std::max(temp, v[t + 1][h2] + logA[h1][h2] + logE[h2][observations[t + 1]]);
             }
             v[t][h1] = temp;
@@ -354,7 +298,7 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
     std::priority_queue<std::pair<double, std::vector<int> > > openSet;
     std::unordered_map<std::vector<int>, double, vectorHash<int> > gScore;  // log prob so far
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         double tempGScore
             = std::log(S[h]) + logE[h][observations[0]];  // Avoids extra look-up operation
         gScore[{h}] = tempGScore;
@@ -376,7 +320,7 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
             return seq;
         }
 
-        for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h2 = 0; h2 < H; ++h2) {
             auto newSeq = seq;
             newSeq.push_back(h2);
             double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
@@ -408,16 +352,16 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
     logA.resize(H);
     logE.resize(H);
 
-    for (int h1 = 0; h1 < H; ++h1) {
+    for (size_t h1 = 0; h1 < H; ++h1) {
         logA[h1].resize(H);
-        for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h2 = 0; h2 < H; ++h2) {
             logA[h1][h2] = std::log(A[h1][h2]);
         }
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         logE[h].resize(O);
-        for (int o = 0; o < O; ++o) {
+        for (size_t o = 0; o < O; ++o) {
             logE[h][o] = std::log(E[h][o]);
         }
     }
@@ -429,14 +373,14 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
         v[t].resize(H);
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         v[T - 1][h] = 0;
     }
 
     for (int t = T - 2; t >= 0; --t) {
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             double temp = -10E12;
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 temp = std::max(temp, v[t + 1][h2] + logA[h1][h2] + logE[h2][observations[t]]);
             }
             v[t][h1] = temp;
@@ -451,7 +395,7 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
     // TODO make better hash for tuple
     std::unordered_map<std::tuple<int, int, int>, int, boost::hash<std::tuple<int, int, int> > >
         prev;  // Used to recover sequence of hidden states
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         double tempGScore
             = std::log(S[h]) + logE[h][observations[0]];  // Avoids extra look-up operation
 
@@ -497,7 +441,7 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
 
         // Expand in the A* algorithm
         else {
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 int newFVal = fVal;
                 if (h2 == 0) {
                     ++newFVal;
@@ -549,16 +493,16 @@ std::vector<int> HMM::aStarOracle(
     logA.resize(H);
     logE.resize(H);
 
-    for (int h1 = 0; h1 < H; ++h1) {
+    for (size_t h1 = 0; h1 < H; ++h1) {
         logA[h1].resize(H);
-        for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h2 = 0; h2 < H; ++h2) {
             logA[h1][h2] = std::log(A[h1][h2]);
         }
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         logE[h].resize(O);
-        for (int o = 0; o < O; ++o) {
+        for (size_t o = 0; o < O; ++o) {
             logE[h][o] = std::log(E[h][o]);
         }
     }
@@ -569,14 +513,14 @@ std::vector<int> HMM::aStarOracle(
         v[t].resize(H);
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         v[T - 1][h] = 0;
     }
 
     for (int t = T - 2; t >= 0; --t) {
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             double temp = -10E12;
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 temp = std::max(temp, v[t + 1][h2] + logA[h1][h2] + logE[h2][observations[t]]);
             }
             v[t][h1] = temp;
@@ -593,7 +537,7 @@ std::vector<int> HMM::aStarOracle(
     // TODO make better hash for tuple
     // Would gScore be better as a multi-dimensional array? <- probably not, b/c we are hoping it
     // stays sparse
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         double tempGScore
             = std::log(S[h]) + logE[h][observations[0]];  // Avoids extra look-up operation
 
@@ -625,7 +569,7 @@ std::vector<int> HMM::aStarOracle(
         }
 
         else {
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                 std::vector<int> newSequence = currentSequence;
                 newSequence.push_back(h2);
@@ -657,16 +601,16 @@ std::vector<std::vector<int> > HMM::aStarMult(const std::vector<int> &observatio
     logA.resize(H);
     logE.resize(H);
 
-    for (int h1 = 0; h1 < H; ++h1) {
+    for (size_t h1 = 0; h1 < H; ++h1) {
         logA[h1].resize(H);
-        for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h2 = 0; h2 < H; ++h2) {
             logA[h1][h2] = std::log(A[h1][h2]);
         }
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         logE[h].resize(O);
-        for (int o = 0; o < O; ++o) {
+        for (size_t o = 0; o < O; ++o) {
             logE[h][o] = std::log(E[h][o]);
         }
     }
@@ -677,14 +621,14 @@ std::vector<std::vector<int> > HMM::aStarMult(const std::vector<int> &observatio
         v[t].resize(H);
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         v[T - 1][h] = 0;
     }
 
     for (int t = T - 2; t >= 0; --t) {
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             double temp = -10E12;
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 temp = std::max(temp, v[t + 1][h2] + logA[h1][h2] + logE[h2][observations[t]]);
             }
             v[t][h1] = temp;
@@ -702,7 +646,7 @@ std::vector<std::vector<int> > HMM::aStarMult(const std::vector<int> &observatio
     // TODO make better hash for tuple
     // Would gScore be better as a multi-dimensional array? <- probably not, b/c we are hoping it
     // stays sparse
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         double tempGScore
             = std::log(S[h]) + logE[h][observations[0]];  // Avoids extra look-up operation
 
@@ -744,7 +688,7 @@ std::vector<std::vector<int> > HMM::aStarMult(const std::vector<int> &observatio
         }
 
         else {
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 int newFVal = fVal;
                 if (h2 == 0) {
                     ++newFVal;
@@ -783,16 +727,16 @@ std::vector<std::vector<int> > HMM::aStarMult(
     logA.resize(H);
     logE.resize(H);
 
-    for (int h1 = 0; h1 < H; ++h1) {
+    for (size_t h1 = 0; h1 < H; ++h1) {
         logA[h1].resize(H);
-        for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h2 = 0; h2 < H; ++h2) {
             logA[h1][h2] = std::log(A[h1][h2]);
         }
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         logE[h].resize(O);
-        for (int o = 0; o < O; ++o) {
+        for (size_t o = 0; o < O; ++o) {
             logE[h][o] = std::log(E[h][o]);
         }
     }
@@ -803,14 +747,14 @@ std::vector<std::vector<int> > HMM::aStarMult(
         v[t].resize(H);
     }
 
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         v[T - 1][h] = 0;
     }
 
     for (int t = T - 2; t >= 0; --t) {
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             double temp = -10E12;
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 temp = std::max(temp, v[t + 1][h2] + logA[h1][h2] + logE[h2][observations[t]]);
             }
             v[t][h1] = temp;
@@ -825,7 +769,7 @@ std::vector<std::vector<int> > HMM::aStarMult(
     // TODO make better hash for tuple
     // Would gScore be better as a multi-dimensional array? <- probably not, b/c we are hoping it
     // stays sparse
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         double tempGScore
             = std::log(S[h]) + logE[h][observations[0]];  // Avoids extra look-up operation
 
@@ -857,7 +801,7 @@ std::vector<std::vector<int> > HMM::aStarMult(
         }
 
         else {
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                 std::vector<int> newSequence = currentSequence;
                 newSequence.push_back(h2);
@@ -907,7 +851,7 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         alpha.resize(numZeros + 1);
         for (int c = 0; c <= numZeros; ++c) {
             alpha[c].resize(H);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 alpha[c][h].resize(T, 0.);
                 if (((c == 1) && (h == 0)) || ((c == 0) && (h != 0))) {
                     alpha[c][h][0] = S[h] * E[h][obs[0]];
@@ -917,8 +861,8 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
 
         for (int t = 1; t < T - 1; ++t) {
             for (int c = 0; c <= numZeros; ++c) {
-                for (int h = 0; h < H; ++h) {
-                    for (int h1 = 0; h1 < H; ++h1) {
+                for (size_t h = 0; h < H; ++h) {
+                    for (size_t h1 = 0; h1 < H; ++h1) {
                         int oldC = c;
                         if (h == 0) {
                             --oldC;
@@ -935,9 +879,9 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
 
         // t = T-1
         for (int c = 0; c <= numZeros; ++c) {
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 if (c == numZeros) {
-                    for (int h1 = 0; h1 < H; ++h1) {
+                    for (size_t h1 = 0; h1 < H; ++h1) {
                         int oldC = c;
                         if (h == 0) {
                             --oldC;
@@ -959,7 +903,7 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         beta.resize(numZeros + 1);
         for (int c = 0; c <= numZeros; ++c) {
             beta[c].resize(numZeros + 1);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 beta[c][h].resize(T, 0.);
                 if (c == 0) {
                     beta[c][h][T - 1] = 1.;
@@ -969,8 +913,8 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
 
         for (int t = T - 2; t > 0; --t) {
             for (int c = 0; c <= numZeros; ++c) {
-                for (int h = 0; h < H; ++h) {
-                    for (int h2 = 0; h2 < H; ++h2) {
+                for (size_t h = 0; h < H; ++h) {
+                    for (size_t h2 = 0; h2 < H; ++h2) {
                         int newC = c;
                         if (h2 == 0) {
                             --newC;
@@ -987,7 +931,7 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         // t = 0
         // h[0] = 0
         if (numZeros > 0) {
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 int newC = numZeros - 1;
                 if (h2 == 0) {
                     --newC;
@@ -999,8 +943,8 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         }
 
         // h[0] != 0
-        for (int h = 1; h < H; ++h) {
-            for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h = 1; h < H; ++h) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 int newC = numZeros;
                 if (h2 == 0) {
                     --newC;
@@ -1018,7 +962,7 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         std::vector<double> den;
         for (int t = 0; t < T; ++t) {
             den.push_back(0.);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 for (int c = 0; c <= numZeros; ++c) {
                     den[t] += alpha[c][h][t] * beta[numZeros - c][h][t];
                 }
@@ -1028,11 +972,11 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         // Gamma
         std::vector<std::vector<double> > gamma;  // gamma[h][t] = P(H_t = h | Y , theta)
         gamma.resize(H);
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             gamma[h].resize(T);
         }
 
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             for (int t = 0; t < T; ++t) {
                 double num = 0.;
                 for (int c = 0; c <= numZeros; ++c) {
@@ -1046,15 +990,15 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         std::vector<std::vector<std::vector<double> > >
             xi;  // xi[i][j][t] = P(H_t = i, H_t+1 = j, O| theta)
         xi.resize(H);
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             xi[h1].resize(H);
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 xi[h1][h2].resize(T - 1);
             }
         }
 
-        for (int h1 = 0; h1 < H; ++h1) {
-            for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 for (int t = 0; t < T - 1; ++t) {
                     double num = 0.;
 
@@ -1076,13 +1020,13 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         }
 
         // New S
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             S[h] = gamma[h][0];
         }
 
         // New E
-        for (int h = 0; h < H; ++h) {
-            for (int o = 0; o < O; ++o) {
+        for (size_t h = 0; h < H; ++h) {
+            for (size_t o = 0; o < O; ++o) {
                 double num = 0.;
                 double newDen = 0.;
 
@@ -1100,8 +1044,8 @@ void HMM::learn(const std::vector<int> &obs, const int numZeros, const double ep
         double tol = 0.;
 
         // New A
-        for (int h1 = 0; h1 < H; ++h1) {
-            for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 double num = 0.;
                 double newDen = 0.;
 
@@ -1132,12 +1076,12 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
                 const double eps)
 {
     int T = obs[0].size();
-    int R = obs.size();
+    size_t R = obs.size();
 
     while (true) {
         std::vector<std::vector<std::vector<double> > > totalGamma;
         std::vector<std::vector<std::vector<std::vector<double> > > > totalXi;
-        for (int r = 0; r < R; ++r) {
+        for (size_t r = 0; r < R; ++r) {
             // alpha
             std::vector<std::vector<std::vector<double> > >
                 alpha;  // alpha[c][h][t] = P(O_0 = obs[0], ... ,O_t = obs[t], H_t = h | theta, c
@@ -1145,7 +1089,7 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
             alpha.resize(numZeros[r] + 1);
             for (int c = 0; c <= numZeros[r]; ++c) {
                 alpha[c].resize(H);
-                for (int h = 0; h < H; ++h) {
+                for (size_t h = 0; h < H; ++h) {
                     alpha[c][h].resize(T);
 
                     if (((c == 1) && (h == 0)) || ((c == 0) && (h != 0))) {
@@ -1160,9 +1104,9 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
 
             for (int t = 1; t < T - 1; ++t) {
                 for (int c = 0; c <= numZeros[r]; ++c) {
-                    for (int h = 0; h < H; ++h) {
+                    for (size_t h = 0; h < H; ++h) {
                         alpha[c][h][t] = 0.;
-                        for (int h1 = 0; h1 < H; ++h1) {
+                        for (size_t h1 = 0; h1 < H; ++h1) {
                             int oldC = c;
                             if (h1 == 0) {
                                 --oldC;
@@ -1179,10 +1123,10 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
 
             // t = T-1
             for (int c = 0; c <= numZeros[r]; ++c) {
-                for (int h = 0; h < H; ++h) {
+                for (size_t h = 0; h < H; ++h) {
                     alpha[c][h][T - 1] = 0.;
                     if (c == numZeros[r]) {
-                        for (int h1 = 0; h1 < H; ++h1) {
+                        for (size_t h1 = 0; h1 < H; ++h1) {
                             int oldC = c;
                             if (h1 == 0) {
                                 --oldC;
@@ -1204,7 +1148,7 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
             beta.resize(numZeros[r] + 1);
             for (int c = 0; c <= numZeros[r]; ++c) {
                 beta[c].resize(H);
-                for (int h = 0; h < H; ++h) {
+                for (size_t h = 0; h < H; ++h) {
                     beta[c][h].resize(T);
 
                     if (c == 0) {
@@ -1219,9 +1163,9 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
 
             for (int t = T - 2; t > 0; --t) {
                 for (int c = 0; c <= numZeros[r]; ++c) {
-                    for (int h = 0; h < H; ++h) {
+                    for (size_t h = 0; h < H; ++h) {
                         beta[c][h][t] = 0.;
-                        for (int h2 = 0; h2 < H; ++h2) {
+                        for (size_t h2 = 0; h2 < H; ++h2) {
                             int newC = c;
                             if (h2 == 0) {
                                 --newC;
@@ -1238,14 +1182,14 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
 
             // t = 0
             for (int c = 0; c <= numZeros[r]; ++c) {
-                for (int h = 0; h < H; ++h) {
+                for (size_t h = 0; h < H; ++h) {
                     beta[c][h][0] = 0.;
                 }
             }
 
             // h[0] = 0
             if (numZeros[r] > 0) {
-                for (int h2 = 0; h2 < H; ++h2) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     int newC = numZeros[r] - 1;
                     if (h2 == 0) {
                         --newC;
@@ -1258,8 +1202,8 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
             }
 
             // h[0] != 0
-            for (int h = 1; h < H; ++h) {
-                for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h = 1; h < H; ++h) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     int newC = numZeros[r];
                     if (h2 == 0) {
                         --newC;
@@ -1277,7 +1221,7 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
             std::vector<double> den;
             for (int t = 0; t < T; ++t) {
                 den.push_back(0.);
-                for (int h = 0; h < H; ++h) {
+                for (size_t h = 0; h < H; ++h) {
                     for (int c = 0; c <= numZeros[r]; ++c) {
                         den[t] += alpha[c][h][t] * beta[numZeros[r] - c][h][t];
                     }
@@ -1287,11 +1231,11 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
             // Gamma
             std::vector<std::vector<double> > gamma;  // gamma[h][t] = P(H_t = h | Y , theta)
             gamma.resize(H);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 gamma[h].resize(T);
             }
 
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 for (int t = 0; t < T; ++t) {
                     double num = 0.;
                     for (int c = 0; c <= numZeros[r]; ++c) {
@@ -1307,15 +1251,15 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
             std::vector<std::vector<std::vector<double> > >
                 xi;  // xi[i][j][t] = P(H_t = i, H_t+1 = j, O| theta)
             xi.resize(H);
-            for (int h1 = 0; h1 < H; ++h1) {
+            for (size_t h1 = 0; h1 < H; ++h1) {
                 xi[h1].resize(H);
-                for (int h2 = 0; h2 < H; ++h2) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     xi[h1][h2].resize(T - 1);
                 }
             }
 
-            for (int h1 = 0; h1 < H; ++h1) {
-                for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h1 = 0; h1 < H; ++h1) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     for (int t = 0; t < T - 1; ++t) {
                         double num = 0.;
 
@@ -1340,18 +1284,18 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
         }
 
         // New S
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             S[h] = 0.;
-            for (int r = 0; r < R; ++r) {
+            for (size_t r = 0; r < R; ++r) {
                 S[h] += totalGamma[r][h][0];
             }
             S[h] /= R;
         }
 
         // New E
-        for (int r = 0; r < R; ++r) {
-            for (int h = 0; h < H; ++h) {
-                for (int o = 0; o < O; ++o) {
+        for (size_t r = 0; r < R; ++r) {
+            for (size_t h = 0; h < H; ++h) {
+                for (size_t o = 0; o < O; ++o) {
                     double num = 0.;
                     double newDen = 0.;
 
@@ -1370,11 +1314,11 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const std::vector<int
         double tol = 0.;
 
         // New A
-        for (int h1 = 0; h1 < H; ++h1) {
-            for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 double num = 0.;
                 double newDen = 0.;
-                for (int r = 0; r < R; ++r) {
+                for (size_t r = 0; r < R; ++r) {
                     for (int t = 0; t < T - 1; ++t) {
                         num += totalXi[r][h1][h2][t];
                         newDen += totalGamma[r][h1][t];
@@ -1405,14 +1349,14 @@ void HMM::learn(const std::vector<int> &obs, const double eps)
         std::vector<std::vector<double> >
             alpha;  // alpha[h][t] = P(O_0 = obs[0], ... ,O_t = obs[t], H_t = h | theta)
         alpha.resize(H);
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             alpha[h].resize(T, 0.);
             alpha[h][0] = S[h] * E[h][obs[0]];
         }
 
         for (int t = 1; t < T; ++t) {
-            for (int h = 0; h < H; ++h) {
-                for (int h1 = 0; h1 < H; ++h1) {
+            for (size_t h = 0; h < H; ++h) {
+                for (size_t h1 = 0; h1 < H; ++h1) {
                     alpha[h][t] += alpha[h1][t - 1] * A[h1][h];
                 }
 
@@ -1424,14 +1368,14 @@ void HMM::learn(const std::vector<int> &obs, const double eps)
         std::vector<std::vector<double> >
             beta;  // beta[h][t] = P(O_{t+1} = o_{t+1} ... O_{T-1} = o_{T-1} | H_t = h theta)
         beta.resize(H);
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             beta[h].resize(T);
             beta[h][T - 1] = 1.;
         }
 
         for (int t = T - 2; t >= 0; --t) {
-            for (int h = 0; h < H; ++h) {
-                for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h = 0; h < H; ++h) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     beta[h][t] += beta[h2][t + 1] * A[h][h2] * E[h2][obs[t + 1]];
                 }
             }
@@ -1440,7 +1384,7 @@ void HMM::learn(const std::vector<int> &obs, const double eps)
         // den = P(O | theta)
         std::vector<double> den(T, 0);
         for (int t = 0; t < T; ++t) {
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 den[t] += alpha[h][t] * beta[h][t];
             }
         }
@@ -1448,11 +1392,11 @@ void HMM::learn(const std::vector<int> &obs, const double eps)
         // Gamma
         std::vector<std::vector<double> > gamma;  // gamma[h][t] = P(H_t = h | Y , theta)
         gamma.resize(H);
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             gamma[h].resize(T);
         }
 
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             for (int t = 0; t < T; ++t) {
                 gamma[h][t] = alpha[h][t] * beta[h][t] / den[t];
             }
@@ -1462,15 +1406,15 @@ void HMM::learn(const std::vector<int> &obs, const double eps)
         std::vector<std::vector<std::vector<double> > >
             xi;  // xi[i][j][t] = P(H_t = i, H_t+1 = j, O| theta)
         xi.resize(H);
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             xi[h1].resize(H);
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 xi[h1][h2].resize(T - 1);
             }
         }
 
-        for (int h1 = 0; h1 < H; ++h1) {
-            for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 for (int t = 0; t < T - 1; ++t) {
                     xi[h1][h2][t]
                         = alpha[h1][t] * beta[h2][t + 1] * A[h1][h2] * E[h2][obs[t + 1]] / den[t];
@@ -1479,13 +1423,13 @@ void HMM::learn(const std::vector<int> &obs, const double eps)
         }
 
         // New S
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             S[h] = gamma[h][0];
         }
 
         // New E
-        for (int h = 0; h < H; ++h) {
-            for (int o = 0; o < O; ++o) {
+        for (size_t h = 0; h < H; ++h) {
+            for (size_t o = 0; o < O; ++o) {
                 double num = 0.;
                 double newDen = 0.;
 
@@ -1503,8 +1447,8 @@ void HMM::learn(const std::vector<int> &obs, const double eps)
         double tol = 0.;
 
         // New A
-        for (int h1 = 0; h1 < H; ++h1) {
-            for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 double num = 0.;
                 double newDen = 0.;
 
@@ -1529,27 +1473,27 @@ void HMM::learn(const std::vector<int> &obs, const double eps)
 void HMM::learn(const std::vector<std::vector<int> > &obs, const double eps)
 {
     int T = obs[0].size();
-    int R = obs.size();
-    int numIt = 0;
+    size_t R = obs.size();
+    size_t numIt = 0;
 
     while (true) {
         ++numIt;
         std::vector<std::vector<std::vector<double> > > totalGamma;
         std::vector<std::vector<std::vector<std::vector<double> > > > totalXi;
 
-        for (int r = 0; r < R; ++r) {
+        for (size_t r = 0; r < R; ++r) {
             // alpha
             std::vector<std::vector<double> >
                 alpha;  // alpha[h][t] = P(O_0 = obs[0], ... ,O_t = obs[t], H_t = h | theta)
             alpha.resize(H);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 alpha[h].resize(T, 0.);
                 alpha[h][0] = S[h] * E[h][obs[r][0]];
             }
 
             for (int t = 1; t < T; ++t) {
-                for (int h = 0; h < H; ++h) {
-                    for (int h1 = 0; h1 < H; ++h1) {
+                for (size_t h = 0; h < H; ++h) {
+                    for (size_t h1 = 0; h1 < H; ++h1) {
                         alpha[h][t] += alpha[h1][t - 1] * A[h1][h];
                     }
 
@@ -1561,14 +1505,14 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const double eps)
             std::vector<std::vector<double> >
                 beta;  // beta[h][t] = P(O_{t+1} = o_{t+1} ... O_{T-1} = o_{T-1} | H_t = h theta)
             beta.resize(H);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 beta[h].resize(T);
                 beta[h][T - 1] = 1.;
             }
 
             for (int t = T - 2; t >= 0; --t) {
-                for (int h = 0; h < H; ++h) {
-                    for (int h2 = 0; h2 < H; ++h2) {
+                for (size_t h = 0; h < H; ++h) {
+                    for (size_t h2 = 0; h2 < H; ++h2) {
                         beta[h][t] += beta[h2][t + 1] * A[h][h2] * E[h2][obs[r][t + 1]];
                     }
                 }
@@ -1577,7 +1521,7 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const double eps)
             // den = P(O | theta)
             std::vector<double> den(T, 0);
             for (int t = 0; t < T; ++t) {
-                for (int h = 0; h < H; ++h) {
+                for (size_t h = 0; h < H; ++h) {
                     den[t] += alpha[h][t] * beta[h][t];
                 }
             }
@@ -1585,11 +1529,11 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const double eps)
             // Gamma
             std::vector<std::vector<double> > gamma;  // gamma[h][t] = P(H_t = h | Y , theta)
             gamma.resize(H);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 gamma[h].resize(T);
             }
 
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 for (int t = 0; t < T; ++t) {
                     gamma[h][t] = alpha[h][t] * beta[h][t] / den[t];
                 }
@@ -1600,15 +1544,15 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const double eps)
             std::vector<std::vector<std::vector<double> > >
                 xi;  // xi[i][j][t] = P(H_t = i, H_t+1 = j, O| theta)
             xi.resize(H);
-            for (int h1 = 0; h1 < H; ++h1) {
+            for (size_t h1 = 0; h1 < H; ++h1) {
                 xi[h1].resize(H);
-                for (int h2 = 0; h2 < H; ++h2) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     xi[h1][h2].resize(T - 1);
                 }
             }
 
-            for (int h1 = 0; h1 < H; ++h1) {
-                for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h1 = 0; h1 < H; ++h1) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     for (int t = 0; t < T - 1; ++t) {
                         xi[h1][h2][t] = alpha[h1][t] * beta[h2][t + 1] * A[h1][h2]
                                         * E[h2][obs[r][t + 1]] / den[t];
@@ -1619,18 +1563,18 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const double eps)
         }
 
         // New S
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             S[h] = 0.;
-            for (int r = 0; r < R; ++r) {
+            for (size_t r = 0; r < R; ++r) {
                 S[h] += totalGamma[r][h][0];
             }
             S[h] /= R;
         }
 
         // New E
-        for (int r = 0; r < R; ++r) {
-            for (int h = 0; h < H; ++h) {
-                for (int o = 0; o < O; ++o) {
+        for (size_t r = 0; r < R; ++r) {
+            for (size_t h = 0; h < H; ++h) {
+                for (size_t o = 0; o < O; ++o) {
                     double num = 0.;
                     double newDen = 0.;
 
@@ -1649,11 +1593,11 @@ void HMM::learn(const std::vector<std::vector<int> > &obs, const double eps)
         double tol = 0.;
 
         // New A
-        for (int h1 = 0; h1 < H; ++h1) {
-            for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 double num = 0.;
                 double newDen = 0.;
-                for (int r = 0; r < R; ++r) {
+                for (size_t r = 0; r < R; ++r) {
                     for (int t = 0; t < T - 1; ++t) {
                         num += totalXi[r][h1][h2][t];
                         newDen += totalGamma[r][h1][t];
@@ -1685,14 +1629,14 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
                 const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
                 const double eps, const int C)
 {
-    int R = obs.size();
+    size_t R = obs.size();
     if (constraintOracle.size() != R) {
         std::cout << "In learnMC, obs and constraintOracle vectors sizes do not match."
                   << std::endl;
         throw std::exception();
     }
     int totTime = 0.;
-    for (int r = 0; r < R; ++r) {
+    for (size_t r = 0; r < R; ++r) {
         totTime += obs[r].size();
     }
 
@@ -1711,7 +1655,7 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
     AStarCounter.resize(R);
     EStarCounter.resize(R);
 
-    for (int r = 0; r < R; ++r) {
+    for (size_t r = 0; r < R; ++r) {
         SStar[r].resize(H);
         AStar[r].resize(H);
         EStar[r].resize(H);
@@ -1719,7 +1663,7 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
         AStarCounter[r].resize(R);
         EStarCounter[r].resize(R);
 
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             AStar[r][h].resize(H);
             AStarCounter[r][h].resize(H);
             EStar[r][h].resize(O);
@@ -1738,8 +1682,8 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
             allHidden.clear();
             std::cout << "Generating hidden feasible hidden states randomly.\n";
             int tempCounter = 0;
-            for (int r = 0; r < R; ++r) {
-                int numIt = 0;
+            for (size_t r = 0; r < R; ++r) {
+                size_t numIt = 0;
                 std::vector<int> observed;
                 std::vector<int> hidden;
                 int T = obs[r].size();
@@ -1762,10 +1706,10 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
 
         ++totNumIt;
 
-        for (int r = 0; r < R; ++r) {
+        for (size_t r = 0; r < R; ++r) {
             fill(SStar[r].begin(), SStar[r].end(), 0.);
             fill(SStarCounter[r].begin(), SStarCounter[r].end(), 0);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 fill(AStar[r][h].begin(), AStar[r][h].end(), 0.);
                 fill(AStarCounter[r][h].begin(), AStarCounter[r][h].end(), 0);
                 fill(EStar[r][h].begin(), EStar[r][h].end(), 0.);
@@ -1773,9 +1717,9 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
             }
         }
 
-        for (int r = 0; r < R; ++r) {
+        for (size_t r = 0; r < R; ++r) {
             int T = obs[r].size();
-            for (int i = 0; i < allHidden[r].size(); ++i) {
+            for (size_t i = 0; i < allHidden[r].size(); ++i) {
                 double p = std::exp(logProb(obs[r], allHidden[r][i]));
                 // double p = 1.;
                 SStar[r][allHidden[r][i][0]] += p;
@@ -1792,8 +1736,8 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
         }
 
         // Normalize
-        for (int r = 0; r < R; ++r) {
-            for (int h = 0; h < H; ++h) {
+        for (size_t r = 0; r < R; ++r) {
+            for (size_t h = 0; h < H; ++h) {
                 if (SStarCounter[r][h] == 0) {
                     SStar[r][h] = 0;
                 }
@@ -1802,21 +1746,21 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
                 }
             }
             double SSum = std::accumulate(SStar[r].begin(), SStar[r].end(), 0.);
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 SStar[r][h] = SStar[r][h] / SSum;
             }
         }
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             double tempSum = 0.;
-            for (int r = 0; r < R; ++r) {
+            for (size_t r = 0; r < R; ++r) {
                 tempSum += SStar[r][h];
             }
             S[h] = tempSum / R;
         }
 
-        for (int r = 0; r < R; ++r) {
-            for (int h1 = 0; h1 < H; ++h1) {
-                for (int h2 = 0; h2 < H; ++h2) {
+        for (size_t r = 0; r < R; ++r) {
+            for (size_t h1 = 0; h1 < H; ++h1) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     if (AStarCounter[r][h1][h2] == 0) {
                         AStar[r][h1][h2] = 0;
                     }
@@ -1827,11 +1771,11 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
             }
 
             double ASum = 0;
-            for (int h1 = 0; h1 < H; ++h1) {
+            for (size_t h1 = 0; h1 < H; ++h1) {
                 ASum += std::accumulate(AStar[r][h1].begin(), AStar[r][h1].end(), 0.);
             }
-            for (int h1 = 0; h1 < H; ++h1) {
-                for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h1 = 0; h1 < H; ++h1) {
+                for (size_t h2 = 0; h2 < H; ++h2) {
                     AStar[r][h1][h2] /= ASum;
                 }
             }
@@ -1839,17 +1783,17 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
         double tol = 0.;
         std::vector<std::vector<double> > newA;
         newA.resize(H);
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             newA[h1].resize(H);
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 double tempSum = 0.;
-                for (int r = 0; r < R; ++r) {
+                for (size_t r = 0; r < R; ++r) {
                     tempSum += AStar[r][h1][h2];
                 }
                 newA[h1][h2] = tempSum;
             }
             double ASum = std::accumulate(newA[h1].begin(), newA[h1].end(), 0.);
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 if (ASum == 0) {
                     newA[h1][h2] = 1. / H;
                 }
@@ -1861,9 +1805,9 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
             }
         }
 
-        for (int r = 0; r < R; ++r) {
-            for (int h = 0; h < H; ++h) {
-                for (int o = 0; o < O; ++o) {
+        for (size_t r = 0; r < R; ++r) {
+            for (size_t h = 0; h < H; ++h) {
+                for (size_t o = 0; o < O; ++o) {
                     if (EStarCounter[r][h][o] == 0) {
                         EStar[r][h][o] = 0;
                     }
@@ -1874,26 +1818,26 @@ void HMM::learn(const std::vector<std::vector<int> > &obs,
             }
 
             double ESum = 0.;
-            for (int h = 0; h < H; ++h) {
+            for (size_t h = 0; h < H; ++h) {
                 ESum += std::accumulate(EStar[r][h].begin(), EStar[r][h].end(), 0.);
             }
-            for (int h = 0; h < H; ++h) {
-                for (int o = 0; o < O; ++o) {
+            for (size_t h = 0; h < H; ++h) {
+                for (size_t o = 0; o < O; ++o) {
                     EStar[r][h][o] /= ESum;
                 }
             }
         }
 
-        for (int h = 0; h < H; ++h) {
-            for (int o = 0; o < O; ++o) {
+        for (size_t h = 0; h < H; ++h) {
+            for (size_t o = 0; o < O; ++o) {
                 double tempSum = 0.;
-                for (int r = 0; r < R; ++r) {
+                for (size_t r = 0; r < R; ++r) {
                     tempSum += EStar[r][h][o];
                 }
                 E[h][o] = tempSum;
             }
             double ESum = std::accumulate(E[h].begin(), E[h].end(), 0.);
-            for (int o = 0; o < O; ++o) {
+            for (size_t o = 0; o < O; ++o) {
                 if (ESum == 0) {
                     E[h][o] = 1. / O;
                 }
@@ -1922,7 +1866,7 @@ void HMM::learnHard(const std::vector<std::vector<int> > &obs,
                     const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
                     double eps, int numSolns)
 {
-    int R = obs.size();
+    size_t R = obs.size();
 
     std::vector<std::vector<int> > ACounter;
     std::vector<std::vector<int> > ECounter;
@@ -1931,19 +1875,19 @@ void HMM::learnHard(const std::vector<std::vector<int> > &obs,
     ACounter.resize(H);
     ECounter.resize(H);
     SCounter.resize(H);
-    for (int h = 0; h < H; ++h) {
+    for (size_t h = 0; h < H; ++h) {
         ACounter[h].resize(H);
         ECounter[h].resize(O);
     }
 
     while (true) {
         fill(SCounter.begin(), SCounter.end(), 0);
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             fill(ACounter[h].begin(), ACounter[h].end(), 0);
             fill(ECounter[h].begin(), ECounter[h].end(), 0);
         }
 
-        for (int r = 0; r < R; ++r) {
+        for (size_t r = 0; r < R; ++r) {
             std::cout << "R = " << r << "\n";
             int T = obs[r].size();
             std::vector<std::vector<int> > hidden;
@@ -1961,28 +1905,28 @@ void HMM::learnHard(const std::vector<std::vector<int> > &obs,
         }
 
         int sum = 0;
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             sum += SCounter[h];
         }
-        for (int h = 0; h < H; ++h) {
+        for (size_t h = 0; h < H; ++h) {
             S[h] = ((double)SCounter[h]) / sum;
         }
 
         double tol = 0.;
-        for (int h1 = 0; h1 < H; ++h1) {
+        for (size_t h1 = 0; h1 < H; ++h1) {
             sum = 0;
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 sum += ACounter[h1][h2];
             }
-            for (int h2 = 0; h2 < H; ++h2) {
+            for (size_t h2 = 0; h2 < H; ++h2) {
                 tol = std::max(std::abs(A[h1][h2] - ((double)ACounter[h1][h2]) / sum), tol);
                 A[h1][h2] = ((double)ACounter[h1][h2]) / sum;
             }
             sum = 0;
-            for (int o = 0; o < O; ++o) {
+            for (size_t o = 0; o < O; ++o) {
                 sum += ECounter[h1][o];
             }
-            for (int o = 0; o < O; ++o) {
+            for (size_t o = 0; o < O; ++o) {
                 E[h1][o] = ((double)ECounter[h1][o]) / sum;
             }
         }
@@ -1995,3 +1939,5 @@ void HMM::learnHard(const std::vector<std::vector<int> > &obs,
     }
     return;
 }
+
+}  // namespace chmmpp

@@ -1,5 +1,6 @@
 // main.cpp
 
+#include <iostream>
 #include <chmmpp/HMM.h>
 
 int main()
@@ -12,7 +13,7 @@ int main()
 
     int T = 1000;  // Time Horizon
 
-    HMM myHMM(A, S, E, 0);
+    chmmpp::HMM myHMM(A, S, E, 0);
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<int> obs;

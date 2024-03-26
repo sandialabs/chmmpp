@@ -6,6 +6,7 @@ set(chmmpp_include_directories)
 set(chmmpp_link_directories)
 
 SET(sources
+    vectorhash.cpp
     mip/test.cpp
     )
 

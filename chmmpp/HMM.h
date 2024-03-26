@@ -1,18 +1,10 @@
-// HMM.h
+#pragma once
 
-#ifndef HMM_H
-#define HMM_H
-
+#include <functional>
 #include <vector>
-#include <iostream>
 #include <random>
-#include <queue>
-#include <map>
-#include <limits>
-#include <cstdint>
-#include <boost/functional/hash.hpp>  //Hash for pairs
-#include <time.h>                     //Used for seed
-#include <utility>                    //Pairs
+
+namespace chmmpp {
 
 /*
 TODO
@@ -23,32 +15,13 @@ TODO
 
 */
 
-// Hash for vectors
-// Taken for Stack Overflow
-// (https://stackoverflow.com/questions/35985960/c-why-is-boosthash-combine-the-best-way-to-combine-hash-values/50978188#50978188)
-template <typename T>
-T xorshift(const T &n, int i);
-
-uint64_t distribute(const uint64_t &n);
-
-template <typename T, typename S>
-typename std::enable_if<std::is_unsigned<T>::value, T>::type constexpr rotl(const T n, const S i);
-
-template <class T>
-inline size_t hash_combine(std::size_t &seed, const T &v);
-
-template <typename T>
-struct vectorHash {
-    std::size_t operator()(const std::vector<T> &vec) const;
-};
-
 // This is the class for dealing with HMMs
 // It stores (as private variables) the transition matrix (A), start probabilities (S), and Emission
 // Probabilities (E) as well as the number of hidden states (H) and observed states (O)
 class HMM {
    private:
-    int H;                                        // Number of hidden states
-    int O;                                        // Number of observed states
+    size_t H;                                     // Number of hidden states
+    size_t O;                                     // Number of observed states
     std::vector<std::vector<double> > A;          // Transition matrix, size HxH
     std::vector<double> S;                        // Start probs, size H
     std::vector<std::vector<double> > E;          // Emission probs, size HxO
@@ -76,7 +49,7 @@ class HMM {
     void printO() const;
     void print() const;
 
-    void run(const int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
+    void run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
 
     // Inference
     std::vector<int> aStar(const std::vector<int> &observations, double &logProb) const;
@@ -107,4 +80,4 @@ class HMM {
                    const double eps = 10E-6, int numSolns = 1);
 };
 
-#endif
+}  // namespace chmmpp

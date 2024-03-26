@@ -1,5 +1,6 @@
 // main.cpp
 
+#include <iostream>
 #include <unordered_set>
 #include <chmmpp/HMM.h>
 
@@ -10,7 +11,7 @@ bool oracleConstraint(std::vector<int> hid)
     std::unordered_set<int> visitedStates;
     visitedStates.insert(hid[0]);
 
-    for (int t = 1; t < hid.size(); ++t) {
+    for (size_t t = 1; t < hid.size(); ++t) {
         if (hid[t] != hid[t - 1]) {
             if (visitedStates.count(hid[t]) != 0) {
                 return false;
@@ -47,7 +48,7 @@ int main()
 
     int T = 20;  // Time Horizon
     int counter = 0;
-    HMM myHMM(A, S, E, 0);
+    chmmpp::HMM myHMM(A, S, E, 0);
 
     // Store the observed and hidden variables
     std::vector<int> obs;
