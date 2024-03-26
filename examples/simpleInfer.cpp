@@ -11,17 +11,16 @@ int main()
     std::vector<double> S = {0.501, 0.499};                               // Start probabilities
     std::vector<std::vector<double> > E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
-    int T = 1000;  // Time Horizon
+    size_t T = 1000;  // Time Horizon
 
     chmmpp::HMM myHMM(A, S, E, 0);
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<int> obs;
     std::vector<int> hid;
-    int numZeros;
 
     myHMM.run(T, obs, hid);
-    numZeros = count(hid.begin(), hid.end(), 0);
+    auto numZeros = count(hid.begin(), hid.end(), 0);
 
     std::cout << "Running inference without constraint.\n";
     double logProbNoConstraints;
@@ -38,7 +37,7 @@ int main()
 
     int numDiffNoConstraints = 0;
     int numDiffConstraints = 0;
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         if (hidGuessNoConstraints[t] != hid[t]) {
             ++numDiffNoConstraints;
         }

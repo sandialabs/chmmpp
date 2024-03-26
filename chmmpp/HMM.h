@@ -16,12 +16,10 @@ TODO
 */
 
 // This is the class for dealing with HMMs
-// It stores (as protected variables) the transition matrix (A), start probabilities (S), and Emission
-// Probabilities (E) as well as the number of hidden states (H) and observed states (O)
+// It stores (as protected variables) the transition matrix (A), start probabilities (S), and
+// Emission Probabilities (E) as well as the number of hidden states (H) and observed states (O)
 class HMM {
-
    protected:
-
     size_t H;                                     // Number of hidden states
     size_t O;                                     // Number of observed states
     std::vector<std::vector<double> > A;          // Transition matrix, size HxH
@@ -33,24 +31,24 @@ class HMM {
     double getRandom();
 
    public:
-    HMM(int seed = time(NULL));
+    HMM(long int seed = time(NULL));
 
     HMM(const std::vector<std::vector<double> > &inputA, const std::vector<double> &inputS,
-        const std::vector<std::vector<double> > &inputE, int seed = time(NULL));
+        const std::vector<std::vector<double> > &inputE, long int seed = time(NULL));
 
     void initialize(const std::vector<std::vector<double> > &inputA,
                     const std::vector<double> &inputS,
-                    const std::vector<std::vector<double> > &inputE, int seed);
+                    const std::vector<std::vector<double> > &inputE, long int seed);
 
     // Get Private Variables
-    int getH() const;
-    int getO() const;
+    size_t getH() const;
+    size_t getO() const;
     std::vector<std::vector<double> > getA() const;
     std::vector<double> getS() const;
     std::vector<std::vector<double> > getE() const;
-    double getAEntry(const int h1, const int h2) const;
-    double getSEntry(const int h) const;
-    double getEEntry(const int h, const int o) const;
+    double getAEntry(size_t h1, size_t h2) const;
+    double getSEntry(size_t h) const;
+    double getEEntry(size_t h, size_t o) const;
 
     void printS() const;
     void printA() const;

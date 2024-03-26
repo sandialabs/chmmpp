@@ -9,6 +9,12 @@ SET(sources
     vectorhash.cpp
     )
 
+if (with_coek)
+    find_package(coek REQUIRED)
+    list(APPEND sources LPModel.cpp)
+    list(APPEND chmmpp_link_libraries "coek::coek")
+endif()
+
 if (with_boost)
     find_package(Boost REQUIRED)
     list(APPEND sources HMM.cpp)
@@ -44,10 +50,10 @@ else()
 endif()
 add_library(chmmpp::chmmpp ALIAS chmmpp)
 
-message("HERE ${chmmpp_include_directories}")
-message("HERE ${chmmpp_compile_options}")
-message("HERE ${chmmpp_link_libraries}")
-message("HERE ${chmmpp_link_directories}")
+#message("HERE ${chmmpp_include_directories}")
+#message("HERE ${chmmpp_compile_options}")
+#message("HERE ${chmmpp_link_libraries}")
+#message("HERE ${chmmpp_link_directories}")
 
 target_compile_options(chmmpp PUBLIC ${chmmpp_compile_options})
 target_include_directories(chmmpp

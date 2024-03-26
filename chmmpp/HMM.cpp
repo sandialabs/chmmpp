@@ -22,17 +22,17 @@ TODO
 
 double HMM::getRandom() { return dist(generator); }
 
-HMM::HMM(int seed) { initialize(A, S, E, seed); }
+HMM::HMM(long int seed) { initialize(A, S, E, seed); }
 
 HMM::HMM(const std::vector<std::vector<double> > &inputA, const std::vector<double> &inputS,
-         const std::vector<std::vector<double> > &inputE, int seed)
+         const std::vector<std::vector<double> > &inputE, int long seed)
 {
     initialize(inputA, inputS, inputE, seed);
 }
 
 void HMM::initialize(const std::vector<std::vector<double> > &inputA,
                      const std::vector<double> &inputS,
-                     const std::vector<std::vector<double> > &inputE, int seed)
+                     const std::vector<std::vector<double> > &inputE, long int seed)
 {
     H = inputA.size();
 
@@ -131,9 +131,9 @@ void HMM::initialize(const std::vector<std::vector<double> > &inputA,
 //-----Access private variables-----
 //----------------------------------
 
-int HMM::getH() const { return H; }
+size_t HMM::getH() const { return H; }
 
-int HMM::getO() const { return O; }
+size_t HMM::getO() const { return O; }
 
 std::vector<std::vector<double> > HMM::getA() const { return A; }
 
@@ -142,11 +142,11 @@ std::vector<double> HMM::getS() const { return S; }
 std::vector<std::vector<double> > HMM::getE() const { return E; }
 
 // Range not checked for speed
-double HMM::getAEntry(const int h1, const int h2) const { return A[h1][h2]; }
+double HMM::getAEntry(size_t h1, size_t h2) const { return A[h1][h2]; }
 
-double HMM::getSEntry(const int h) const { return S[h]; }
+double HMM::getSEntry(size_t h) const { return S[h]; }
 
-double HMM::getEEntry(const int h, const int o) const { return E[h][o]; }
+double HMM::getEEntry(size_t h, size_t o) const { return E[h][o]; }
 
 //-----------------------
 //-----Print the HMM-----

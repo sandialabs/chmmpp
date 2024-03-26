@@ -43,8 +43,10 @@ option(coek_home "Installation of Coek" OFF)
 
 if(coek_home)
     set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${coek_home})
+    set(with_coek ON)
 else()
     # Assume that Catch2 is installed with coek (for now)
+    set(with_coek OFF)
     set(with_tests OFF)
 endif()
 
@@ -93,6 +95,7 @@ message("-- with_gcov: ${with_gcov}")
 message("-- with_gprof: ${with_gprof}")
 message("-- with_tests: ${with_tests}")
 message("-- with_boost: ${with_boost}")
+message("-- with_coek: ${with_coek}")
 message("-- coek_home: ${coek_home}")
 
 #

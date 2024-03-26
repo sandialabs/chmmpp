@@ -3,7 +3,7 @@
 #include <iostream>
 #include <chmmpp/HMM.h>
 
-bool oracleConstraint(std::vector<int> hid, double numZeros)
+bool oracleConstraint(std::vector<int> hid, long int numZeros)
 {
     return (numZeros == count(hid.begin(), hid.end(), 0));
 }
@@ -16,23 +16,23 @@ int main()
     std::vector<double> S = {0.501, 0.499};                               // Start probabilities
     std::vector<std::vector<double> > E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
-    int T = 25;        // Time Horizon
-    int numSolns = 5;  // Find top # of solutions
+    size_t T = 25;        // Time Horizon
+    size_t numSolns = 5;  // Find top # of solutions
 
     chmmpp::HMM myHMM(A, S, E, 1234);  // 1234 is the seed
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<int> obs;
     std::vector<int> hid;
-    int numZeros;
 
     myHMM.run(T, obs, hid);
-    numZeros = count(hid.begin(), hid.end(), 0);
+    auto numZeros = count(hid.begin(), hid.end(), 0);
 
     std::cout << "Running inference without constraint.\n";
     double logProbNoConstraints;
     std::vector<std::vector<int> > hidGuessNoConstraints = myHMM.aStarMult(
-        obs, logProbNoConstraints, [](std::vector<int> myHid) -> bool { return true; }, numSolns);
+        obs, logProbNoConstraints, [](std::vector<int> /*myHid*/) -> bool { return true; },
+        numSolns);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;
@@ -44,25 +44,25 @@ int main()
         numSolns);
 
     std::cout << "Observed:\n";
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         std::cout << obs[t];
     }
 
     std::cout << "\n\nTrue solution:\n";
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         std::cout << hid[t];
     }
     std::cout << "\n\nTop " << numSolns << " solutions with no constraints.\n";
-    for (int r = 0; r < numSolns; ++r) {
-        for (int t = 0; t < T; ++t) {
+    for (size_t r = 0; r < numSolns; ++r) {
+        for (size_t t = 0; t < T; ++t) {
             std::cout << hidGuessNoConstraints[r][t];
         }
         std::cout << "\n";
     }
 
     std::cout << "\n\nTop " << numSolns << " solutions with constraints.\n";
-    for (int r = 0; r < numSolns; ++r) {
-        for (int t = 0; t < T; ++t) {
+    for (size_t r = 0; r < numSolns; ++r) {
+        for (size_t t = 0; t < T; ++t) {
             std::cout << hidGuessConstraints[r][t];
         }
         std::cout << "\n";

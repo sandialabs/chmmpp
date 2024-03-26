@@ -46,7 +46,7 @@ int main()
         {0.05, 0.05, 0.05, 0.40, 0.05, 0.40},
         {0.05, 0.05, 0.05, 0.05, 0.40, 0.40}};  // Emission Matrix, 6th state is ``unknown''
 
-    int T = 20;  // Time Horizon
+    size_t T = 20;  // Time Horizon
     int counter = 0;
     chmmpp::HMM myHMM(A, S, E, 0);
 
@@ -79,7 +79,7 @@ int main()
 
     int numDiffNoConstraints = 0;
     int numDiffConstraints = 0;
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         if (hidGuessNoConstraints[t] != hid[t]) {
             ++numDiffNoConstraints;
         }
@@ -96,17 +96,17 @@ int main()
               << "\n\n";
 
     std::cout << "True hidden:\n";
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         std::cout << hid[t];
     }
 
     std::cout << "\n\nHidden guess with no constraints.\n";
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         std::cout << hidGuessNoConstraints[t];
     }
 
     std::cout << "\n\nHidden guess with constraints.\n";
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         std::cout << hidGuessConstraints[t];
     }
     std::cout << "\n\n";

@@ -11,8 +11,8 @@ int main()
     std::vector<double> S = {0.501, 0.499};                               // Start probabilities
     std::vector<std::vector<double> > E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
-    int T = 50;      // Time Horizon
-    int numIt = 10;  // Number of runs
+    size_t T = 50;      // Time Horizon
+    size_t numIt = 10;  // Number of runs
 
     // Initial Guesses
     std::vector<std::vector<double> > AInitial{{0.61, 0.39}, {0.4, 0.6}};
@@ -31,14 +31,14 @@ int main()
     std::vector<int> numZeros;
     std::vector<std::function<bool(std::vector<int>)> > constraintOracleVec;
 
-    for (int i = 0; i < numIt; ++i) {
+    for (size_t i = 0; i < numIt; ++i) {
         // std::cout << "Iteration number: " << i << "\n";
         obs.push_back({});
         hid.push_back({});
 
         trueHMM.run(T, obs[i], hid[i]);
 
-        double numZerosTemp = count(hid[i].begin(), hid[i].end(), 0);
+        auto numZerosTemp = count(hid[i].begin(), hid[i].end(), 0);
         numZeros.push_back(numZerosTemp);
         constraintOracleVec.push_back([numZerosTemp](std::vector<int> myHid) -> bool {
             return (numZerosTemp == count(myHid.begin(), myHid.end(), 0));

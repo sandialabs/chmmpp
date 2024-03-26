@@ -44,8 +44,8 @@ int main()
         {0.05, 0.05, 0.05, 0.40, 0.05, 0.40},
         {0.05, 0.05, 0.05, 0.05, 0.40, 0.40}};  // Emission Matrix, 6th state is ``unknown''
 
-    int T = 20;        // Time Horizon
-    int numSolns = 5;  // Find top # of solns
+    size_t T = 20;        // Time Horizon
+    size_t numSolns = 5;  // Find top # of solns
     int counter = 0;
     chmmpp::HMM myHMM(A, S, E, 1233);  // 1233 is the seed
 
@@ -70,7 +70,8 @@ int main()
     std::cout << "Running inference without constraint.\n";
     double logProbNoConstraints;
     std::vector<std::vector<int> > hidGuessNoConstraints = myHMM.aStarMult(
-        obs, logProbNoConstraints, [](std::vector<int> myHid) -> bool { return true; }, numSolns);
+        obs, logProbNoConstraints, [](std::vector<int> /*myHid*/) -> bool { return true; },
+        numSolns);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;
@@ -78,25 +79,25 @@ int main()
         = myHMM.aStarMult(obs, logProbConstraints, oracleConstraint, numSolns);
 
     std::cout << "\nObserved:\n";
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         std::cout << obs[t];
     }
 
     std::cout << "\n\nTrue solution:\n";
-    for (int t = 0; t < T; ++t) {
+    for (size_t t = 0; t < T; ++t) {
         std::cout << hid[t];
     }
     std::cout << "\n\nTop " << numSolns << " solutions with no constraints.\n";
-    for (int r = 0; r < numSolns; ++r) {
-        for (int t = 0; t < T; ++t) {
+    for (size_t r = 0; r < numSolns; ++r) {
+        for (size_t t = 0; t < T; ++t) {
             std::cout << hidGuessNoConstraints[r][t];
         }
         std::cout << "\n";
     }
 
     std::cout << "\n\nTop " << numSolns << " solutions with constraints.\n";
-    for (int r = 0; r < numSolns; ++r) {
-        for (int t = 0; t < T; ++t) {
+    for (size_t r = 0; r < numSolns; ++r) {
+        for (size_t t = 0; t < T; ++t) {
             std::cout << hidGuessConstraints[r][t];
         }
         std::cout << "\n";
