@@ -313,7 +313,7 @@ std::vector<int> HMM::aStar(const std::vector<int> &observations, double &logPro
     std::priority_queue<std::pair<double, std::vector<int> > > openSet;
     std::unordered_map<std::vector<int>, double, vectorHash<int> > gScore;  // log prob so far
 
-    for (size_t h = 0; h < H; ++h) {
+    for (int h = 0; h < H; ++h) {
         double tempGScore
             = std::log(S[h]) + logE[h][observations[0]];  // Avoids extra look-up operation
         gScore[{h}] = tempGScore;
@@ -784,7 +784,7 @@ std::vector<std::vector<int> > HMM::aStarMult(
     // TODO make better hash for tuple
     // Would gScore be better as a multi-dimensional array? <- probably not, b/c we are hoping it
     // stays sparse
-    for (size_t h = 0; h < H; ++h) {
+    for (int h = 0; h < H; ++h) {
         double tempGScore
             = std::log(S[h]) + logE[h][observations[0]];  // Avoids extra look-up operation
 
