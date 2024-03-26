@@ -25,9 +25,7 @@ if(CLANGFORMAT)
         #
         message(STATUS "Found ${CLANGFORMATVERSION}: " ${CLANGFORMAT})
 
-        file(GLOB_RECURSE ALL_CXX_SOURCE_FILES
-            (${CMAKE_SOURCE_DIR}/lib/*.[ch]pp) | (${CMAKE_SOURCE_DIR}/test/*.[ch]pp)
-        )
+        file(GLOB_RECURSE ALL_CXX_SOURCE_FILES (${CMAKE_SOURCE_DIR}/examples/*.[ch]pp) | (${CMAKE_SOURCE_DIR}/test/*.[ch]pp) | (${CMAKE_SOURCE_DIR}/chmmpp/*.[ch]pp) | (${CMAKE_SOURCE_DIR}/chmmpp/*.h))
 
         if ("${ALL_CXX_SOURCE_FILES}" STREQUAL "")
             message("WARNING: C++ formatting targets not setup because no source files found!")

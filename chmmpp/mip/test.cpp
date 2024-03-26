@@ -4,10 +4,6 @@
 
 namespace chmmpp {
 
-void run_test()
-{
-std::cout << "CHMMPP TEST" << std::endl;
-}
+void run_test() { std::cout << "CHMMPP TEST" << std::endl; }
 
-
-} // namespace chmmpp
+}  // namespace chmmpp
