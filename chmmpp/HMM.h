@@ -31,8 +31,14 @@ class HMM {
     double getRandom();
 
    public:
+    HMM(int seed = time(NULL));
+
     HMM(const std::vector<std::vector<double> > &inputA, const std::vector<double> &inputS,
         const std::vector<std::vector<double> > &inputE, int seed = time(NULL));
+
+    void initialize(const std::vector<std::vector<double> > &inputA,
+                    const std::vector<double> &inputS,
+                    const std::vector<std::vector<double> > &inputE, int seed);
 
     // Get Private Variables
     int getH() const;

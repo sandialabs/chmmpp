@@ -22,81 +22,96 @@ TODO
 
 double HMM::getRandom() { return dist(generator); }
 
+HMM::HMM(int seed) { initialize(A, S, E, seed); }
+
 HMM::HMM(const std::vector<std::vector<double> > &inputA, const std::vector<double> &inputS,
          const std::vector<std::vector<double> > &inputE, int seed)
 {
+    initialize(inputA, inputS, inputE, seed);
+}
+
+void HMM::initialize(const std::vector<std::vector<double> > &inputA,
+                     const std::vector<double> &inputS,
+                     const std::vector<std::vector<double> > &inputE, int seed)
+{
     H = inputA.size();
 
-    // Check if sizes are correct
-    if ((inputS.size() != H) || (inputE.size() != H)) {
-        std::cout << "Error in constructor for HMM, matrices not appropriately sized." << std::endl;
-        throw std::exception();
-    }
-
-    for (size_t h = 0; h < H; ++h) {
-        if (inputA[h].size() != H) {
-            std::cout << "Error in constructor for HMM, A is not a square matrix." << std::endl;
-            throw std::exception();
-        }
-    }
-
-    O = inputE[0].size();
-
-    for (size_t h = 0; h < H; ++h) {
-        if (inputE[h].size() != O) {
-            std::cout << "Error in constructor for HMM, E is not a matrix." << std::endl;
-            throw std::exception();
-        }
-    }
-
-    // Check if matrices represent probabilities
-    double sum = 0;
-    for (size_t h1 = 0; h1 < H; ++h1) {
-        sum = 0;
-        for (size_t h2 = 0; h2 < H; ++h2) {
-            if (inputA[h1][h2] < 0.) {
-                std::cout << "Error in constructor for HMM, A cannot have negative entries."
-                          << std::endl;
-                throw std::exception();
-            }
-
-            sum += inputA[h1][h2];
-        }
-
-        if (std::abs(sum - 1.) > 10E-6) {
-            std::cout << "Error in constructor for HMM, the rows of A must sum to 1." << std::endl;
-            throw std::exception();
-        }
-    }
-
-    sum = 0;
-    for (size_t h = 0; h < H; ++h) {
-        if (inputS[h] < 0.) {
-            std::cout << "Error in constructor for HMM, S cannot have negative entries."
+    if (H > 0) {
+        // Check if sizes are correct
+        if ((inputS.size() != H) || (inputE.size() != H)) {
+            std::cout << "Error in constructor for HMM, matrices not appropriately sized."
                       << std::endl;
             throw std::exception();
         }
-        sum += inputS[h];
-    }
-    if (std::abs(sum - 1.) > 10E-6) {
-        std::cout << "Error in constructor for HMM, the entries of S must sum to 1." << std::endl;
-    }
 
-    for (size_t h = 0; h < H; ++h) {
-        sum = 0;
-        for (size_t o = 0; o < O; ++o) {
-            if (inputE[h][o] < 0.) {
-                std::cout << "Error in constructor for HMM, E cannot have negative entries."
+        for (size_t h = 0; h < H; ++h) {
+            if (inputA[h].size() != H) {
+                std::cout << "Error in constructor for HMM, A is not a square matrix." << std::endl;
+                throw std::exception();
+            }
+        }
+
+        O = inputE[0].size();
+
+        for (size_t h = 0; h < H; ++h) {
+            if (inputE[h].size() != O) {
+                std::cout << "Error in constructor for HMM, E is not a matrix." << std::endl;
+                throw std::exception();
+            }
+        }
+
+        // Check if matrices represent probabilities
+        double sum = 0;
+        for (size_t h1 = 0; h1 < H; ++h1) {
+            sum = 0;
+            for (size_t h2 = 0; h2 < H; ++h2) {
+                if (inputA[h1][h2] < 0.) {
+                    std::cout << "Error in constructor for HMM, A cannot have negative entries."
+                              << std::endl;
+                    throw std::exception();
+                }
+
+                sum += inputA[h1][h2];
+            }
+
+            if (std::abs(sum - 1.) > 10E-6) {
+                std::cout << "Error in constructor for HMM, the rows of A must sum to 1."
                           << std::endl;
                 throw std::exception();
             }
-
-            sum += inputE[h][o];
         }
 
+        sum = 0;
+        for (size_t h = 0; h < H; ++h) {
+            if (inputS[h] < 0.) {
+                std::cout << "Error in constructor for HMM, S cannot have negative entries."
+                          << std::endl;
+                throw std::exception();
+            }
+            sum += inputS[h];
+        }
         if (std::abs(sum - 1.) > 10E-6) {
-            std::cout << "Error in constructor for HMM, the rows of E must sum to 1." << std::endl;
-            throw std::exception();
+            std::cout << "Error in constructor for HMM, the entries of S must sum to 1."
+                      << std::endl;
+        }
+
+        for (size_t h = 0; h < H; ++h) {
+            sum = 0;
+            for (size_t o = 0; o < O; ++o) {
+                if (inputE[h][o] < 0.) {
+                    std::cout << "Error in constructor for HMM, E cannot have negative entries."
+                              << std::endl;
+                    throw std::exception();
+                }
+
+                sum += inputE[h][o];
+            }
+
+            if (std::abs(sum - 1.) > 10E-6) {
+                std::cout << "Error in constructor for HMM, the rows of E must sum to 1."
+                          << std::endl;
+                throw std::exception();
+            }
         }
     }
 
