@@ -7,7 +7,6 @@ set(chmmpp_link_directories)
 
 SET(sources
     vectorhash.cpp
-    mip/test.cpp
     )
 
 if (with_boost)

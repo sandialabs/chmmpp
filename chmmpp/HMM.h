@@ -16,10 +16,12 @@ TODO
 */
 
 // This is the class for dealing with HMMs
-// It stores (as private variables) the transition matrix (A), start probabilities (S), and Emission
+// It stores (as protected variables) the transition matrix (A), start probabilities (S), and Emission
 // Probabilities (E) as well as the number of hidden states (H) and observed states (O)
 class HMM {
-   private:
+
+   protected:
+
     size_t H;                                     // Number of hidden states
     size_t O;                                     // Number of observed states
     std::vector<std::vector<double> > A;          // Transition matrix, size HxH
