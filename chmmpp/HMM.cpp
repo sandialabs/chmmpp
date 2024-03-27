@@ -238,6 +238,13 @@ double HMM::getSEntry(size_t h) const { return S[h]; }
 
 double HMM::getEEntry(size_t h, size_t o) const { return E[h][o]; }
 
+// CLM - Do we want to check these to make sure they are valid?
+void HMM::setA(std::vector<std::vector<double> > newA) {A = newA;}
+
+void HMM::setS(std::vector<double> newS) {S = newS;}
+
+void HMM::setE(std::vector<std::vector<double> > newE) {E = newE;}
+
 //-----------------------
 //-----Print the HMM-----
 //-----------------------

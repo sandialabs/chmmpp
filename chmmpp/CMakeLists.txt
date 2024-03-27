@@ -30,6 +30,11 @@ if (with_boost)
             inference/aStarMultOracle.cpp
             inference/aStar_numZeros.cpp
             inference/aStarOracle.cpp
+
+	    learn/learn_unconstrained.cpp
+	    learn/learn_numZeros.cpp
+	    learn/learn_stochastic.cpp
+	    learn/learn_hardEM.cpp
             )
     list(APPEND chmmpp_link_libraries "Boost::boost")
     list(APPEND chmmpp_compile_options "-DWITH_BOOST")

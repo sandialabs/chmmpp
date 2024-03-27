@@ -44,6 +44,10 @@ class HMM {
     double getAEntry(size_t h1, size_t h2) const;
     double getSEntry(size_t h) const;
     double getEEntry(size_t h, size_t o) const;
+    
+    void setA(std::vector<std::vector<double> > newA);
+    void setS(std::vector<double> newS);
+    void setE(std::vector<std::vector<double> > newE);
 
     void printS() const;
     void printA() const;
