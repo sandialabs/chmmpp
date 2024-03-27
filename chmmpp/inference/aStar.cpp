@@ -15,7 +15,8 @@ namespace chmmpp {
 // logProb is the log of the probability that the given states occur (we use logs as otherwise we
 // could get numerical underflow) Uses the A* algorithm for inference Without constraints (such as
 // in this case) this is basically equivalent to running Viterbi with a bit of overhead
-void aStar(const HMM &hmm, const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb)
+void aStar(const HMM& hmm, const std::vector<int>& observations, std::vector<int>& hidden_states,
+           double& logProb)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -45,8 +46,7 @@ void aStar(const HMM &hmm, const std::vector<int> &observations, std::vector<int
 
     // Stands for Viterbi, used as an estimate for how much logprob is left
     std::vector<std::vector<double> > v(T);
-    for (auto& vec : v)
-        vec.resize(H);
+    for (auto& vec : v) vec.resize(H);
 
     /* WEH: Vectors are default initialized to zero.
     for (size_t h = 0; h < H; ++h) {
@@ -104,4 +104,4 @@ void aStar(const HMM &hmm, const std::vector<int> &observations, std::vector<int
     return;
 }
 
-} // namespace chmmpp
+}  // namespace chmmpp

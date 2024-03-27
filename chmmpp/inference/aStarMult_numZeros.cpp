@@ -13,7 +13,9 @@ namespace chmmpp {
 
 // Returns the top numSolns solutions to the inference problem.
 // Uses the same inference technique as A*Oracle, so it is much slower than general A*
-void aStarMult_numZeros(const HMM& hmm, const std::vector<int> &observations, std::vector<std::vector<int>>& hidden_states, double &logProb, const int numZeros, const int numSolns)
+void aStarMult_numZeros(const HMM& hmm, const std::vector<int>& observations,
+                        std::vector<std::vector<int>>& hidden_states, double& logProb,
+                        const int numZeros, const int numSolns)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -23,9 +25,9 @@ void aStarMult_numZeros(const HMM& hmm, const std::vector<int> &observations, st
     const auto& E = hmm.getE();
 
     // So we don't need to keep recomputing logs
-    std::vector<std::vector<double> > logA;
+    std::vector<std::vector<double>> logA;
     std::vector<double> logS;
-    std::vector<std::vector<double> > logE;
+    std::vector<std::vector<double>> logE;
 
     logA.resize(H);
     logE.resize(H);
@@ -44,7 +46,7 @@ void aStarMult_numZeros(const HMM& hmm, const std::vector<int> &observations, st
         }
     }
 
-    std::vector<std::vector<double> > v;  // Stands for Viterbi
+    std::vector<std::vector<double>> v;  // Stands for Viterbi
     v.resize(T);
     for (int t = 0; t < T; ++t) {
         v[t].resize(H);
@@ -67,9 +69,9 @@ void aStarMult_numZeros(const HMM& hmm, const std::vector<int> &observations, st
     int counter = 0;
 
     // Dist, current h, time, constraint val
-    std::priority_queue<std::pair<double, std::vector<int> > >
+    std::priority_queue<std::pair<double, std::vector<int>>>
         openSet;  // Works b/c c++ orders tuples lexigraphically
-    std::unordered_map<std::vector<int>, double, boost::hash<std::vector<int> > >
+    std::unordered_map<std::vector<int>, double, boost::hash<std::vector<int>>>
         gScore;  // pair is h,t, constraintVal
     // TODO make better hash for tuple
     // Would gScore be better as a multi-dimensional array? <- probably not, b/c we are hoping it
@@ -135,4 +137,4 @@ void aStarMult_numZeros(const HMM& hmm, const std::vector<int> &observations, st
     }
 }
 
-} // namespace chmmpp
+}  // namespace chmmpp

@@ -31,15 +31,15 @@ int main()
     std::cout << "Running inference without constraint.\n";
     double logProbNoConstraints;
     std::vector<std::vector<int> > hidGuessNoConstraints;
-    chmmpp::aStarMultOracle(myHMM,
-        obs, hidGuessNoConstraints, logProbNoConstraints, [](std::vector<int> /*myHid*/) -> bool { return true; },
-        numSolns);
+    chmmpp::aStarMultOracle(
+        myHMM, obs, hidGuessNoConstraints, logProbNoConstraints,
+        [](std::vector<int> /*myHid*/) -> bool { return true; }, numSolns);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;
     std::vector<std::vector<int> > hidGuessConstraints;
-    chmmpp::aStarMultOracle(myHMM,
-        obs, hidGuessConstraints, logProbConstraints,
+    chmmpp::aStarMultOracle(
+        myHMM, obs, hidGuessConstraints, logProbConstraints,
         [numZeros](std::vector<int> myHid) -> bool {
             return (numZeros == count(myHid.begin(), myHid.end(), 0));
         },

@@ -12,7 +12,10 @@ SET(sources
 
 if (with_coek)
     find_package(coek REQUIRED)
-    list(APPEND sources LPModel.cpp)
+    list(APPEND sources
+            inference/LPModel.cpp
+            inference/lp_map.cpp
+            )
     list(APPEND chmmpp_link_libraries "coek::coek")
     list(APPEND chmmpp_compile_options "-DWITH_COEK")
 endif()

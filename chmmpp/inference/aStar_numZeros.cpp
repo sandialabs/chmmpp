@@ -14,7 +14,8 @@ namespace chmmpp {
 // The same as the function above, however here we are allowed to specify the number of times the
 // function is in hidden state 0 with the parameter numZeros Could also expand this to be general
 // linear constraints
-void aStar_numZeros(const HMM& hmm, const std::vector<int> &observations, std::vector<int>& hidden_states, double &logProb, const int numZeros)
+void aStar_numZeros(const HMM& hmm, const std::vector<int>& observations,
+                    std::vector<int>& hidden_states, double& logProb, const int numZeros)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -148,4 +149,4 @@ void aStar_numZeros(const HMM& hmm, const std::vector<int> &observations, std::v
     }
 }
 
-} // namespace chmmpp
+}  // namespace chmmpp

@@ -30,12 +30,14 @@ class LPModel {
     bool keep_data = true;
 
    public:
-
     virtual void initialize(const HMM& hmm, const std::vector<int>& observations);
 
-    virtual void optimize(double& log_likelihood, std::vector<int>& hidden_states);
+    virtual void optimize(double& log_likelihood, std::vector<int>& hidden_states,
+                          bool verbose = false);
 
     virtual void collect_solution(std::vector<int>& hidden_states);
+
+    virtual void print();
 
     virtual void clear();
 };

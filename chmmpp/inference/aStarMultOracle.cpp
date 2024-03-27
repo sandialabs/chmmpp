@@ -12,9 +12,10 @@ namespace chmmpp {
 //---------------------------------
 
 // Same as above, but we now have an oracle for the constraints
-void aStarMultOracle( const HMM& hmm,
-    const std::vector<int> &observations, std::vector<std::vector<int>>& hidden_states, double &logProb,
-    const std::function<bool(std::vector<int>)> &constraintOracle, const int numSolns)
+void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
+                     std::vector<std::vector<int>>& hidden_states, double& logProb,
+                     const std::function<bool(std::vector<int>)>& constraintOracle,
+                     const int numSolns)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -24,9 +25,9 @@ void aStarMultOracle( const HMM& hmm,
     const auto& E = hmm.getE();
 
     // So we don't need to keep recomputing logs
-    std::vector<std::vector<double> > logA;
+    std::vector<std::vector<double>> logA;
     std::vector<double> logS;
-    std::vector<std::vector<double> > logE;
+    std::vector<std::vector<double>> logE;
 
     logA.resize(H);
     logE.resize(H);
@@ -45,7 +46,7 @@ void aStarMultOracle( const HMM& hmm,
         }
     }
 
-    std::vector<std::vector<double> > v;  // Stands for Viterbi
+    std::vector<std::vector<double>> v;  // Stands for Viterbi
     v.resize(T);
     for (int t = 0; t < T; ++t) {
         v[t].resize(H);
@@ -66,9 +67,9 @@ void aStarMultOracle( const HMM& hmm,
     }
 
     // Dist, current h, time, constraint val
-    std::priority_queue<std::pair<double, std::vector<int> > >
+    std::priority_queue<std::pair<double, std::vector<int>>>
         openSet;  // Works b/c c++ orders tuples lexigraphically
-    std::unordered_map<std::vector<int>, double, boost::hash<std::vector<int> > >
+    std::unordered_map<std::vector<int>, double, boost::hash<std::vector<int>>>
         gScore;  // pair is h,t, constraintVal
     // TODO make better hash for tuple
     // Would gScore be better as a multi-dimensional array? <- probably not, b/c we are hoping it
@@ -116,4 +117,4 @@ void aStarMultOracle( const HMM& hmm,
     }
 }
 
-} // namespace chmmpp
+}  // namespace chmmpp

@@ -31,9 +31,9 @@ class HMM {
                     const std::vector<double> &inputS,
                     const std::vector<std::vector<double> > &inputE, long int seed);
 
-    void initialize_from_file(const std::string& json_filename);
+    void initialize_from_file(const std::string &json_filename);
 
-    void initialize_from_string(const std::string& json_string);
+    void initialize_from_string(const std::string &json_string);
 
     // Get Private Variables
     size_t getH() const;

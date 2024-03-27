@@ -51,10 +51,10 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
     for (auto i : coek::range(N)) E.push_back({Tmax, i, -2});
 
     if (y_binary) {
-        for (auto& e : E) y[e] = coek::variable().bounds(0, 1).within(coek::Boolean);
+        for (auto& e : E) y[e] = model.add(coek::variable().bounds(0, 1).within(coek::Boolean));
     }
     else {
-        for (auto& e : E) y[e] = coek::variable().bounds(0, 1);
+        for (auto& e : E) y[e] = model.add(coek::variable().bounds(0, 1));
     }
 
     // flow constraints
@@ -108,22 +108,25 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
     }
 }
 
-void LPModel::optimize(double& log_likelihood, std::vector<int>& hidden_states)
+void LPModel::optimize(double& log_likelihood, std::vector<int>& hidden_states, bool verbose)
 {
     coek::Solver solver(solver_name);
     if (not solver.available()) std::cout << "Error setting up solver " + solver_name << std::endl;
 
+    solver.set_option("OutputFlag", 0);  // Specific to Gurobi
     auto status = solver.solve(model);
     if (status)
         std::cout << "Error executing linear programming solver: " + std::to_string(status)
                   << std::endl;
 
     collect_solution(hidden_states);
-    log_likelihood = log_likelihood_expr.value();
+    log_likelihood = -log_likelihood_expr.value();
 }
 
 void LPModel::collect_solution(std::vector<int>& hidden_states)
 {
+    hidden_states.resize(Tmax);
+
     for (auto& it : y) {
         if (it.second.value() > 0) {
             auto& [t, a, b] = it.first;
@@ -135,14 +138,16 @@ void LPModel::collect_solution(std::vector<int>& hidden_states)
 
 void LPModel::clear()
 {
-Tmax = 0;
-N = 0;
-log_likelihood_expr = coek::expression(0);
-y.clear();
-E.clear();
-F.clear();
-FF.clear();
-G.clear();
+    Tmax = 0;
+    N = 0;
+    log_likelihood_expr = coek::expression(0);
+    y.clear();
+    E.clear();
+    F.clear();
+    FF.clear();
+    G.clear();
 }
+
+void LPModel::print() { model.print_equations(); }
 
 }  // namespace chmmpp

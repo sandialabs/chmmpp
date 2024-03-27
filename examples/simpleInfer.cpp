@@ -8,10 +8,10 @@ int main()
     // bool oracleConstraint(std::vector<int> hid, double numZeros);
 
     std::vector<std::vector<double> > A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
-    std::vector<double> S = {0.9, 0.1};                               // Start probabilities
+    std::vector<double> S = {0.9, 0.1};                                   // Start probabilities
     std::vector<std::vector<double> > E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
-    size_t T = 10;  // Time Horizon
+    size_t T = 1000;  // Time Horizon
 
     chmmpp::HMM myHMM(A, S, E, 0);
     myHMM.print();
@@ -23,10 +23,15 @@ int main()
     myHMM.run(T, obs, hid);
     auto numZeros = count(hid.begin(), hid.end(), 0);
 
-    std::cout << "Running inference without constraint.\n";
-    double logProbNoConstraints;
-    std::vector<int> hidGuessNoConstraints;
-    aStar(myHMM, obs, hidGuessNoConstraints, logProbNoConstraints);
+    std::cout << "Running inference without constraint - aStar\n";
+    double logProbNoConstraints_aStar;
+    std::vector<int> hidGuessNoConstraints_aStar;
+    aStar(myHMM, obs, hidGuessNoConstraints_aStar, logProbNoConstraints_aStar);
+
+    std::cout << "Running inference without constraint - lp\n";
+    double logProbNoConstraints_lp;
+    std::vector<int> hidGuessNoConstraints_lp;
+    lp_map_inference(myHMM, obs, hidGuessNoConstraints_lp, logProbNoConstraints_lp);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;
@@ -39,26 +44,41 @@ int main()
     // works better if we don't have a ``nice'' constraint like numZeros. It uses an oracles and
     // just tells you at the end if you satisfy the constraints.
 
-    int numDiffNoConstraints = 0;
+    int numDiffNoConstraints_aStar = 0;
+    int numDiffNoConstraints_lp = 0;
     int numDiffConstraints = 0;
     for (size_t t = 0; t < T; ++t) {
-        if (hidGuessNoConstraints[t] != hid[t]) {
-            ++numDiffNoConstraints;
+        if (hidGuessNoConstraints_aStar[t] != hid[t]) {
+            ++numDiffNoConstraints_aStar;
+        }
+        if (hidGuessNoConstraints_lp[t] != hid[t]) {
+            ++numDiffNoConstraints_lp;
         }
         if (hidGuessConstraints[t] != hid[t]) {
             ++numDiffConstraints;
         }
     }
 
-    std::cout << "\nLog prob without constraints: " << -logProbNoConstraints << "\n";
-    std::cout << "Log prob with constraints: " << logProbConstraints << "\n\n";
-    std::cout << "Number of mistakes in inference with no constraints: " << numDiffNoConstraints
-              << "\n";
-    std::cout << "Number of mistakes in inference with constraints: " << numDiffConstraints
-              << "\n\n";
+    std::cout << std::endl;
+    std::cout << "Log prob without constraints - aStar:\t" << -logProbNoConstraints_aStar << "\n";
+    std::cout << "Log prob without constraints - lp:\t" << -logProbNoConstraints_lp << "\n";
+    std::cout << "Log prob with constraints:\t\t" << logProbConstraints << "\n";
 
-    std::cout << "Double-checking log prob without constraints: " << myHMM.logProb(obs, hidGuessNoConstraints) << std::endl;
-    std::cout << "Double-checking log prob with constraints:    " << myHMM.logProb(obs, hidGuessConstraints) << std::endl;
+    std::cout << std::endl;
+    std::cout << "Number of mistakes in inference with no constraints - aStar:\t"
+              << numDiffNoConstraints_aStar << "\n";
+    std::cout << "Number of mistakes in inference with no constraints - lp:\t"
+              << numDiffNoConstraints_lp << "\n";
+    std::cout << "Number of mistakes in inference with constraints:\t\t" << numDiffConstraints
+              << "\n";
+
+    std::cout << std::endl;
+    std::cout << "Double-checking log prob without constraints - aStar:\t"
+              << myHMM.logProb(obs, hidGuessNoConstraints_aStar) << std::endl;
+    std::cout << "Double-checking log prob without constraints - lp:\t"
+              << myHMM.logProb(obs, hidGuessNoConstraints_lp) << std::endl;
+    std::cout << "Double-checking log prob with constraints:\t\t"
+              << myHMM.logProb(obs, hidGuessConstraints) << std::endl;
 
     return 0;
 }
