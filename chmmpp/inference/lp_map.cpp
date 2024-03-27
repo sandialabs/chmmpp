@@ -3,7 +3,9 @@
 #include <queue>
 #include <iostream>
 #include "inference.hpp"
+#ifdef WITH_COEK
 #include "LPModel.hpp"
+#endif
 
 namespace chmmpp {
 
@@ -14,11 +16,16 @@ namespace chmmpp {
 void lp_map_inference(const HMM &hmm, const std::vector<int> &observations,
                       std::vector<int> &hidden_states, double &logProb)
 {
+#ifdef WITH_COEK
     LPModel model;
 
     model.initialize(hmm, observations);
     // model.print();
     model.optimize(logProb, hidden_states);
+#else
+    hidden_states.resize(hmm.getH());
+    logProb = 0;
+#endif
 }
 
 }  // namespace chmmpp

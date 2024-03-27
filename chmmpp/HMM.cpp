@@ -128,6 +128,7 @@ void HMM::initialize(const std::vector<std::vector<double> >& inputA,
     dist = myDist;
 }
 
+#ifdef WITH_COEK
 namespace {
 
 // WEH - I omitted this method from the HMM class to avoid conditional imports
@@ -192,6 +193,7 @@ void initialize_from_dataportal(HMM& hmm, coek::DataPortal& dp)
 }
 
 }  // namespace
+#endif
 
 void HMM::initialize_from_file(const std::string& json_filename)
 {
