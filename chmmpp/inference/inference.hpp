@@ -14,7 +14,9 @@ void lp_map_inference(const HMM &hmm, const std::vector<int> &observations,
                       std::vector<int> &hidden_states, double &logProb);
 
 void aStar(const HMM &hmm, const std::vector<int> &observations, std::vector<int> &hidden_states,
-           double &logProb);
+           double &logProb); // Can be removed -- viterbi is faster and gives the same answer
+void viterbi(const HMM &hmm, const std::vector<int> &observations, std::vector<int> &hidden_states,
+           double &logProb); //This should give the same answer as aStar. 
 
 // WEH - This is an application-specific A* implementation?
 void aStar_numZeros(const HMM &hmm, const std::vector<int> &observations,

@@ -28,6 +28,11 @@ int main()
     std::vector<int> hidGuessNoConstraints_aStar;
     aStar(myHMM, obs, hidGuessNoConstraints_aStar, logProbNoConstraints_aStar);
 
+    std::cout << "Running inference without constraint - Viterbi\n";
+    double logProbNoConstraints_viterbi;
+    std::vector<int> hidGuessNoConstraints_viterbi;
+    viterbi(myHMM, obs, hidGuessNoConstraints_viterbi, logProbNoConstraints_viterbi);
+
     std::cout << "Running inference without constraint - lp\n";
     double logProbNoConstraints_lp;
     std::vector<int> hidGuessNoConstraints_lp;
@@ -45,11 +50,15 @@ int main()
     // just tells you at the end if you satisfy the constraints.
 
     int numDiffNoConstraints_aStar = 0;
+    int numDiffNoConstraints_viterbi = 0;
     int numDiffNoConstraints_lp = 0;
     int numDiffConstraints = 0;
     for (size_t t = 0; t < T; ++t) {
         if (hidGuessNoConstraints_aStar[t] != hid[t]) {
             ++numDiffNoConstraints_aStar;
+        }
+        if (hidGuessNoConstraints_viterbi[t] != hid[t]) {
+            ++numDiffNoConstraints_viterbi;
         }
         if (hidGuessNoConstraints_lp[t] != hid[t]) {
             ++numDiffNoConstraints_lp;
@@ -61,12 +70,15 @@ int main()
 
     std::cout << std::endl;
     std::cout << "Log prob without constraints - aStar:\t" << -logProbNoConstraints_aStar << "\n";
+    std::cout << "Log prob without constraints - viterbi:\t" << -logProbNoConstraints_viterbi << "\n";
     std::cout << "Log prob without constraints - lp:\t" << -logProbNoConstraints_lp << "\n";
     std::cout << "Log prob with constraints:\t\t" << logProbConstraints << "\n";
 
     std::cout << std::endl;
     std::cout << "Number of mistakes in inference with no constraints - aStar:\t"
               << numDiffNoConstraints_aStar << "\n";
+    std::cout << "Number of mistakes in inference with no constraints - viterbi:\t"
+              << numDiffNoConstraints_viterbi << "\n";
     std::cout << "Number of mistakes in inference with no constraints - lp:\t"
               << numDiffNoConstraints_lp << "\n";
     std::cout << "Number of mistakes in inference with constraints:\t\t" << numDiffConstraints
@@ -75,6 +87,8 @@ int main()
     std::cout << std::endl;
     std::cout << "Double-checking log prob without constraints - aStar:\t"
               << myHMM.logProb(obs, hidGuessNoConstraints_aStar) << std::endl;
+    std::cout << "Double-checking log prob without constraints - viterbi:\t"
+              << myHMM.logProb(obs, hidGuessNoConstraints_viterbi) << std::endl;
     std::cout << "Double-checking log prob without constraints - lp:\t"
               << myHMM.logProb(obs, hidGuessNoConstraints_lp) << std::endl;
     std::cout << "Double-checking log prob with constraints:\t\t"
