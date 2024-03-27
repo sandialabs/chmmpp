@@ -47,7 +47,7 @@ int main()
     size_t T = 20;        // Time Horizon
     size_t numSolns = 5;  // Find top # of solns
     int counter = 0;
-    chmmpp::HMM_inference myHMM(A, S, E, 1233);  // 1233 is the seed
+    chmmpp::HMM myHMM(A, S, E, 1233);  // 1233 is the seed
 
     // Store the observed and hidden variables
     std::vector<int> obs;
@@ -69,14 +69,15 @@ int main()
 
     std::cout << "Running inference without constraint.\n";
     double logProbNoConstraints;
-    std::vector<std::vector<int> > hidGuessNoConstraints = myHMM.aStarMult(
-        obs, logProbNoConstraints, [](std::vector<int> /*myHid*/) -> bool { return true; },
+    std::vector<std::vector<int> > hidGuessNoConstraints;
+    chmmpp::aStarMultOracle(myHMM,
+        obs, hidGuessNoConstraints, logProbNoConstraints, [](std::vector<int> /*myHid*/) -> bool { return true; },
         numSolns);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;
-    std::vector<std::vector<int> > hidGuessConstraints
-        = myHMM.aStarMult(obs, logProbConstraints, oracleConstraint, numSolns);
+    std::vector<std::vector<int> > hidGuessConstraints;
+    chmmpp::aStarMultOracle(myHMM, obs, hidGuessConstraints, logProbConstraints, oracleConstraint, numSolns);
 
     std::cout << "\nObserved:\n";
     for (size_t t = 0; t < T; ++t) {
@@ -102,8 +103,6 @@ int main()
         }
         std::cout << "\n";
     }
-
-    return 0;
 
     return 0;
 }

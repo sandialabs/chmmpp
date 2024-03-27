@@ -2,22 +2,19 @@
 
 #include <queue>
 #include <iostream>
-#include "inference.hpp"
+#include "HMM_inference.hpp"
 #include "../util/vectorhash.hpp"
 
 namespace chmmpp {
 
-//------------------------
-//-----A* with oracle-----
-//------------------------
+//---------------------------------
+//-----A* multiple with Oracle-----
+//---------------------------------
 
-// Rather than having some nice function that we can take advantage of the structure of, we just
-// have an oracle which Keeps track of all values not just constraint value. Need for more
-// complicated constraints Note: This may produce a different solution from other A* functions.
-// However, they will have the same logProb, and thus occur with the same probability Effectively
-// the same as the code above, but we can't restrict the space if we have too many 0's
-void aStarOracle(const HMM& hmm, const std::vector<int> &observations, std::vector<int>& hidden_states, double &logProb,
-    const std::function<bool(std::vector<int>)> &constraintOracle)
+// Same as above, but we now have an oracle for the constraints
+void aStarMultOracle( const HMM& hmm,
+    const std::vector<int> &observations, std::vector<std::vector<int>>& hidden_states, double &logProb,
+    const std::function<bool(std::vector<int>)> &constraintOracle, const int numSolns)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -25,7 +22,6 @@ void aStarOracle(const HMM& hmm, const std::vector<int> &observations, std::vect
     const auto& A = hmm.getA();
     const auto& S = hmm.getS();
     const auto& E = hmm.getE();
-
 
     // So we don't need to keep recomputing logs
     std::vector<std::vector<double> > logA;
@@ -69,9 +65,6 @@ void aStarOracle(const HMM& hmm, const std::vector<int> &observations, std::vect
         }
     }
 
-    // WEH - not used?
-    std::vector<int> output;
-
     // Dist, current h, time, constraint val
     std::priority_queue<std::pair<double, std::vector<int> > >
         openSet;  // Works b/c c++ orders tuples lexigraphically
@@ -80,35 +73,33 @@ void aStarOracle(const HMM& hmm, const std::vector<int> &observations, std::vect
     // TODO make better hash for tuple
     // Would gScore be better as a multi-dimensional array? <- probably not, b/c we are hoping it
     // stays sparse
-    for (size_t h = 0; h < H; ++h) {
+    for (int h = 0; h < H; ++h) {
         double tempGScore
             = std::log(S[h]) + logE[h][observations[0]];  // Avoids extra look-up operation
 
-        if (h == 0) {
-            std::vector<int> tempVec = {0};  // Otherwise C++ can't figure out what is happening
-            openSet.push(std::make_pair(tempGScore + v[0][h], tempVec));
-            gScore[{0}] = tempGScore;
-        }
-        else {
-            std::vector<int> tempVec = {1};
-            openSet.push(std::make_pair(tempGScore + v[0][h], tempVec));
-            gScore[{1}] = tempGScore;
-        }
+        std::vector<int> tempVec = {h};  // Otherwise C++ can't figure out what is happening
+        openSet.push(std::make_pair(tempGScore + v[0][h], tempVec));
+        gScore[tempVec] = tempGScore;
     }
+
+    int counter = 0;
 
     while (!openSet.empty()) {
         auto tempPair = openSet.top();
+        openSet.pop();
+
         std::vector<int> currentSequence = std::get<1>(tempPair);
         int t = currentSequence.size();
         int h1 = currentSequence[t - 1];
-
-        openSet.pop();
         double oldGScore = gScore.at(currentSequence);
+
         if (t == T) {
             if (constraintOracle(currentSequence)) {
-                logProb = oldGScore;
-                hidden_states = currentSequence;
-                return;
+                hidden_states.push_back(currentSequence);
+                ++counter;
+                if (counter == numSolns) {
+                    return;
+                }
             }
         }
 

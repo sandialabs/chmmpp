@@ -48,7 +48,7 @@ int main()
 
     size_t T = 20;  // Time Horizon
     int counter = 0;
-    chmmpp::HMM_inference myHMM(A, S, E, 0);
+    chmmpp::HMM myHMM(A, S, E, 0);
 
     // Store the observed and hidden variables
     std::vector<int> obs;
@@ -70,12 +70,13 @@ int main()
 
     std::cout << "Running inference without constraint.\n";
     double logProbNoConstraints;
-    std::vector<int> hidGuessNoConstraints = myHMM.aStar(obs, logProbNoConstraints);
+    std::vector<int> hidGuessNoConstraints;
+    aStar(myHMM, obs, hidGuessNoConstraints, logProbNoConstraints);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;
-    std::vector<int> hidGuessConstraints
-        = myHMM.aStarOracle(obs, logProbConstraints, oracleConstraint);
+    std::vector<int> hidGuessConstraints;
+    aStarOracle(myHMM, obs, hidGuessConstraints, logProbConstraints, oracleConstraint);
 
     int numDiffNoConstraints = 0;
     int numDiffConstraints = 0;
