@@ -3,7 +3,7 @@
 #include <queue>
 #include <iostream>
 #include "HMM_inference.hpp"
-#include "vectorhash.hpp"
+#include "../util/vectorhash.hpp"
 
 namespace chmmpp {
 
@@ -579,24 +579,6 @@ std::vector<std::vector<int> > HMM_inference::aStarMult(
             }
         }
     }
-    return output;
-}
-
-//---------------------------
-//-----Calculate logProb-----
-//---------------------------
-
-// Useful in debugging and Monte Carlo learning algorithm
-// Should match A* function
-double HMM_inference::logProb(const std::vector<int> obs, const std::vector<int> guess) const
-{
-    double output = 0;
-    int T = guess.size();
-    output += log(S[guess[0]]);
-    for (int t = 0; t < T - 1; ++t) {
-        output += log(A[guess[t]][guess[t + 1]]) + log(E[guess[t]][obs[t]]);
-    }
-    output += log(E[guess[T - 1]][obs[T - 1]]);
     return output;
 }
 

@@ -31,6 +31,10 @@ class HMM {
                     const std::vector<double> &inputS,
                     const std::vector<std::vector<double> > &inputE, long int seed);
 
+    void initialize_from_file(const std::string& json_filename);
+
+    void initialize_from_string(const std::string& json_string);
+
     // Get Private Variables
     size_t getH() const;
     size_t getO() const;
@@ -48,7 +52,7 @@ class HMM {
 
     void run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
 
-    void load_from_json(const std::string &json_file);
+    double logProb(const std::vector<int> obs, const std::vector<int> guess) const;
 };
 
 }  // namespace chmmpp

@@ -6,7 +6,7 @@ set(chmmpp_include_directories)
 set(chmmpp_link_directories)
 
 SET(sources
-    vectorhash.cpp
+    util/vectorhash.cpp
     HMM.cpp
     )
 
@@ -14,12 +14,21 @@ if (with_coek)
     find_package(coek REQUIRED)
     list(APPEND sources LPModel.cpp)
     list(APPEND chmmpp_link_libraries "coek::coek")
+    list(APPEND chmmpp_compile_options "-DWITH_COEK")
 endif()
 
 if (with_boost)
     find_package(Boost REQUIRED)
-    list(APPEND sources HMM_inference.cpp)
+    list(APPEND sources 
+            inference/HMM_inference.cpp
+            inference/aStar.cpp
+            inference/aStarMult_numZeros.cpp
+            inference/aStarMultOracle.cpp
+            inference/aStar_numZeros.cpp
+            inference/aStarOracle.cpp
+            )
     list(APPEND chmmpp_link_libraries "Boost::boost")
+    list(APPEND chmmpp_compile_options "-DWITH_BOOST")
 endif()
 
 # gcov

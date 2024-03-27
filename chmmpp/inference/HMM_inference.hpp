@@ -28,8 +28,6 @@ class HMM_inference : public HMM {
         const std::vector<int> &observations, double &logProb,
         const std::function<bool(std::vector<int>)> &constraintOracle, const int numSolns) const;
 
-    double logProb(const std::vector<int> obs, const std::vector<int> guess) const;
-
     // Learning Algorithms
     void learn(const std::vector<int> &obs, const int numZeros, const double eps = 10E-6);
     void learn(const std::vector<std::vector<int> > &obs, const std::vector<int> &numZeros,

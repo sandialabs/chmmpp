@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include "HMM.hpp"
+#ifdef WITH_COEK
+#include <coek/util/DataPortal.hpp>
+#endif
 
 namespace chmmpp {
 
@@ -23,7 +26,7 @@ double HMM::getRandom() { return dist(generator); }
 HMM::HMM(long int seed) { initialize(A, S, E, seed); }
 
 HMM::HMM(const std::vector<std::vector<double> > &inputA, const std::vector<double> &inputS,
-         const std::vector<std::vector<double> > &inputE, int long seed)
+         const std::vector<std::vector<double> > &inputE, long int seed)
 {
     initialize(inputA, inputS, inputE, seed);
 }
@@ -123,6 +126,97 @@ void HMM::initialize(const std::vector<std::vector<double> > &inputA,
     generator.seed(seed);
     std::uniform_real_distribution<double> myDist(0., 1.);
     dist = myDist;
+}
+
+namespace {
+
+// WEH - I omitted this method from the HMM class to avoid conditional imports
+//       of coek logic in the HMM header.
+void initialize_from_dataportal(HMM& hmm, coek::DataPortal& dp)
+{
+//
+// Load data from the data portal
+//
+int H;
+if (not dp.get("H",H))
+    throw std::runtime_error("Error loading value 'H': Number of hidden states");
+
+int O;
+if (not dp.get("O",O))
+    throw std::runtime_error("Error loading value 'O': Number of observed states");
+
+std::map<std::tuple<int,int>,double> A;
+if (not dp.get("A",A))
+    throw std::runtime_error("Error loading value 'A': Transition matrix");
+
+std::map<int,double> S;
+if (not dp.get("S",S))
+    throw std::runtime_error("Error loading value 'S': Initial state probabilities");
+
+std::map<std::tuple<int,int>,double> E;
+if (not dp.get("E",E))
+    throw std::runtime_error("Error loading value 'E': Emission matrix");
+
+int seed;
+if (not dp.get("seed",seed))
+    throw std::runtime_error("Error loading value 'seed': Seed for the random number generator");
+
+//
+// Setup the dense data structures used by the HMM class
+//
+std::vector<std::vector<double> > inputA;
+inputA.resize(H);
+for (auto& vec : inputA)
+    vec.resize(H);
+for (auto& it : A) {
+    auto [a,b] = it.first;
+    inputA[a][b] = it.second;
+}
+
+std::vector<double> inputS;
+inputS.resize(H);
+for (auto& it : S)
+    inputS[it.first] = it.second;
+
+std::vector<std::vector<double> > inputE;
+inputA.resize(H);
+for (auto& vec : inputE)
+    vec.resize(O);
+for (auto& it : E) {
+    auto [a,b] = it.first;
+    inputE[a][b] = it.second;
+}
+
+long int hmm_seed = static_cast<long int>(seed);
+
+//
+// The HMM initialize() method does further error checking on the values.
+//
+hmm.initialize(inputA, inputS, inputE, seed);
+}
+
+}
+
+void HMM::initialize_from_file(const std::string& json_filename)
+{
+#ifdef WITH_COEK
+coek::DataPortal dp;
+dp.load_from_file(json_filename);
+initialize_from_dataportal(*this, dp);
+#else
+throw std::runtime_error("Must build with coek to initialize HMM objects from a file.");
+#endif
+}
+
+void HMM::initialize_from_string(const std::string& json_string)
+{
+#ifdef WITH_COEK
+coek::DataPortal dp;
+dp.load_from_json_string(json_string);
+initialize_from_dataportal(*this, dp);
+#else
+throw std::runtime_error("Must build with coek to initialize HMM objects from a string.");
+#endif
 }
 
 //----------------------------------
@@ -251,6 +345,18 @@ void HMM::run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenS
     }
 
     return;
+}
+
+// WEH - I reworked this to simplify the logic a little bit
+double HMM::logProb(const std::vector<int> obs, const std::vector<int> hidden_states) const
+{
+    size_t T = hidden_states.size();
+
+    double output = log(S[hidden_states[0]]) + log(E[hidden_states[0]][obs[0]]);
+    for (size_t t=1; t<T; t++)
+        output += log(A[hidden_states[t-1]][hidden_states[t]]) + log(E[hidden_states[t]][obs[t]]);
+
+    return output;
 }
 
 }  // namespace chmmpp

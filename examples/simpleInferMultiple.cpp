@@ -1,7 +1,7 @@
 // main.cpp
 
 #include <iostream>
-#include <chmmpp/HMM_inference.hpp>
+#include <chmmpp/chmmpp.hpp>
 
 bool oracleConstraint(std::vector<int> hid, long int numZeros)
 {

@@ -1,19 +1,20 @@
 // main.cpp
 
 #include <iostream>
-#include <chmmpp/HMM_inference.hpp>
+#include <chmmpp/chmmpp.hpp>
 
 int main()
 {
     // bool oracleConstraint(std::vector<int> hid, double numZeros);
 
     std::vector<std::vector<double> > A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
-    std::vector<double> S = {0.501, 0.499};                               // Start probabilities
+    std::vector<double> S = {0.9, 0.1};                               // Start probabilities
     std::vector<std::vector<double> > E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
-    size_t T = 1000;  // Time Horizon
+    size_t T = 10;  // Time Horizon
 
-    chmmpp::HMM_inference myHMM(A, S, E, 0);
+    chmmpp::HMM myHMM(A, S, E, 0);
+    myHMM.print();
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<int> obs;
@@ -24,11 +25,14 @@ int main()
 
     std::cout << "Running inference without constraint.\n";
     double logProbNoConstraints;
-    std::vector<int> hidGuessNoConstraints = myHMM.aStar(obs, logProbNoConstraints);
+    std::vector<int> hidGuessNoConstraints;
+    aStar(myHMM, obs, hidGuessNoConstraints, logProbNoConstraints);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;
-    std::vector<int> hidGuessConstraints = myHMM.aStar(obs, logProbConstraints, numZeros);
+    std::vector<int> hidGuessConstraints;
+    aStar_numZeros(myHMM, obs, hidGuessConstraints, logProbConstraints, numZeros);
+
     // std::vector<int> hidGuessConstraints = myHMM.aStarOracle(obs, logProbConstraints,
     // [numZeros](std::vector<int> myHid) -> bool { return (numZeros == count(myHid.begin(),
     // myHid.end(), 0));  }); //Gives the same answer as above, but slower. This inference method
@@ -52,6 +56,9 @@ int main()
               << "\n";
     std::cout << "Number of mistakes in inference with constraints: " << numDiffConstraints
               << "\n\n";
+
+    std::cout << "Double-checking log prob without constraints: " << myHMM.logProb(obs, hidGuessNoConstraints) << std::endl;
+    std::cout << "Double-checking log prob with constraints:    " << myHMM.logProb(obs, hidGuessConstraints) << std::endl;
 
     return 0;
 }

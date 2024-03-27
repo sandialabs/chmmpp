@@ -1,6 +1,6 @@
 #include <iostream>
 #include <unordered_set>
-#include <chmmpp/HMM_inference.hpp>
+#include <chmmpp/chmmpp.hpp>
 
 // Could also make this a lambda fn, but this is easier
 // Checks if the hidden constraints form a tour

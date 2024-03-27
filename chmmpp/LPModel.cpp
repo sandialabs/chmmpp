@@ -133,4 +133,16 @@ void LPModel::collect_solution(std::vector<int>& hidden_states)
     }
 }
 
+void LPModel::clear()
+{
+Tmax = 0;
+N = 0;
+log_likelihood_expr = coek::expression(0);
+y.clear();
+E.clear();
+F.clear();
+FF.clear();
+G.clear();
+}
+
 }  // namespace chmmpp
