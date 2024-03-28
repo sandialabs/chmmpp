@@ -250,7 +250,7 @@ void numZerosHMM::aStarMult_numZeros(const std::vector<int>& observations,
         double oldGScore = gScore.at(currentSequence);
         if (t == T) {
             if (fVal == numZeros) {
-                logProb.push_back(-oldGScore);
+                logProb.push_back(oldGScore);
                 hidden_states.push_back(currentSequence);
                 ++counter;
                 if (counter == numSolns) {
