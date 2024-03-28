@@ -27,6 +27,7 @@ void run(T& hmm, V& obs, W& hid, size_t numSolns, const Z& fn)
         std::cout << "  Num zeros:                       " << count(hidGuess[r].begin(), hidGuess[r].end(), 0) << "\n";
         std::cout << "  Number of mistakes in inference: " << numDiff << "\n";
         std::cout << "  Log prob:                        " << logProb[r] << std::endl;
+        std::cout << "  Log prob (check):                " << hmm.logProb(obs, hid) << std::endl;
         std::cout << std::endl;
     }
 
