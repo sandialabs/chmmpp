@@ -99,7 +99,7 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
 
         if (t == T) {
             if (fVal == numZeros) {  // Make sure we actually satisfy the constraints
-                logProb = oldGScore;
+                logProb = -oldGScore;
                 std::vector<int> output;
                 output.push_back(h1);
 
