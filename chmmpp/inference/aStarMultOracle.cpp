@@ -16,7 +16,7 @@ namespace chmmpp {
 void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
                      const std::function<bool(std::vector<int>&)>& constraintOracle,
-                     const int numSolns)
+                     const int numSolns, const int iterationLimit)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -85,8 +85,14 @@ void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
     }
 
     int counter = 0;
+    int iterationCounter = 0;
 
     while (!openSet.empty()) {
+        if(iterationCounter >= iterationLimit) {
+            break;
+        }
+        ++iterationCounter;
+
         auto tempPair = openSet.top();
         openSet.pop();
 

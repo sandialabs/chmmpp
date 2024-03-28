@@ -29,6 +29,6 @@ void aStarOracle(const HMM &hmm, const std::vector<int> &observations,
 void aStarMultOracle(const HMM &hmm, const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
                      const std::function<bool(std::vector<int>&)> &constraintOracle,
-                     const int numSolns);
+                     const int numSolns, const int iterationLimit = 10E7);
 
 }  // namespace chmmpp
