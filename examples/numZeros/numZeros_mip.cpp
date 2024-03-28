@@ -5,6 +5,7 @@
 
 namespace chmmpp {
 
+#ifdef WITH_COEK
 class MIPModel : public LPModel 
 {
 public:
@@ -32,7 +33,7 @@ LPModel::collect_solution(hidden_states);
 
 // TODO - more here
 }
-
+#endif
 
 void numZerosHMM::mip_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb)
 {
