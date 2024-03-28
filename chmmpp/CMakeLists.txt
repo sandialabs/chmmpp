@@ -27,9 +27,7 @@ if (with_boost)
             inference/HMM_inference.cpp
             inference/aStar.cpp
             inference/viterbi.cpp
-            inference/aStarMult_numZeros.cpp
             inference/aStarMultOracle.cpp
-            inference/aStar_numZeros.cpp
             inference/aStarOracle.cpp
 
 	    learn/learn_unconstrained.cpp

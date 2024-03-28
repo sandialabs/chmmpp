@@ -1,7 +1,6 @@
 project (CHMM_Examples)
 
 set(EXAMPLES 
-    simpleInferMultiple.cpp
     simpleLearn.cpp
     simpleLearnMC.cpp
 	tourInfer.cpp

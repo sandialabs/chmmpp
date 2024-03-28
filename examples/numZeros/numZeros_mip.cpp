@@ -22,16 +22,29 @@ public:
 
 void MIPModel::initialize(const numZerosHMM& hmm, const std::vector<int>& observations)
 {
+// Require the use of binary flow variables (y)
+y_binary = true;
 LPModel::initialize(hmm.hmm, observations);
 
-// TODO - more here
+// # of times the solution flows through state 0  == numZeros
+auto sum = coek::expression();
+for (auto t : coek::range(Tmax)) {
+    if (t == 0)
+        sum += y[{t - 1, -1, 0}];
+    else {
+        for (auto a : coek::range(N))
+            if (not(F.find({a, 0}) == F.end()))
+                sum += y[{t - 1, a, 0}];
+        }
+}
+model.add( sum == hmm.numZeros );
 }
 
 void MIPModel::collect_solution(std::vector<int>& hidden_states)
 {
 LPModel::collect_solution(hidden_states);
 
-// TODO - more here
+// TODO - more here ?
 }
 #endif
 

@@ -17,7 +17,7 @@ void run(T& hmm, V& obs, W& hid, const Z& fn)
         }
     }
 
-    std::cout << "  Solution:";
+    std::cout << "  Solution: ";
     for (auto& v : hidGuess)
         std::cout << v;
     std::cout << "\n";
@@ -69,9 +69,11 @@ int main()
     std::cout << "Running inference without constraint - LP\n";
     run(hmm, obs, hid, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.lp_map_inference(obs,hs,logProb);});
 
-//  WEH - This returns the wrong log probability (positive, not negative).  Any clue why?
     std::cout << "Running inference with constraint - custom aStar\n";
     run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar_numZeros(obs,hs,logProb);});
+
+    std::cout << "Running inference with constraint - MIP \n";
+    run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.mip_map_inference(obs,hs,logProb);});
 
 #if 0
     WEH - This doesn't seem to terminate.  Do we have the right function?
