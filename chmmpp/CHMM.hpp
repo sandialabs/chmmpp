@@ -35,8 +35,7 @@ public:
     void aStar(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
 
     // aStar generating multiple solutions
-    void aStarMult(const std::vector<int> &observations, std::vector<std::vector<int>> &hidden_states, double &logProb,
-                     const int numSolns);
+    void aStarMult(const std::vector<int> &observations, std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb, const int numSolns);
 
     // Optimize using an mixed-integer programming formulation that expresses application constraints
     virtual void mip_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);

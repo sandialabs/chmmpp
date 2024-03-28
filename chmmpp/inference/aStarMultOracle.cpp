@@ -14,7 +14,7 @@ namespace chmmpp {
 // Same as above, but we now have an oracle for the constraints
 // WARNING this will not produce the correct number of solutions if it isn't possible
 void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
-                     std::vector<std::vector<int>>& hidden_states, double& logProb,
+                     std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
                      const std::function<bool(std::vector<int>&)>& constraintOracle,
                      const int numSolns)
 {
@@ -98,6 +98,7 @@ void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
         if (t == T) {
             if (constraintOracle(currentSequence)) {
                 hidden_states.push_back(currentSequence);
+                logProb.push_back(oldGScore);   // WEH - is this right?
                 ++counter;
                 if (counter == numSolns) {
                     return;

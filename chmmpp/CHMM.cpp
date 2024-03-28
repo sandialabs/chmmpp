@@ -8,7 +8,7 @@ void CHMM::aStar(const std::vector<int> &observations, std::vector<int> &hidden_
 chmmpp::aStarOracle(hmm, observations, hidden_states, logProb, constraintOracle);
 }
 
-void CHMM::aStarMult(const std::vector<int> &observations, std::vector<std::vector<int>> &hidden_states, double &logProb,
+void CHMM::aStarMult(const std::vector<int> &observations, std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
                      const int numSolns)
 {
 chmmpp::aStarMultOracle(hmm, observations, hidden_states, logProb, constraintOracle, numSolns);

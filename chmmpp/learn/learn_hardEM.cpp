@@ -40,7 +40,7 @@ namespace chmmpp {
                 std::cout << "R = " << r << "\n";
                 int T = obs[r].size();
                 std::vector<std::vector<int> > hidden;
-                double temp;
+                std::vector<double> temp;
 
                 aStarMultOracle(hmm, obs[r], hidden, temp, constraintOracle[r], numSolns);
                 for (int i = 0; i < hidden.size(); ++i) { //Use hidden.size() here incase there aren't numSolns # of solutions

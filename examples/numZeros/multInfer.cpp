@@ -68,11 +68,11 @@ int main()
     nzhmm.initialize(hmm);
 
 
-    //std::cout << "Running inference without constraint - aStarMulti\n";
-    //run(hmm, obs, hid, numSolns, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb, size_t num){hmm.aStarMult(obs,hs,logProb,num);});
-
     std::cout << "Running inference with constraint - custom aStar\n";
     run(nzhmm, obs, hid, numSolns, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<std::vector<int>>& hs, std::vector<double>& logProb, size_t num){hmm.aStarMult_numZeros(obs,hs,logProb,num);});
+
+    std::cout << "Running inference with constraint - generic aStar\n";
+    run(nzhmm, obs, hid, numSolns, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<std::vector<int>>& hs, std::vector<double>& logProb, size_t num){hmm.aStarMult(obs,hs,logProb,num);});
 
     return 0;
 }
