@@ -72,15 +72,11 @@ int main()
     std::cout << "Running inference with constraint - custom aStar\n";
     run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar_numZeros(obs,hs,logProb);});
 
-    std::cout << "Running inference with constraint - MIP \n";
-    run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.mip_map_inference(obs,hs,logProb);});
-
-#if 0
-    WEH - This doesn't seem to terminate.  Do we have the right function?
-
     std::cout << "Running inference with constraint - generic aStar\n";
     run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar(obs,hs,logProb);});
-#endif
+
+    std::cout << "Running inference with constraint - MIP \n";
+    run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.mip_map_inference(obs,hs,logProb);});
 
     return 0;
 }
