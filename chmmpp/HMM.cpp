@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "HMM.hpp"
+#include "inference/inference.hpp"
 #ifdef WITH_COEK
 #    include <coek/util/DataPortal.hpp>
 #endif
@@ -362,6 +363,21 @@ double HMM::logProb(const std::vector<int> obs, const std::vector<int> hidden_st
         output += log(A[hidden_states[t - 1]][hidden_states[t]]) + log(E[hidden_states[t]][obs[t]]);
 
     return output;
+}
+
+void HMM::viterbi(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb)
+{
+chmmpp::viterbi(*this, observations, hidden_states, logProb);
+}
+
+void HMM::aStar(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb)
+{
+chmmpp::aStar(*this, observations, hidden_states, logProb);
+}
+
+void HMM::lp_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb)
+{
+chmmpp::lp_map_inference(*this, observations, hidden_states, logProb);
 }
 
 }  // namespace chmmpp

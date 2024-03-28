@@ -23,20 +23,24 @@ int main()
     myHMM.run(T, obs, hid);
     auto numZeros = count(hid.begin(), hid.end(), 0);
 
+    numZeros = 100;
+    std::cout << "Num Zeros in randomly generated data: " << numZeros << std::endl << std::endl;
+
     std::cout << "Running inference without constraint - aStar\n";
     double logProbNoConstraints_aStar;
     std::vector<int> hidGuessNoConstraints_aStar;
-    aStar(myHMM, obs, hidGuessNoConstraints_aStar, logProbNoConstraints_aStar);
+    myHMM.aStar(obs, hidGuessNoConstraints_aStar, logProbNoConstraints_aStar);
 
     std::cout << "Running inference without constraint - Viterbi\n";
     double logProbNoConstraints_viterbi;
     std::vector<int> hidGuessNoConstraints_viterbi;
-    viterbi(myHMM, obs, hidGuessNoConstraints_viterbi, logProbNoConstraints_viterbi);
+    myHMM.viterbi(obs, hidGuessNoConstraints_viterbi, logProbNoConstraints_viterbi);
 
     std::cout << "Running inference without constraint - lp\n";
     double logProbNoConstraints_lp;
     std::vector<int> hidGuessNoConstraints_lp;
-    lp_map_inference(myHMM, obs, hidGuessNoConstraints_lp, logProbNoConstraints_lp);
+    myHMM.set_option("debug", 0);
+    myHMM.lp_map_inference(obs, hidGuessNoConstraints_lp, logProbNoConstraints_lp);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;
@@ -73,6 +77,12 @@ int main()
     std::cout << "Log prob without constraints - viterbi:\t" << -logProbNoConstraints_viterbi << "\n";
     std::cout << "Log prob without constraints - lp:\t" << -logProbNoConstraints_lp << "\n";
     std::cout << "Log prob with constraints:\t\t" << logProbConstraints << "\n";
+
+    std::cout << std::endl;
+    std::cout << "Num zeros - aStar:\t\t" << count(hidGuessNoConstraints_aStar.begin(), hidGuessNoConstraints_aStar.end(), 0) << "\n";
+    std::cout << "Num zeros - viterbi:\t\t" <<  count(hidGuessNoConstraints_lp.begin(), hidGuessNoConstraints_lp.end(), 0) << "\n";
+    std::cout << "Num zeros - lp:\t\t\t" << count(hidGuessNoConstraints_viterbi.begin(), hidGuessNoConstraints_viterbi.end(), 0) << "\n";
+    std::cout << "Num zeros - constrained aStar:\t" << count(hidGuessConstraints.begin(), hidGuessConstraints.end(), 0) << "\n";
 
     std::cout << std::endl;
     std::cout << "Number of mistakes in inference with no constraints - aStar:\t"

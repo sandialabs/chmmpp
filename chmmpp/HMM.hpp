@@ -3,13 +3,14 @@
 #include <functional>
 #include <vector>
 #include <random>
+#include <chmmpp/Options.hpp>
 
 namespace chmmpp {
 
 // This is the class for dealing with HMMs
 // It stores (as protected variables) the transition matrix (A), start probabilities (S), and
 // Emission Probabilities (E) as well as the number of hidden states (H) and observed states (O)
-class HMM {
+class HMM : public Options {
    protected:
     size_t H;                                     // Number of hidden states
     size_t O;                                     // Number of observed states
@@ -57,6 +58,14 @@ class HMM {
     void run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
 
     double logProb(const std::vector<int> obs, const std::vector<int> guess) const;
+
+    // Inference methods
+
+    void viterbi(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
+    void aStar(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
+    void lp_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
+
 };
+
 
 }  // namespace chmmpp

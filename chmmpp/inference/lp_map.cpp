@@ -1,7 +1,3 @@
-// HMM.cpp
-
-#include <queue>
-#include <iostream>
 #include "inference.hpp"
 #ifdef WITH_COEK
 #include "LPModel.hpp"
@@ -19,8 +15,8 @@ void lp_map_inference(const HMM &hmm, const std::vector<int> &observations,
 #ifdef WITH_COEK
     LPModel model;
 
+    model.set_options(hmm);
     model.initialize(hmm, observations);
-    // model.print();
     model.optimize(logProb, hidden_states);
 #else
     hidden_states.resize(hmm.getH());

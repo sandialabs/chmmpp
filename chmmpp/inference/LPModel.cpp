@@ -106,14 +106,70 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
         FF.clear();
         G.clear();
     }
+
+    if (debug)
+        model.print_equations();
 }
 
-void LPModel::optimize(double& log_likelihood, std::vector<int>& hidden_states, bool verbose)
+void LPModel::set_options(const Options& options)
+{
+for (auto& it : options.options) {
+    if (it.first == "solver") {
+        if (std::holds_alternative<std::string>(it.second)) 
+            solver_name == std::get<std::string>(it.second);
+        else
+            std::cerr << "WARNING: 'solver' option must be a string" << std::endl;
+        }
+    else if (it.first == "keep_data") {
+        if (std::holds_alternative<int>(it.second)) 
+            keep_data = std::get<int>(it.second) != 0;
+        else if (std::holds_alternative<unsigned int>(it.second)) 
+            keep_data = std::get<unsigned int>(it.second) != 0;
+        else
+            std::cerr << "WARNING: 'keep_data' option must be an integer" << std::endl;
+        }
+    else if (it.first == "y_binary") {
+        if (std::holds_alternative<int>(it.second)) 
+            y_binary = std::get<int>(it.second) != 0;
+        else if (std::holds_alternative<unsigned int>(it.second)) 
+            y_binary = std::get<unsigned int>(it.second) != 0;
+        else
+            std::cerr << "WARNING: 'y_binary' option must be an integer" << std::endl;
+        }
+    else if (it.first == "debug") {
+        if (std::holds_alternative<int>(it.second)) 
+            debug = std::get<int>(it.second) != 0;
+        else if (std::holds_alternative<unsigned int>(it.second)) 
+            debug = std::get<unsigned int>(it.second) != 0;
+        else
+            std::cerr << "WARNING: 'debug' option must be an integer" << std::endl;
+        }
+    else
+        solver_options.set_option(it.first, it.second);
+    }
+}
+
+void LPModel::optimize(double& log_likelihood, std::vector<int>& hidden_states)
 {
     coek::Solver solver(solver_name);
     if (not solver.available()) std::cout << "Error setting up solver " + solver_name << std::endl;
 
-    solver.set_option("OutputFlag", 0);  // Specific to Gurobi
+    // Set solver options
+    if (solver_name == "gurobi")                // Suppress default Gurobi output
+        solver.set_option("OutputFlag", 0);
+    for (auto& it : solver_options.options) {
+        if (std::holds_alternative<int>(it.second)) 
+            solver.set_option(it.first, std::get<int>(it.second));
+        else if (std::holds_alternative<unsigned int>(it.second)) {
+            int tmp = std::get<unsigned int>(it.second);
+            solver.set_option(it.first, tmp);
+            }
+        else if (std::holds_alternative<double>(it.second)) 
+            solver.set_option(it.first, std::get<double>(it.second));
+        else if (std::holds_alternative<std::string>(it.second)) 
+            solver.set_option(it.first, std::get<std::string>(it.second));
+        }
+
     auto status = solver.solve(model);
     if (status)
         std::cout << "Error executing linear programming solver: " + std::to_string(status)

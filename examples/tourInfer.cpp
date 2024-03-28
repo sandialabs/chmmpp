@@ -71,7 +71,7 @@ int main()
     std::cout << "Running inference without constraint.\n";
     double logProbNoConstraints;
     std::vector<int> hidGuessNoConstraints;
-    aStar(myHMM, obs, hidGuessNoConstraints, logProbNoConstraints);
+    myHMM.aStar(obs, hidGuessNoConstraints, logProbNoConstraints);
 
     std::cout << "Running inference with constraints.\n";
     double logProbConstraints;

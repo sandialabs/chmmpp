@@ -28,12 +28,16 @@ class LPModel {
     std::string solver_name = "gurobi";
     bool y_binary = false;
     bool keep_data = true;
+    bool debug = false;
+    Options solver_options;
 
    public:
+
+    virtual void set_options(const Options& options);
+
     virtual void initialize(const HMM& hmm, const std::vector<int>& observations);
 
-    virtual void optimize(double& log_likelihood, std::vector<int>& hidden_states,
-                          bool verbose = false);
+    virtual void optimize(double& log_likelihood, std::vector<int>& hidden_states);
 
     virtual void collect_solution(std::vector<int>& hidden_states);
 

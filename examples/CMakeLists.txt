@@ -2,10 +2,13 @@ project (CHMM_Examples)
 
 #Go through all files in examples and add an executable for each
 set(EXAMPLES 
-	simpleInfer.cpp simpleInferMultiple.cpp simpleLearn.cpp simpleLearnMC.cpp
-	tourInfer.cpp tourInferMultiple.cpp
+	numZeros/simpleInfer.cpp
+    simpleInferMultiple.cpp
+    simpleLearn.cpp
+    simpleLearnMC.cpp
+	tourInfer.cpp
+    tourInferMultiple.cpp
 )
-
 
 foreach( exampleFile ${EXAMPLES} )
     # Cut off the file extension and directory path
@@ -13,9 +16,8 @@ foreach( exampleFile ${EXAMPLES} )
     
     add_executable( ${exampleName} ${exampleFile} )
     
-    target_link_libraries(${exampleName} #hmm.h
+    target_link_libraries(${exampleName}
         PRIVATE
         chmmpp::chmmpp
     )
-
 endforeach( exampleFile ${EXAMPLES} )

@@ -103,6 +103,8 @@ endif()
 
 install(FILES
         chmmpp.hpp
+        Options.hpp
+        HMM.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chmmpp
         )
 
