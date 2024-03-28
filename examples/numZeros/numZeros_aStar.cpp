@@ -127,8 +127,9 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
                     ++newFVal;
                 }
 
-                if (newFVal <= numZeros) {  // Helps reduce the size of the problem - we can't do
-                                            // this if we instead have a general oracle
+                if ((newFVal <= numZeros) 
+                        && ((T-t) >= (numZeros-fVal)) ) { // Helps reduce the size of the problem - we can't do
+                                                          // this if we instead have a general oracle
                     double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                     if (gScore.count(std::make_tuple(h2, t + 1, newFVal)) == 0) {
                         gScore[std::make_tuple(h2, t + 1, newFVal)] = tempGScore;
@@ -155,7 +156,7 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
 // Returns the top numSolns solutions to the inference problem.
 // Uses the same inference technique as A*Oracle, so it is much slower than general A*
 void numZerosHMM::aStarMult_numZeros(const std::vector<int>& observations,
-                        std::vector<std::vector<int>>& hidden_states, double& logProb,
+                        std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
                         int numSolns)
 {
     const int T = observations.size();
@@ -249,7 +250,7 @@ void numZerosHMM::aStarMult_numZeros(const std::vector<int>& observations,
         double oldGScore = gScore.at(currentSequence);
         if (t == T) {
             if (fVal == numZeros) {
-                logProb = oldGScore;
+                logProb.push_back(-oldGScore);
                 hidden_states.push_back(currentSequence);
                 ++counter;
                 if (counter == numSolns) {
@@ -265,7 +266,7 @@ void numZerosHMM::aStarMult_numZeros(const std::vector<int>& observations,
                     ++newFVal;
                 }
 
-                if (newFVal <= numZeros) {
+                if ((newFVal <= numZeros) && ((T-t) >= (numZeros-fVal)) ) {
                     double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                     std::vector<int> newSequence = currentSequence;
                     newSequence.push_back(h2);

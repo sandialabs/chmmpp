@@ -6,13 +6,13 @@
 template <typename T, typename V, typename W, typename Z>
 void run(T& hmm, V& obs, W& hid, size_t numSolns, const Z& fn)
 {
-    double logProb;
+    std::vector<double> logProb;
     std::vector<std::vector<int>> hidGuess;
     fn(hmm, obs, hidGuess, logProb, numSolns);
 
 
-    std::cout << "Top " << numSolns << " solutions.\n";
-    for (size_t r = 0; r < numSolns; ++r) {
+    std::cout << "Top " << hidGuess.size() << " solutions.\n";
+    for (size_t r = 0; r < hidGuess.size(); ++r) {
         std::cout << "  Solution:";
         for (auto& v : hidGuess[r])
             std::cout << v;
@@ -26,11 +26,11 @@ void run(T& hmm, V& obs, W& hid, size_t numSolns, const Z& fn)
         }
         std::cout << "  Num zeros:                       " << count(hidGuess[r].begin(), hidGuess[r].end(), 0) << "\n";
         std::cout << "  Number of mistakes in inference: " << numDiff << "\n";
-        std::cout << "  Log prob:                        " << hmm.logProb(obs, hidGuess[r]) << std::endl;
+        std::cout << "  Log prob:                        " << logProb[r] << std::endl;
         std::cout << std::endl;
     }
 
-    std::cout << "OPTIMAL Log prob: " << -logProb << "\n";
+    std::cout << "OPTIMAL Log prob: " << logProb[0] << "\n";
     std::cout << std::endl;
 }
 
@@ -72,7 +72,7 @@ int main()
     //run(hmm, obs, hid, numSolns, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb, size_t num){hmm.aStarMult(obs,hs,logProb,num);});
 
     std::cout << "Running inference with constraint - custom aStar\n";
-    run(nzhmm, obs, hid, numSolns, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<std::vector<int>>& hs, double& logProb, size_t num){hmm.aStarMult_numZeros(obs,hs,logProb,num);});
+    run(nzhmm, obs, hid, numSolns, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<std::vector<int>>& hs, std::vector<double>& logProb, size_t num){hmm.aStarMult_numZeros(obs,hs,logProb,num);});
 
     return 0;
 }
