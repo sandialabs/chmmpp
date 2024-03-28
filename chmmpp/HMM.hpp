@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 #include <vector>
 #include <random>
 #include <chmmpp/Options.hpp>

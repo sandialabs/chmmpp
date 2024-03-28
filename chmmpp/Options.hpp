@@ -3,6 +3,7 @@
 #include <map>
 #include <variant>
 #include <optional>
+#include <string>
 
 //
 // A simple class to set options that are used to configure methods in a subclass.
@@ -12,6 +13,12 @@ class Options
 public:
 
     std::map<std::string, std::variant<std::string, int, double, unsigned int>> options;
+
+    Options& get_options()
+        {return *this;}
+
+    const Options& get_options() const
+        {return *this;}
 
     template <typename T>
     void set_option(const std::string& name, const T& value)

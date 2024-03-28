@@ -15,7 +15,7 @@ void lp_map_inference(const HMM &hmm, const std::vector<int> &observations,
 #ifdef WITH_COEK
     LPModel model;
 
-    model.set_options(hmm);
+    model.set_options(hmm.get_options());
     model.initialize(hmm, observations);
     model.optimize(logProb, hidden_states);
 #else

@@ -15,7 +15,7 @@ namespace chmmpp {
 // WARNING this will not produce the correct number of solutions if it isn't possible
 void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, double& logProb,
-                     const std::function<bool(std::vector<int>)>& constraintOracle,
+                     const std::function<bool(std::vector<int>&)>& constraintOracle,
                      const int numSolns)
 {
     const int T = observations.size();

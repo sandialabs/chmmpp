@@ -1,7 +1,28 @@
 // main.cpp
 
 #include <iostream>
-#include <chmmpp/chmmpp.hpp>
+#include "numZerosHMM.hpp"
+
+template <typename T, typename V, typename W, typename Z>
+void run(T& hmm, V& obs, W& hid, const Z& fn)
+{
+    double logProb;
+    std::vector<int> hidGuess;
+    fn(hmm, obs, hidGuess, logProb);
+
+    int numDiff= 0;
+    for (size_t t = 0; t < obs.size(); ++t) {
+        if (hidGuess[t] != hid[t]) {
+            ++numDiff;
+        }
+    }
+
+    std::cout << "  Log prob:                        " << -logProb << "\n";
+    std::cout << "  Double-checking log prob:        " << hmm.logProb(obs, hidGuess) << std::endl;
+    std::cout << "  Num zeros:                       " << count(hidGuess.begin(), hidGuess.end(), 0) << "\n";
+    std::cout << "  Number of mistakes in inference: " << numDiff << "\n";
+    std::cout << std::endl;
+}
 
 int main()
 {
@@ -13,96 +34,39 @@ int main()
 
     size_t T = 1000;  // Time Horizon
 
-    chmmpp::HMM myHMM(A, S, E, 0);
-    myHMM.print();
+    chmmpp::HMM hmm(A, S, E, 0);
+    hmm.print();
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<int> obs;
     std::vector<int> hid;
 
-    myHMM.run(T, obs, hid);
+    hmm.run(T, obs, hid);
     auto numZeros = count(hid.begin(), hid.end(), 0);
-
-    numZeros = 100;
     std::cout << "Num Zeros in randomly generated data: " << numZeros << std::endl << std::endl;
 
+    chmmpp::numZerosHMM nzhmm(numZeros);
+    nzhmm.initialize(hmm);
+
+
     std::cout << "Running inference without constraint - aStar\n";
-    double logProbNoConstraints_aStar;
-    std::vector<int> hidGuessNoConstraints_aStar;
-    myHMM.aStar(obs, hidGuessNoConstraints_aStar, logProbNoConstraints_aStar);
-
+    run(hmm, obs, hid, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar(obs,hs,logProb);});
     std::cout << "Running inference without constraint - Viterbi\n";
-    double logProbNoConstraints_viterbi;
-    std::vector<int> hidGuessNoConstraints_viterbi;
-    myHMM.viterbi(obs, hidGuessNoConstraints_viterbi, logProbNoConstraints_viterbi);
+    run(hmm, obs, hid, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.viterbi(obs,hs,logProb);});
 
-    std::cout << "Running inference without constraint - lp\n";
-    double logProbNoConstraints_lp;
-    std::vector<int> hidGuessNoConstraints_lp;
-    myHMM.set_option("debug", 0);
-    myHMM.lp_map_inference(obs, hidGuessNoConstraints_lp, logProbNoConstraints_lp);
+    std::cout << "Running inference without constraint - LP\n";
+    run(hmm, obs, hid, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.lp_map_inference(obs,hs,logProb);});
 
-    std::cout << "Running inference with constraints.\n";
-    double logProbConstraints;
-    std::vector<int> hidGuessConstraints;
-    aStar_numZeros(myHMM, obs, hidGuessConstraints, logProbConstraints, numZeros);
+//  WEH - This returns the wrong log probability (positive, not negative).  Any clue why?
+    std::cout << "Running inference with constraint - custom aStar\n";
+    run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar_numZeros(obs,hs,logProb);});
 
-    // std::vector<int> hidGuessConstraints = myHMM.aStarOracle(obs, logProbConstraints,
-    // [numZeros](std::vector<int> myHid) -> bool { return (numZeros == count(myHid.begin(),
-    // myHid.end(), 0));  }); //Gives the same answer as above, but slower. This inference method
-    // works better if we don't have a ``nice'' constraint like numZeros. It uses an oracles and
-    // just tells you at the end if you satisfy the constraints.
+#if 0
+    WEH - This doesn't seem to terminate.  Do we have the right function?
 
-    int numDiffNoConstraints_aStar = 0;
-    int numDiffNoConstraints_viterbi = 0;
-    int numDiffNoConstraints_lp = 0;
-    int numDiffConstraints = 0;
-    for (size_t t = 0; t < T; ++t) {
-        if (hidGuessNoConstraints_aStar[t] != hid[t]) {
-            ++numDiffNoConstraints_aStar;
-        }
-        if (hidGuessNoConstraints_viterbi[t] != hid[t]) {
-            ++numDiffNoConstraints_viterbi;
-        }
-        if (hidGuessNoConstraints_lp[t] != hid[t]) {
-            ++numDiffNoConstraints_lp;
-        }
-        if (hidGuessConstraints[t] != hid[t]) {
-            ++numDiffConstraints;
-        }
-    }
-
-    std::cout << std::endl;
-    std::cout << "Log prob without constraints - aStar:\t" << -logProbNoConstraints_aStar << "\n";
-    std::cout << "Log prob without constraints - viterbi:\t" << -logProbNoConstraints_viterbi << "\n";
-    std::cout << "Log prob without constraints - lp:\t" << -logProbNoConstraints_lp << "\n";
-    std::cout << "Log prob with constraints:\t\t" << logProbConstraints << "\n";
-
-    std::cout << std::endl;
-    std::cout << "Num zeros - aStar:\t\t" << count(hidGuessNoConstraints_aStar.begin(), hidGuessNoConstraints_aStar.end(), 0) << "\n";
-    std::cout << "Num zeros - viterbi:\t\t" <<  count(hidGuessNoConstraints_lp.begin(), hidGuessNoConstraints_lp.end(), 0) << "\n";
-    std::cout << "Num zeros - lp:\t\t\t" << count(hidGuessNoConstraints_viterbi.begin(), hidGuessNoConstraints_viterbi.end(), 0) << "\n";
-    std::cout << "Num zeros - constrained aStar:\t" << count(hidGuessConstraints.begin(), hidGuessConstraints.end(), 0) << "\n";
-
-    std::cout << std::endl;
-    std::cout << "Number of mistakes in inference with no constraints - aStar:\t"
-              << numDiffNoConstraints_aStar << "\n";
-    std::cout << "Number of mistakes in inference with no constraints - viterbi:\t"
-              << numDiffNoConstraints_viterbi << "\n";
-    std::cout << "Number of mistakes in inference with no constraints - lp:\t"
-              << numDiffNoConstraints_lp << "\n";
-    std::cout << "Number of mistakes in inference with constraints:\t\t" << numDiffConstraints
-              << "\n";
-
-    std::cout << std::endl;
-    std::cout << "Double-checking log prob without constraints - aStar:\t"
-              << myHMM.logProb(obs, hidGuessNoConstraints_aStar) << std::endl;
-    std::cout << "Double-checking log prob without constraints - viterbi:\t"
-              << myHMM.logProb(obs, hidGuessNoConstraints_viterbi) << std::endl;
-    std::cout << "Double-checking log prob without constraints - lp:\t"
-              << myHMM.logProb(obs, hidGuessNoConstraints_lp) << std::endl;
-    std::cout << "Double-checking log prob with constraints:\t\t"
-              << myHMM.logProb(obs, hidGuessConstraints) << std::endl;
+    std::cout << "Running inference with constraint - generic aStar\n";
+    run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar(obs,hs,logProb);});
+#endif
 
     return 0;
 }
