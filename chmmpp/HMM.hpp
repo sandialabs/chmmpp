@@ -44,7 +44,7 @@ class HMM : public Options {
     double getAEntry(size_t h1, size_t h2) const;
     double getSEntry(size_t h) const;
     double getEEntry(size_t h, size_t o) const;
-    
+
     void setA(std::vector<std::vector<double> > newA);
     void setS(std::vector<double> newS);
     void setE(std::vector<std::vector<double> > newE);
@@ -60,11 +60,12 @@ class HMM : public Options {
 
     // Inference methods
 
-    void viterbi(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
-    void aStar(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
-    void lp_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
-
+    void viterbi(const std::vector<int> &observations, std::vector<int> &hidden_states,
+                 double &logProb);
+    void aStar(const std::vector<int> &observations, std::vector<int> &hidden_states,
+               double &logProb);
+    void lp_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states,
+                          double &logProb);
 };
-
 
 }  // namespace chmmpp

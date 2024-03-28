@@ -14,7 +14,7 @@ namespace chmmpp {
 // function is in hidden state 0 with the parameter numZeros Could also expand this to be general
 // linear constraints
 void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
-                    std::vector<int>& hidden_states, double& logProb)
+                                 std::vector<int>& hidden_states, double& logProb)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -24,9 +24,9 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
     const auto& E = hmm.getE();
 
     // So we don't need to keep recomputing logs
-    std::vector<std::vector<double> > logA;
-    //std::vector<double> logS;
-    std::vector<std::vector<double> > logE;
+    std::vector<std::vector<double>> logA;
+    // std::vector<double> logS;
+    std::vector<std::vector<double>> logE;
 
     logA.resize(H);
     logE.resize(H);
@@ -45,7 +45,7 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
         }
     }
 
-    std::vector<std::vector<double> >
+    std::vector<std::vector<double>>
         v;  // Stands for Viterbi, used as an estimate for how much logprob is left
     v.resize(T);
     for (int t = 0; t < T; ++t) {
@@ -67,12 +67,12 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
     }
 
     // Dist, current h, time, constraint val
-    std::priority_queue<std::tuple<double, int, int, int> >
+    std::priority_queue<std::tuple<double, int, int, int>>
         openSet;  // Works b/c c++ orders tuples lexigraphically
-    std::unordered_map<std::tuple<int, int, int>, double, boost::hash<std::tuple<int, int, int> > >
+    std::unordered_map<std::tuple<int, int, int>, double, boost::hash<std::tuple<int, int, int>>>
         gScore;  // pair is h,t, constraintVal
     // TODO make better hash for tuple
-    std::unordered_map<std::tuple<int, int, int>, int, boost::hash<std::tuple<int, int, int> > >
+    std::unordered_map<std::tuple<int, int, int>, int, boost::hash<std::tuple<int, int, int>>>
         prev;  // Used to recover sequence of hidden states
     for (size_t h = 0; h < H; ++h) {
         double tempGScore
@@ -127,9 +127,10 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
                     ++newFVal;
                 }
 
-                if ((newFVal <= numZeros) 
-                        && ((T-t) >= (numZeros-fVal)) ) { // Helps reduce the size of the problem - we can't do
-                                                          // this if we instead have a general oracle
+                if ((newFVal <= numZeros)
+                    && ((T - t)
+                        >= (numZeros - fVal))) {  // Helps reduce the size of the problem - we can't
+                                                  // do this if we instead have a general oracle
                     double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                     if (gScore.count(std::make_tuple(h2, t + 1, newFVal)) == 0) {
                         gScore[std::make_tuple(h2, t + 1, newFVal)] = tempGScore;
@@ -156,8 +157,8 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
 // Returns the top numSolns solutions to the inference problem.
 // Uses the same inference technique as A*Oracle, so it is much slower than general A*
 void numZerosHMM::aStarMult_numZeros(const std::vector<int>& observations,
-                        std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
-                        int numSolns)
+                                     std::vector<std::vector<int>>& hidden_states,
+                                     std::vector<double>& logProb, int numSolns)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -168,7 +169,7 @@ void numZerosHMM::aStarMult_numZeros(const std::vector<int>& observations,
 
     // So we don't need to keep recomputing logs
     std::vector<std::vector<double>> logA;
-    //std::vector<double> logS;
+    // std::vector<double> logS;
     std::vector<std::vector<double>> logE;
 
     logA.resize(H);
@@ -266,7 +267,7 @@ void numZerosHMM::aStarMult_numZeros(const std::vector<int>& observations,
                     ++newFVal;
                 }
 
-                if ((newFVal <= numZeros) && ((T-t) >= (numZeros-fVal)) ) {
+                if ((newFVal <= numZeros) && ((T - t) >= (numZeros - fVal))) {
                     double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                     std::vector<int> newSequence = currentSequence;
                     newSequence.push_back(h2);

@@ -10,7 +10,7 @@ void run(T& hmm, V& obs, W& hid, const Z& fn)
     std::vector<int> hidGuess;
     fn(hmm, obs, hidGuess, logProb);
 
-    int numDiff= 0;
+    int numDiff = 0;
     for (size_t t = 0; t < obs.size(); ++t) {
         if (hidGuess[t] != hid[t]) {
             ++numDiff;
@@ -18,13 +18,13 @@ void run(T& hmm, V& obs, W& hid, const Z& fn)
     }
 
     std::cout << "  Solution: ";
-    for (auto& v : hidGuess)
-        std::cout << v;
+    for (auto& v : hidGuess) std::cout << v;
     std::cout << "\n";
 
     std::cout << "  Log prob:                        " << -logProb << "\n";
     std::cout << "  Double-checking log prob:        " << hmm.logProb(obs, hidGuess) << std::endl;
-    std::cout << "  Num zeros:                       " << count(hidGuess.begin(), hidGuess.end(), 0) << "\n";
+    std::cout << "  Num zeros:                       " << count(hidGuess.begin(), hidGuess.end(), 0)
+              << "\n";
     std::cout << "  Number of mistakes in inference: " << numDiff << "\n";
     std::cout << std::endl;
 }
@@ -52,31 +52,45 @@ int main()
     nzhmm.initialize(hmm);
 
     std::cout << "Observed:\n";
-    for (auto& v : obs)
-        std::cout << v;
+    for (auto& v : obs) std::cout << v;
     std::cout << std::endl;
 
     std::cout << "\nTrue solution:\n";
-    for (auto& v : hid)
-        std::cout << v;
-    std::cout << std::endl << std::endl;;
+    for (auto& v : hid) std::cout << v;
+    std::cout << std::endl << std::endl;
+    ;
 
     std::cout << "Running inference without constraint - aStar\n";
-    run(hmm, obs, hid, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar(obs,hs,logProb);});
+    run(hmm, obs, hid,
+        [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb) {
+            hmm.aStar(obs, hs, logProb);
+        });
     std::cout << "Running inference without constraint - Viterbi\n";
-    run(hmm, obs, hid, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.viterbi(obs,hs,logProb);});
+    run(hmm, obs, hid,
+        [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb) {
+            hmm.viterbi(obs, hs, logProb);
+        });
 
     std::cout << "Running inference without constraint - LP\n";
-    run(hmm, obs, hid, [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.lp_map_inference(obs,hs,logProb);});
+    run(hmm, obs, hid,
+        [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb) {
+            hmm.lp_map_inference(obs, hs, logProb);
+        });
 
     std::cout << "Running inference with constraint - custom aStar\n";
-    run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar_numZeros(obs,hs,logProb);});
+    run(nzhmm, obs, hid,
+        [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs,
+           double& logProb) { hmm.aStar_numZeros(obs, hs, logProb); });
 
     std::cout << "Running inference with constraint - generic aStar\n";
-    run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.aStar(obs,hs,logProb);});
+    run(nzhmm, obs, hid,
+        [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs,
+           double& logProb) { hmm.aStar(obs, hs, logProb); });
 
     std::cout << "Running inference with constraint - MIP \n";
-    run(nzhmm, obs, hid, [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb){hmm.mip_map_inference(obs,hs,logProb);});
+    run(nzhmm, obs, hid,
+        [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs,
+           double& logProb) { hmm.mip_map_inference(obs, hs, logProb); });
 
     return 0;
 }

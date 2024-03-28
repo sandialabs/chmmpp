@@ -32,7 +32,6 @@ class LPModel {
     Options solver_options;
 
    public:
-
     virtual void set_options(const Options& options);
 
     virtual void initialize(const HMM& hmm, const std::vector<int>& observations);

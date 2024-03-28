@@ -240,11 +240,11 @@ double HMM::getSEntry(size_t h) const { return S[h]; }
 double HMM::getEEntry(size_t h, size_t o) const { return E[h][o]; }
 
 // CLM - Do we want to check these to make sure they are valid?
-void HMM::setA(std::vector<std::vector<double> > newA) {A = newA;}
+void HMM::setA(std::vector<std::vector<double> > newA) { A = newA; }
 
-void HMM::setS(std::vector<double> newS) {S = newS;}
+void HMM::setS(std::vector<double> newS) { S = newS; }
 
-void HMM::setE(std::vector<std::vector<double> > newE) {E = newE;}
+void HMM::setE(std::vector<std::vector<double> > newE) { E = newE; }
 
 //-----------------------
 //-----Print the HMM-----
@@ -365,19 +365,22 @@ double HMM::logProb(const std::vector<int> obs, const std::vector<int> hidden_st
     return output;
 }
 
-void HMM::viterbi(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb)
+void HMM::viterbi(const std::vector<int>& observations, std::vector<int>& hidden_states,
+                  double& logProb)
 {
-chmmpp::viterbi(*this, observations, hidden_states, logProb);
+    chmmpp::viterbi(*this, observations, hidden_states, logProb);
 }
 
-void HMM::aStar(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb)
+void HMM::aStar(const std::vector<int>& observations, std::vector<int>& hidden_states,
+                double& logProb)
 {
-chmmpp::aStar(*this, observations, hidden_states, logProb);
+    chmmpp::aStar(*this, observations, hidden_states, logProb);
 }
 
-void HMM::lp_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb)
+void HMM::lp_map_inference(const std::vector<int>& observations, std::vector<int>& hidden_states,
+                           double& logProb)
 {
-chmmpp::lp_map_inference(*this, observations, hidden_states, logProb);
+    chmmpp::lp_map_inference(*this, observations, hidden_states, logProb);
 }
 
 }  // namespace chmmpp

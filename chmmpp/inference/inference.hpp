@@ -20,15 +20,15 @@ void aStar(const HMM &hmm, const std::vector<int> &observations, std::vector<int
            double &logProb);
 
 void viterbi(const HMM &hmm, const std::vector<int> &observations, std::vector<int> &hidden_states,
-           double &logProb);
+             double &logProb);
 
 void aStarOracle(const HMM &hmm, const std::vector<int> &observations,
                  std::vector<int> &hidden_states, double &logProb,
-                 const std::function<bool(std::vector<int>&)> &constraintOracle);
+                 const std::function<bool(std::vector<int> &)> &constraintOracle);
 
 void aStarMultOracle(const HMM &hmm, const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
-                     const std::function<bool(std::vector<int>&)> &constraintOracle,
+                     const std::function<bool(std::vector<int> &)> &constraintOracle,
                      const int numSolns);
 
 }  // namespace chmmpp

@@ -77,7 +77,8 @@ int main()
     std::cout << "Running inference with constraints.\n";
     std::vector<double> logProbConstraints;
     std::vector<std::vector<int> > hidGuessConstraints;
-    chmmpp::aStarMultOracle(myHMM, obs, hidGuessConstraints, logProbConstraints, oracleConstraint, numSolns);
+    chmmpp::aStarMultOracle(myHMM, obs, hidGuessConstraints, logProbConstraints, oracleConstraint,
+                            numSolns);
 
     std::cout << "\nObserved:\n";
     for (size_t t = 0; t < T; ++t) {

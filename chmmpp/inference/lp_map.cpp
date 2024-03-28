@@ -1,6 +1,6 @@
 #include "inference.hpp"
 #ifdef WITH_COEK
-#include "LPModel.hpp"
+#    include "LPModel.hpp"
 #endif
 
 namespace chmmpp {

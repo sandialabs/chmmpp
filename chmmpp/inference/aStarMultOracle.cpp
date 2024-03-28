@@ -98,7 +98,7 @@ void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
         if (t == T) {
             if (constraintOracle(currentSequence)) {
                 hidden_states.push_back(currentSequence);
-                logProb.push_back(oldGScore);   // WEH - is this right?
+                logProb.push_back(oldGScore);  // WEH - is this right?
                 ++counter;
                 if (counter == numSolns) {
                     return;

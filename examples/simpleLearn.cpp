@@ -19,8 +19,9 @@ int main()
     std::vector<double> SInitial{0.51, 0.49};
     std::vector<std::vector<double> > EInitial{{0.91, 0.09}, {0.1, 0.9}};
 
-    chmmpp::HMM_inference toLearn_unconstrained(AInitial, SInitial, EInitial,
-                                   0);  // 0 is the seed of the RNG, can remove and it seeds by time
+    chmmpp::HMM_inference toLearn_unconstrained(
+        AInitial, SInitial, EInitial,
+        0);  // 0 is the seed of the RNG, can remove and it seeds by time
     chmmpp::HMM_inference toLearn_numZeros(AInitial, SInitial, EInitial, 0);
     chmmpp::HMM_inference toLearn_stochastic(AInitial, SInitial, EInitial, 0);
     chmmpp::HMM_inference toLearn_hardEM(AInitial, SInitial, EInitial, 0);
