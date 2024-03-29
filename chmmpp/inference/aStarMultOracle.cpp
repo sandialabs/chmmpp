@@ -22,18 +22,20 @@ void process_options(const Options& options, unsigned int& max_iterations)
                 if (tmp > 0)
                     max_iterations = tmp;
                 else
-                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
-                }
+                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer"
+                              << std::endl;
+            }
             else if (std::holds_alternative<unsigned int>(it.second)) {
                 max_iterations = std::get<unsigned int>(it.second);
-                }
+            }
             else
-                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer"
+                          << std::endl;
         }
     }
 }
 
-}
+}  // namespace
 
 void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
@@ -43,7 +45,8 @@ void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
     unsigned int max_iterations = 0;
     process_options(options, max_iterations);
 
-    aStarMultOracle(hmm, observations, hidden_states, logProb, constraintOracle, numSolns, max_iterations);
+    aStarMultOracle(hmm, observations, hidden_states, logProb, constraintOracle, numSolns,
+                    max_iterations);
 }
 
 // This simpler API is used to simplify calls to aStarMultOracle from hardEM

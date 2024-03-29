@@ -43,39 +43,43 @@ class CHMM : public Options {
     //
 
     // aStar using a constraintOracle function to identify feasible solutions
-    void aStar(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
+    void aStar(const std::vector<int> &observations, std::vector<int> &hidden_states,
+               double &logProb);
 
-    // aStar using a constraintOracle function to identify feasible solutions, generating 
+    // aStar using a constraintOracle function to identify feasible solutions, generating
     // multiple solutions
     //
     //  Options
     //      max_iterations (int):   Stop learning if number of iterations equals this threshold.
     //                              No threshold if this is 0 (Default: 0).
     //
-    void aStarMult(const std::vector<int> &observations, std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb, const int numSolns);
+    void aStarMult(const std::vector<int> &observations,
+                   std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
+                   const int numSolns);
 
     // Optimize using an mixed-integer programming formulation that expresses application
     // constraints
-    virtual void mip_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states, double &logProb);
+    virtual void mip_map_inference(const std::vector<int> &observations,
+                                   std::vector<int> &hidden_states, double &logProb);
 
     //
     // learning methods
     //
 
-    void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
-                      const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
-                      const double eps = 10E-6, const int C = 10E4);
+    void learn_stochastic(
+        HMM &hmm, const std::vector<std::vector<int>> &obs,
+        const std::vector<std::function<bool(std::vector<int>)>> &constraintOracle,
+        const double eps = 10E-6, const int C = 10E4);
     void learn_stochastic(HMM &hmm, const std::vector<int> &obs,
-                      const std::function<bool(std::vector<int>)> &constraintOracle,
-                      const double eps = 10E-6, const int C = 10E4);
+                          const std::function<bool(std::vector<int>)> &constraintOracle,
+                          const double eps = 10E-6, const int C = 10E4);
 
-    void learn_hardEM(HMM &hmm, const std::vector<std::vector<int> > &obs,
-                  const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
-                  const int numSolns = 1, const double eps = 10E-6);
+    void learn_hardEM(HMM &hmm, const std::vector<std::vector<int>> &obs,
+                      const std::vector<std::function<bool(std::vector<int>)>> &constraintOracle,
+                      const int numSolns = 1, const double eps = 10E-6);
     void learn_hardEM(HMM &hmm, const std::vector<int> &obs,
-                  const std::function<bool(std::vector<int>)> &constraintOracle,
-                  const int numSolns = 1, const double eps = 10E-6);
-
+                      const std::function<bool(std::vector<int>)> &constraintOracle,
+                      const int numSolns = 1, const double eps = 10E-6);
 };
 
 }  // namespace chmmpp

@@ -20,7 +20,7 @@ int main()
     std::vector<std::vector<double> > EInitial{{0.91, 0.09}, {0.1, 0.9}};
 
     size_t seed = 9238479387;
-    chmmpp::HMM toLearn_unconstrained( AInitial, SInitial, EInitial, seed);
+    chmmpp::HMM toLearn_unconstrained(AInitial, SInitial, EInitial, seed);
     chmmpp::HMM_inference toLearn_numZeros(AInitial, SInitial, EInitial, seed);
     chmmpp::HMM_inference toLearn_stochastic(AInitial, SInitial, EInitial, seed);
     chmmpp::HMM_inference toLearn_hardEM(AInitial, SInitial, EInitial, seed);

@@ -14,7 +14,7 @@ namespace chmmpp {
 // WEH - Is 'inference' redundant here?  We could use a 'inference'
 // namespace for all of these functions in this header...
 void lp_map_inference(const HMM &hmm, const std::vector<int> &observations,
-                      std::vector<int> &hidden_states, double &logProb, const Options& options);
+                      std::vector<int> &hidden_states, double &logProb, const Options &options);
 
 void aStar(const HMM &hmm, const std::vector<int> &observations, std::vector<int> &hidden_states,
            double &logProb);
@@ -24,15 +24,15 @@ void viterbi(const HMM &hmm, const std::vector<int> &observations, std::vector<i
 
 void aStarOracle(const HMM &hmm, const std::vector<int> &observations,
                  std::vector<int> &hidden_states, double &logProb,
-                 const std::function<bool(std::vector<int>&)>& constraintOracle);
+                 const std::function<bool(std::vector<int> &)> &constraintOracle);
 
 void aStarMultOracle(const HMM &hmm, const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
-                     const std::function<bool(std::vector<int>&)>& constraintOracle,
-                     const int numSolns, const Options& options);
+                     const std::function<bool(std::vector<int> &)> &constraintOracle,
+                     const int numSolns, const Options &options);
 void aStarMultOracle(const HMM &hmm, const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
-                     const std::function<bool(std::vector<int>&)>& constraintOracle,
+                     const std::function<bool(std::vector<int> &)> &constraintOracle,
                      const int numSolns, unsigned int max_iterations);
 
 }  // namespace chmmpp

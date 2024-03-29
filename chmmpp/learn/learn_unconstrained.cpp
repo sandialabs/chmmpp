@@ -20,20 +20,21 @@ void process_options(Options& options, double& convergence_tolerance, unsigned i
                 if (tmp > 0)
                     max_iterations = tmp;
                 else
-                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
-                }
+                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer"
+                              << std::endl;
+            }
             else if (std::holds_alternative<unsigned int>(it.second))
                 max_iterations = std::get<unsigned int>(it.second);
             else
-                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer"
+                          << std::endl;
         }
     }
 }
 
-}
+}  // namespace
 
-
-void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs)
+void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
 {
     double convergence_tolerance = 10E-6;
     unsigned int max_iterations = 0;
@@ -183,15 +184,12 @@ void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs)
         }
         hmm.setA(A);
 
-        if (tol < convergence_tolerance) {
-            break;
-        if (max_iterations and (++numIt > max_iterations))
-            break;
-        }
+        if (tol < convergence_tolerance) break;
+        if (max_iterations and (++numIt > max_iterations)) break;
     }
 }
 
-void learn_unconstrained(HMM &hmm, const std::vector<int> &obs)
+void learn_unconstrained(HMM& hmm, const std::vector<int>& obs)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);

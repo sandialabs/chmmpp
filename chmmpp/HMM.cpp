@@ -364,27 +364,27 @@ double HMM::logProb(const std::vector<int>& obs, const std::vector<int>& hidden_
     return output;
 }
 
-void HMM::viterbi(const std::vector<int>& observations, std::vector<int>& hidden_states, double& logProb)
+void HMM::viterbi(const std::vector<int>& observations, std::vector<int>& hidden_states,
+                  double& logProb)
 {
     chmmpp::viterbi(*this, observations, hidden_states, logProb);
 }
 
-void HMM::aStar(const std::vector<int>& observations, std::vector<int>& hidden_states, double& logProb)
+void HMM::aStar(const std::vector<int>& observations, std::vector<int>& hidden_states,
+                double& logProb)
 {
     chmmpp::aStar(*this, observations, hidden_states, logProb);
 }
 
-void HMM::lp_map_inference(const std::vector<int>& observations, std::vector<int>& hidden_states, double& logProb)
+void HMM::lp_map_inference(const std::vector<int>& observations, std::vector<int>& hidden_states,
+                           double& logProb)
 {
     chmmpp::lp_map_inference(*this, observations, hidden_states, logProb, this->get_options());
 }
 
-void HMM::baum_welch(const std::vector<int> &obs)
-{
-    chmmpp::learn_unconstrained(*this, obs);
-}
+void HMM::baum_welch(const std::vector<int>& obs) { chmmpp::learn_unconstrained(*this, obs); }
 
-void HMM::baum_welch(const std::vector<std::vector<int> > &obs)
+void HMM::baum_welch(const std::vector<std::vector<int> >& obs)
 {
     chmmpp::learn_unconstrained(*this, obs);
 }

@@ -10,7 +10,7 @@ namespace chmmpp {
 // could get numerical underflow) Uses the A* algorithm for inference Without constraints (such as
 // in this case) this is basically equivalent to running Viterbi with a bit of overhead
 void lp_map_inference(const HMM &hmm, const std::vector<int> &observations,
-                      std::vector<int> &hidden_states, double &logProb, const Options& options)
+                      std::vector<int> &hidden_states, double &logProb, const Options &options)
 {
 #ifdef WITH_COEK
     LPModel model;

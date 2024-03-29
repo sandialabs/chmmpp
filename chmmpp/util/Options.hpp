@@ -14,7 +14,7 @@ class Options {
    public:
     std::map<std::string, std::variant<std::string, int, double, unsigned int>> options;
 
-    void clear_options() {options.clear();}
+    void clear_options() { options.clear(); }
 
     Options& get_options() { return *this; }
 
@@ -37,4 +37,4 @@ class Options {
     void print_options() const;
 };
 
-} // namespace chmmpp
+}  // namespace chmmpp

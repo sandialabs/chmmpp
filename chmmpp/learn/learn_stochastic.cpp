@@ -5,9 +5,9 @@
 
 namespace chmmpp {
 
-void process_options(const Options& options, double& convergence_tolerance, unsigned int& C)
+void process_options(const Options &options, double &convergence_tolerance, unsigned int &C)
 {
-    for (const auto& it : options.options) {
+    for (const auto &it : options.options) {
         if (it.first == "C") {
             if (std::holds_alternative<int>(it.second)) {
                 int tmp = std::get<int>(it.second);
@@ -15,10 +15,10 @@ void process_options(const Options& options, double& convergence_tolerance, unsi
                     C = tmp;
                 else
                     std::cerr << "WARNING: 'C' option must be a non-negative integer" << std::endl;
-                }
+            }
             else if (std::holds_alternative<unsigned int>(it.second)) {
                 C = std::get<unsigned int>(it.second);
-                }
+            }
             else
                 std::cerr << "WARNING: 'C' option must be a non-negative integer" << std::endl;
         }
@@ -26,7 +26,8 @@ void process_options(const Options& options, double& convergence_tolerance, unsi
             if (std::holds_alternative<double>(it.second))
                 convergence_tolerance = std::get<double>(it.second);
             else
-                std::cerr << "WARNING: 'convergence_tolerance' option must be a double" << std::endl;
+                std::cerr << "WARNING: 'convergence_tolerance' option must be a double"
+                          << std::endl;
         }
     }
 }
@@ -95,7 +96,7 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
     while (true) {
         if ((totNumIt & (totNumIt - 1)) == 0) {
             // Who knows what is best here... this runs if totNumIt is a power of two so
-                     // that it becomes more rare as time goes on
+            // that it becomes more rare as time goes on
             allHidden.clear();
             std::cout << "Generating hidden feasible hidden states randomly.\n";
             int tempCounter = 0;
@@ -275,17 +276,18 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
 
 void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
                       const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
-                      const Options& options)
+                      const Options &options)
 {
-double convergence_tolerance=10E-6;
-unsigned int C=10E4;
-process_options(options, convergence_tolerance, C);
+    double convergence_tolerance = 10E-6;
+    unsigned int C = 10E4;
+    process_options(options, convergence_tolerance, C);
 
-learn_stochastic(hmm, obs, constraintOracle, convergence_tolerance, C);
+    learn_stochastic(hmm, obs, constraintOracle, convergence_tolerance, C);
 }
 
 void learn_stochastic(HMM &hmm, const std::vector<int> &obs,
-                      const std::function<bool(std::vector<int>)> &constraintOracle, const Options& options)
+                      const std::function<bool(std::vector<int>)> &constraintOracle,
+                      const Options &options)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);

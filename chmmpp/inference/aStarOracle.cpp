@@ -17,8 +17,7 @@ namespace chmmpp {
 // However, they will have the same logProb, and thus occur with the same probability Effectively
 // the same as the code above, but we can't restrict the space if we have too many 0's
 void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vector<int>& hidden,
-                 double& logProb,
-                 const std::function<bool(std::vector<int>&)>& constraintOracle)
+                 double& logProb, const std::function<bool(std::vector<int>&)>& constraintOracle)
 {
     const int T = observations.size();
     auto H = hmm.getH();
