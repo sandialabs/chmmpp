@@ -1,5 +1,3 @@
-// HMM.cpp
-
 #include <iostream>
 #include "learn.hpp"
 #include "../inference/inference.hpp"

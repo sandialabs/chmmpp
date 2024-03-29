@@ -18,10 +18,13 @@ class CHMM : public Options {
 
     void initialize(const std::vector<std::vector<double>> &inputA,
                     const std::vector<double> &inputS,
-                    const std::vector<std::vector<double>> &inputE, long int seed)
+                    const std::vector<std::vector<double>> &inputE)
     {
-        hmm.initialize(inputA, inputS, inputE, seed);
+        hmm.initialize(inputA, inputS, inputE);
     }
+
+    void set_seed(long int seed)
+    { hmm.set_seed(seed); }
 
     virtual void initialize_from_file(const std::string &json_filename)
     {

@@ -1,5 +1,6 @@
 // HMM.cpp
 
+#include <iomanip>
 #include <iostream>
 #include "HMM.hpp"
 #include "inference/inference.hpp"
@@ -24,17 +25,18 @@ TODO
 // function, possibly multiple times
 double HMM::getRandom() { return dist(generator); }
 
-HMM::HMM(long int seed) { initialize(A, S, E, seed); }
+HMM::HMM(long int _seed) { set_seed(_seed); }
 
 HMM::HMM(const std::vector<std::vector<double> >& inputA, const std::vector<double>& inputS,
-         const std::vector<std::vector<double> >& inputE, long int seed)
+         const std::vector<std::vector<double> >& inputE, long int _seed)
 {
-    initialize(inputA, inputS, inputE, seed);
+    initialize(inputA, inputS, inputE);
+    set_seed(_seed);
 }
 
 void HMM::initialize(const std::vector<std::vector<double> >& inputA,
                      const std::vector<double>& inputS,
-                     const std::vector<std::vector<double> >& inputE, long int seed)
+                     const std::vector<std::vector<double> >& inputE)
 {
     H = inputA.size();
 
@@ -120,7 +122,16 @@ void HMM::initialize(const std::vector<std::vector<double> >& inputA,
     A = inputA;
     S = inputS;
     E = inputE;
+}
 
+void HMM::set_seed(long int _seed)
+{
+    seed = _seed;
+    reset_rng();
+}
+
+void HMM::reset_rng()
+{
     std::random_device rand_dev;
     std::mt19937 myGenerator(rand_dev());
     generator = myGenerator;
@@ -190,7 +201,8 @@ void initialize_from_dataportal(HMM& hmm, coek::DataPortal& dp)
     //
     // The HMM initialize() method does further error checking on the values.
     //
-    hmm.initialize(inputA, inputS, inputE, seed);
+    hmm.initialize(inputA, inputS, inputE);
+    hmm.set_seed(seed);
 }
 
 }  // namespace
@@ -254,7 +266,7 @@ void HMM::printS() const
 {
     std::cout << "Start vector:\n";
     for (size_t i = 0; i < H; ++i) {
-        std::cout << S[i] << " ";
+        std::cout << std::fixed << std::setprecision(4) << S[i] << " ";
     }
     std::cout << "\n\n";
     return;
@@ -265,7 +277,7 @@ void HMM::printA() const
     std::cout << "Transmission matrix:\n";
     for (size_t i = 0; i < H; ++i) {
         for (size_t j = 0; j < H; ++j) {
-            std::cout << A[i][j] << " ";
+            std::cout << std::fixed << std::setprecision(4) << A[i][j] << " ";
         }
         std::cout << "\n";
     }
@@ -278,7 +290,7 @@ void HMM::printO() const
     std::cout << "Emission matrix: (Columns are hidden states, rows are observed states)\n";
     for (size_t h = 0; h < H; ++h) {
         for (size_t o = 0; o < O; ++o) {
-            std::cout << E[h][o] << " ";
+            std::cout << std::fixed << std::setprecision(4) << E[h][o] << " ";
         }
         std::cout << "\n";
     }
@@ -291,7 +303,6 @@ void HMM::print() const
     printS();
     printA();
     printO();
-    return;
 }
 
 //---------------------
@@ -310,7 +321,7 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
     double prob = 0;
     for (size_t h = 0; h < H; ++h) {
         prob += S[h];
-        if (startProb < prob) {
+        if (startProb <= prob) {
             hiddenStates.push_back(h);
             break;
         }
@@ -319,9 +330,10 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
     // Initial Observed State
     double obsProb = getRandom();
     prob = 0;
+    auto h_curr = hiddenStates[0];
     for (size_t o = 0; o < O; ++o) {
-        prob += E[hiddenStates[0]][o];
-        if (obsProb < prob) {
+        prob += E[h_curr][o];
+        if (obsProb <= prob) {
             observedStates.push_back(o);
             break;
         }
@@ -331,9 +343,10 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
     for (int t = 1; t < T; ++t) {
         startProb = getRandom();
         prob = 0;
+        auto h_prev = hiddenStates[t - 1];
         for (size_t h = 0; h < H; ++h) {
-            prob += A[hiddenStates[t - 1]][h];
-            if (startProb < prob) {
+            prob += A[h_prev][h];
+            if (startProb <= prob) {
                 hiddenStates.push_back(h);
                 break;
             }
@@ -341,16 +354,15 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
 
         obsProb = getRandom();
         prob = 0;
+        auto h_curr = hiddenStates[t];
         for (size_t o = 0; o < O; ++o) {
-            prob += E[hiddenStates[t]][o];
-            if (obsProb < prob) {
+            prob += E[h_curr][o];
+            if (obsProb <= prob) {
                 observedStates.push_back(o);
                 break;
             }
         }
     }
-
-    return;
 }
 
 double HMM::logProb(const std::vector<int>& obs, const std::vector<int>& hidden_states) const
@@ -380,6 +392,20 @@ void HMM::lp_map_inference(const std::vector<int>& observations, std::vector<int
                            double& logProb)
 {
     chmmpp::lp_map_inference(*this, observations, hidden_states, logProb, this->get_options());
+}
+
+void HMM::estimate_hmm(const std::vector<int>&obs, const std::vector<int>& hid)
+{
+std::vector<std::vector<int>> mobs;
+mobs.push_back(obs);
+std::vector<std::vector<int>> mhid;
+mhid.push_back(hid);
+estimate_hmm(mobs, mhid);
+}
+
+void HMM::estimate_hmm(const std::vector<std::vector<int> >& obs, const std::vector<std::vector<int> >& hid)
+{
+    chmmpp::estimate_hmm(*this, obs, hid);
 }
 
 void HMM::baum_welch(const std::vector<int>& obs) { chmmpp::learn_unconstrained(*this, obs); }

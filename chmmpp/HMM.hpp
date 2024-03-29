@@ -19,6 +19,7 @@ class HMM : public Options {
     std::mt19937 generator;                       // Needed for running the HMM
     std::uniform_real_distribution<double> dist;  // Ditto
 
+    long int seed;
     double getRandom();
 
    public:
@@ -29,7 +30,9 @@ class HMM : public Options {
 
     void initialize(const std::vector<std::vector<double> > &inputA,
                     const std::vector<double> &inputS,
-                    const std::vector<std::vector<double> > &inputE, long int seed);
+                    const std::vector<std::vector<double> > &inputE);
+    void set_seed(long int seed);
+    void reset_rng();
 
     void initialize_from_file(const std::string &json_filename);
 
@@ -80,6 +83,10 @@ class HMM : public Options {
     //
     void lp_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states,
                           double &logprob);
+
+    // Estimate the HMM parameters using the values of hidden states
+    void estimate_hmm(const std::vector<int>&obs, const std::vector<int>& hid);
+    void estimate_hmm(const std::vector<std::vector<int> >& obs, const std::vector<std::vector<int> >& hid);
 
     //
     // Baum-Welch learning algorithm
