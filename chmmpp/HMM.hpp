@@ -85,8 +85,9 @@ class HMM : public Options {
                           double &logprob);
 
     // Estimate the HMM parameters using the values of hidden states
-    void estimate_hmm(const std::vector<int>&obs, const std::vector<int>& hid);
-    void estimate_hmm(const std::vector<std::vector<int> >& obs, const std::vector<std::vector<int> >& hid);
+    void estimate_hmm(const std::vector<int> &obs, const std::vector<int> &hid);
+    void estimate_hmm(const std::vector<std::vector<int> > &obs,
+                      const std::vector<std::vector<int> > &hid);
 
     //
     // Baum-Welch learning algorithm

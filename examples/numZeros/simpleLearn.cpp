@@ -24,7 +24,7 @@ void run_all(bool with_rejection)
     std::vector<std::vector<double>> E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
     size_t T = 25;         // Time Horizon
-    size_t numIt = 10000;     // Number of runs
+    size_t numIt = 10000;  // Number of runs
     size_t numZeros = 10;  // Number of zeros in the hidden states
 
     chmmpp::HMM hmm(A, S, E, 1937309487);

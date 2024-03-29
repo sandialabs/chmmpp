@@ -6,7 +6,8 @@
 
 namespace chmmpp {
 
-void estimate_hmm(HMM &hmm, const std::vector<std::vector<int> > &obs, const std::vector<std::vector<int> > &hid);
+void estimate_hmm(HMM &hmm, const std::vector<std::vector<int> > &obs,
+                  const std::vector<std::vector<int> > &hid);
 
 void learn_unconstrained(HMM &hmm, const std::vector<int> &obs);
 void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs);

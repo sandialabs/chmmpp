@@ -23,8 +23,7 @@ class CHMM : public Options {
         hmm.initialize(inputA, inputS, inputE);
     }
 
-    void set_seed(long int seed)
-    { hmm.set_seed(seed); }
+    void set_seed(long int seed) { hmm.set_seed(seed); }
 
     virtual void initialize_from_file(const std::string &json_filename)
     {

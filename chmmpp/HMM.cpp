@@ -27,16 +27,16 @@ double HMM::getRandom() { return dist(generator); }
 
 HMM::HMM(long int _seed) { set_seed(_seed); }
 
-HMM::HMM(const std::vector<std::vector<double> >& inputA, const std::vector<double>& inputS,
-         const std::vector<std::vector<double> >& inputE, long int _seed)
+HMM::HMM(const std::vector<std::vector<double>>& inputA, const std::vector<double>& inputS,
+         const std::vector<std::vector<double>>& inputE, long int _seed)
 {
     initialize(inputA, inputS, inputE);
     set_seed(_seed);
 }
 
-void HMM::initialize(const std::vector<std::vector<double> >& inputA,
+void HMM::initialize(const std::vector<std::vector<double>>& inputA,
                      const std::vector<double>& inputS,
-                     const std::vector<std::vector<double> >& inputE)
+                     const std::vector<std::vector<double>>& inputE)
 {
     H = inputA.size();
 
@@ -176,7 +176,7 @@ void initialize_from_dataportal(HMM& hmm, coek::DataPortal& dp)
     //
     // Setup the dense data structures used by the HMM class
     //
-    std::vector<std::vector<double> > inputA;
+    std::vector<std::vector<double>> inputA;
     inputA.resize(H);
     for (auto& vec : inputA) vec.resize(H);
     for (auto& it : A) {
@@ -188,7 +188,7 @@ void initialize_from_dataportal(HMM& hmm, coek::DataPortal& dp)
     inputS.resize(H);
     for (auto& it : S) inputS[it.first] = it.second;
 
-    std::vector<std::vector<double> > inputE;
+    std::vector<std::vector<double>> inputE;
     inputA.resize(H);
     for (auto& vec : inputE) vec.resize(O);
     for (auto& it : E) {
@@ -238,11 +238,11 @@ size_t HMM::getH() const { return H; }
 
 size_t HMM::getO() const { return O; }
 
-std::vector<std::vector<double> > HMM::getA() const { return A; }
+std::vector<std::vector<double>> HMM::getA() const { return A; }
 
 std::vector<double> HMM::getS() const { return S; }
 
-std::vector<std::vector<double> > HMM::getE() const { return E; }
+std::vector<std::vector<double>> HMM::getE() const { return E; }
 
 // Range not checked for speed
 double HMM::getAEntry(size_t h1, size_t h2) const { return A[h1][h2]; }
@@ -252,11 +252,11 @@ double HMM::getSEntry(size_t h) const { return S[h]; }
 double HMM::getEEntry(size_t h, size_t o) const { return E[h][o]; }
 
 // CLM - Do we want to check these to make sure they are valid?
-void HMM::setA(std::vector<std::vector<double> > newA) { A = newA; }
+void HMM::setA(std::vector<std::vector<double>> newA) { A = newA; }
 
 void HMM::setS(std::vector<double> newS) { S = newS; }
 
-void HMM::setE(std::vector<std::vector<double> > newE) { E = newE; }
+void HMM::setE(std::vector<std::vector<double>> newE) { E = newE; }
 
 //-----------------------
 //-----Print the HMM-----
@@ -394,23 +394,24 @@ void HMM::lp_map_inference(const std::vector<int>& observations, std::vector<int
     chmmpp::lp_map_inference(*this, observations, hidden_states, logProb, this->get_options());
 }
 
-void HMM::estimate_hmm(const std::vector<int>&obs, const std::vector<int>& hid)
+void HMM::estimate_hmm(const std::vector<int>& obs, const std::vector<int>& hid)
 {
-std::vector<std::vector<int>> mobs;
-mobs.push_back(obs);
-std::vector<std::vector<int>> mhid;
-mhid.push_back(hid);
-estimate_hmm(mobs, mhid);
+    std::vector<std::vector<int>> mobs;
+    mobs.push_back(obs);
+    std::vector<std::vector<int>> mhid;
+    mhid.push_back(hid);
+    estimate_hmm(mobs, mhid);
 }
 
-void HMM::estimate_hmm(const std::vector<std::vector<int> >& obs, const std::vector<std::vector<int> >& hid)
+void HMM::estimate_hmm(const std::vector<std::vector<int>>& obs,
+                       const std::vector<std::vector<int>>& hid)
 {
     chmmpp::estimate_hmm(*this, obs, hid);
 }
 
 void HMM::baum_welch(const std::vector<int>& obs) { chmmpp::learn_unconstrained(*this, obs); }
 
-void HMM::baum_welch(const std::vector<std::vector<int> >& obs)
+void HMM::baum_welch(const std::vector<std::vector<int>>& obs)
 {
     chmmpp::learn_unconstrained(*this, obs);
 }
