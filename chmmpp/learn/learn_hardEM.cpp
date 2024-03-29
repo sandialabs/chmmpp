@@ -39,7 +39,7 @@ void process_options(const Options& options, double& convergence_tolerance,
 }  // namespace
 
 void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
-                  const std::vector<std::function<bool(std::vector<int>)> >& constraintOracle,
+                  const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
                   const int numSolns, const Options& options)
 {
     double convergence_tolerance = 10E-6;
@@ -74,7 +74,7 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
         }
 
         for (size_t r = 0; r < R; ++r) {
-            std::cout << "R = " << r << "\n";
+            //std::cout << "R = " << r << "\n";
             int T = obs[r].size();
             std::vector<std::vector<int> > hidden;
             std::vector<double> temp;
@@ -130,16 +130,16 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
 }
 
 void learn_hardEM(HMM& hmm, const std::vector<int>& obs,
-                  const std::function<bool(std::vector<int>)>& constraintOracle, const int numSolns,
+                  const std::function<bool(std::vector<int>&)>& constraintOracle, const int numSolns,
                   const Options& options)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);
-    std::vector<std::function<bool(std::vector<int>)> > newConstraintOracle;
+    std::vector<std::function<bool(std::vector<int>&)> > newConstraintOracle;
     newConstraintOracle.push_back(constraintOracle);
     // WEH - Is this an error???
     // learn_stochastic(hmm, newObs, newConstraintOracle, numSolns, options);
-    learn_stochastic(hmm, newObs, newConstraintOracle, options);
+    learn_hardEM(hmm, newObs, newConstraintOracle, numSolns, options);
 }
 
 }  // namespace chmmpp

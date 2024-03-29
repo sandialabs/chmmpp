@@ -36,7 +36,7 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
 // ``simple'' constraints This also fails to work if we are converging towards values in the
 // transition matrix with 0's (which is NOT uncommon)
 void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
-                      const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
+                      const std::vector<std::function<bool(std::vector<int>&)> > &constraintOracle,
                       const double convergence_tolerance, const int C)
 {
     auto A = hmm.getA();
@@ -96,7 +96,7 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
             // Who knows what is best here... this runs if totNumIt is a power of two so
             // that it becomes more rare as time goes on
             allHidden.clear();
-            std::cout << "Generating hidden feasible hidden states randomly.\n";
+            //std::cout << "Generating hidden feasible hidden states randomly.\n";
             int tempCounter = 0;
             for (size_t r = 0; r < R; ++r) {
                 size_t numIt = 0;
@@ -273,7 +273,7 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
 }
 
 void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
-                      const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
+                      const std::vector<std::function<bool(std::vector<int>&)> > &constraintOracle,
                       const Options &options)
 {
     double convergence_tolerance = 10E-6;
@@ -284,12 +284,12 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
 }
 
 void learn_stochastic(HMM &hmm, const std::vector<int> &obs,
-                      const std::function<bool(std::vector<int>)> &constraintOracle,
+                      const std::function<bool(std::vector<int>&)> &constraintOracle,
                       const Options &options)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);
-    std::vector<std::function<bool(std::vector<int>)> > newConstraintOracle;
+    std::vector<std::function<bool(std::vector<int>&)> > newConstraintOracle;
     newConstraintOracle.push_back(constraintOracle);
     learn_stochastic(hmm, newObs, newConstraintOracle, options);
 }

@@ -40,6 +40,11 @@ class CHMM : public Options {
         return hmm.logProb(obs, guess);
     }
 
+    virtual void print() const
+    {
+        hmm.print();
+    }
+
     //
     // inference methods
     //
@@ -68,20 +73,39 @@ class CHMM : public Options {
     // learning methods
     //
 
-    void learn_stochastic(
-        HMM &hmm, const std::vector<std::vector<int>> &obs,
-        const std::vector<std::function<bool(std::vector<int>)>> &constraintOracle,
-        const double eps = 10E-6, const int C = 10E4);
-    void learn_stochastic(HMM &hmm, const std::vector<int> &obs,
-                          const std::function<bool(std::vector<int>)> &constraintOracle,
-                          const double eps = 10E-6, const int C = 10E4);
+    // TODO
+    //
+    //  Options
+    //      convergence_tolerance (double):     Stop learning when difference in model parameters
+    //                                          falls below this threshold (Default: 10E-6).
+    //      C (unsigned int):                   TODO
+    //
+    void learn_stochastic(const std::vector<std::vector<int>> &obs);
 
-    void learn_hardEM(HMM &hmm, const std::vector<std::vector<int>> &obs,
-                      const std::vector<std::function<bool(std::vector<int>)>> &constraintOracle,
-                      const int numSolns = 1, const double eps = 10E-6);
-    void learn_hardEM(HMM &hmm, const std::vector<int> &obs,
-                      const std::function<bool(std::vector<int>)> &constraintOracle,
-                      const int numSolns = 1, const double eps = 10E-6);
+    // TODO
+    //
+    //  Options
+    //      convergence_tolerance (double):     Stop learning when difference in model parameters
+    //                                          falls below this threshold (Default: 10E-6).
+    //      C (unsigned int):                   TODO
+    //
+    void learn_stochastic(const std::vector<int> &obs);
+
+    // TODO
+    //
+    //  Options
+    //      convergence_tolerance (double):     Stop learning when difference in model parameters
+    //                                          falls below this threshold (Default: 10E-6).
+    //
+    void learn_hardEM(const std::vector<std::vector<int>> &obs, const int numSolns = 1);
+
+    // TODO
+    //
+    //  Options
+    //      convergence_tolerance (double):     Stop learning when difference in model parameters
+    //                                          falls below this threshold (Default: 10E-6).
+    //
+    void learn_hardEM(const std::vector<int> &obs, const int numSolns = 1);
 };
 
 }  // namespace chmmpp

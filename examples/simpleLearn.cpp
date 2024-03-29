@@ -49,12 +49,14 @@ int main()
 
     std::cout << "Learning without constraints.\n";
     toLearn_unconstrained.baum_welch(obs);
+#if 0
     std::cout << "\nSoft learning with constraints.\n";
     learn_numZeros(toLearn_numZeros, obs, numZeros);
     std::cout << "\nStochastic Soft learning with constraints.\n";
-    learn_stochastic(toLearn_stochastic, obs, constraintOracleVec, toLearn_numZeros.get_options());
+    toLearn_stochastic.learn_stochastic(obs, constraintOracleVec, toLearn_numZeros.get_options());
     std::cout << "\nHard learning with constraints.\n";
-    learn_hardEM(toLearn_hardEM, obs, constraintOracleVec, 100, toLearn_hardEM.get_options());
+    toLearn_hardEM.learn_hardEM(obs, constraintOracleVec, 100, toLearn_hardEM.get_options());
+#endif
 
     std::cout << "Learned parameters without constraints:\n\n";
     toLearn_unconstrained.print();

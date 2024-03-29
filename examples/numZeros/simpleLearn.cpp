@@ -79,6 +79,18 @@ void run_all(bool with_rejection)
     run(hmm, obs,
         [](chmmpp::HMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.baum_welch(obs); });
 
+    std::cout << "------------------------------------------------------------------------\n";
+    std::cout << "Running learning with constraint - Soft EM\n";
+    std::cout << "------------------------------------------------------------------------\n";
+    run(nzhmm, obs,
+        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_stochastic(obs); });
+
+    std::cout << "------------------------------------------------------------------------\n";
+    std::cout << "Running learning with constraint - Hard EM\n";
+    std::cout << "------------------------------------------------------------------------\n";
+    run(nzhmm, obs,
+        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs); });
+
     std::cout << std::endl;
 }
 
