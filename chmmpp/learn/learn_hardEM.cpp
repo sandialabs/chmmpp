@@ -66,6 +66,7 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
         ECounter[h].resize(O);
     }
 
+    size_t iter=0;
     while (true) {
         fill(SCounter.begin(), SCounter.end(), 0);
         for (size_t h = 0; h < H; ++h) {
@@ -122,11 +123,11 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
         hmm.setE(E);
         hmm.setA(A);
 
-        if (tol < convergence_tolerance) {
+        if (tol < convergence_tolerance)
             break;
-        }
+        if (++iter >= max_iterations)
+            break;
     }
-    return;
 }
 
 void learn_hardEM(HMM& hmm, const std::vector<int>& obs,

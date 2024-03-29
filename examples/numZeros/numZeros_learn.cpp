@@ -1,10 +1,11 @@
 #include <iostream>
-#include "learn.hpp"
+#include "numZerosHMM.hpp"
 
 namespace chmmpp {
 
-void learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs,
-                    const std::vector<int> &numZeros, const double eps)
+namespace {
+
+void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, const std::vector<int> &numZeros, const double convergence_tolerance)
 {
     auto A = hmm.getA();
     auto S = hmm.getS();
@@ -270,19 +271,32 @@ void learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs,
 
         // std::cout << "Tolerance: " << tol << "\n";
         //  tol = 0.;
-        if (tol < eps) {
+        if (tol < convergence_tolerance) {
             break;
         }
     }
 }
 
-void learn_numZeros(HMM &hmm, const std::vector<int> &obs, int numZeros, const double eps)
+}
+
+void numZerosHMM::learn_numZeros(const std::vector<std::vector<int>> &obs)
+{
+    std::vector<int> newNumZeros;
+    for (size_t i=0; i<obs.size(); i++)
+        newNumZeros.push_back(numZeros);
+
+    auto option = get_option<double>("convergence_tolerance");
+    double convergence_tolerance = 10E-6;
+    if (option.has_value())
+        convergence_tolerance = *option;
+    local_learn_numZeros(hmm, obs, newNumZeros, convergence_tolerance);
+}
+
+void numZerosHMM::learn_numZeros(const std::vector<int> &obs)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);
-    std::vector<int> newNumZeros;
-    newNumZeros.push_back(numZeros);
-    learn_numZeros(hmm, newObs, newNumZeros, eps);
+    learn_numZeros(newObs);
 }
 
 }  // namespace chmmpp

@@ -9,14 +9,16 @@
 template <typename T, typename V, typename Z>
 void run(T& hmm, V& obs, const Z& fn)
 {
-    double logProb;
-    std::vector<int> hidGuess;
+    hmm.reset_rng();
+    hmm.print_options();
+    std::cout << std::endl;
+
     fn(hmm, obs);
 
     hmm.print();
 }
 
-void run_all(bool with_rejection)
+void run_all(bool with_rejection, bool debug=false)
 {
     // Initial Guess
     std::vector<std::vector<double>> A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
@@ -24,7 +26,7 @@ void run_all(bool with_rejection)
     std::vector<std::vector<double>> E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
     size_t T = 25;         // Time Horizon
-    size_t numIt = 10000;  // Number of runs
+    size_t numIt = 5000;  // Number of runs
     size_t numZeros = 10;  // Number of zeros in the hidden states
 
     chmmpp::HMM hmm(A, S, E, 1937309487);
@@ -45,7 +47,7 @@ void run_all(bool with_rejection)
             if (not with_rejection) break;
         }
 
-#if 0
+    if (debug) {
         std::cout << "Trial: " << i << std::endl;
         std::cout << "Observed:      ";
         for (auto& v : obs[i]) std::cout << v;
@@ -56,7 +58,7 @@ void run_all(bool with_rejection)
         std::cout << std::endl;
         std::cout << "Num zeros: " << count(hid[i].begin(), hid[i].end(), 0) << std::endl;
         std::cout << std::endl;
-#endif
+        }
     }
 
     std::cout << "------------------------------------------------------------------------\n";
@@ -80,6 +82,12 @@ void run_all(bool with_rejection)
         [](chmmpp::HMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.baum_welch(obs); });
 
     std::cout << "------------------------------------------------------------------------\n";
+    std::cout << "Running learning with constraint - Customized Soft EM???\n";
+    std::cout << "------------------------------------------------------------------------\n";
+    run(nzhmm, obs,
+        [](chmmpp::numZerosHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_numZeros(obs); });
+
+    std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Soft EM\n";
     std::cout << "------------------------------------------------------------------------\n";
     run(nzhmm, obs,
@@ -88,8 +96,10 @@ void run_all(bool with_rejection)
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Hard EM\n";
     std::cout << "------------------------------------------------------------------------\n";
+    nzhmm.set_option("max_iterations", 100);
     run(nzhmm, obs,
         [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs); });
+    nzhmm.clear_options();
 
     std::cout << std::endl;
 }

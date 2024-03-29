@@ -30,8 +30,10 @@ class Options {
     std::optional<T> get_option(const std::string& name) const
     {
         auto it = options.find(name);
-        if (it == options.end()) return std::optional<T>();
-        return std::optional<T>(it->second);
+        if (it == options.end()) return {};
+        if (not std::holds_alternative<T>(it->second))
+            return {};
+        return {std::get<T>(it->second)};
     }
 
     void print_options() const;

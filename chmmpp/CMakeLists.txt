@@ -33,7 +33,6 @@ if (with_boost)
             inference/aStarOracle.cpp
 
 	    learn/learn_unconstrained.cpp
-	    learn/learn_numZeros.cpp
 	    learn/learn_stochastic.cpp
 	    learn/learn_hardEM.cpp
             )

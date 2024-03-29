@@ -26,6 +26,9 @@ class numZerosHMM : public CHMM {
     // Optimize using an mixed-integer programming formulation
     void mip_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states,
                            double &logProb);
+
+    void learn_numZeros(const std::vector<std::vector<int>> &observations);
+    void learn_numZeros(const std::vector<int> &observations);
 };
 
 }  // namespace chmmpp

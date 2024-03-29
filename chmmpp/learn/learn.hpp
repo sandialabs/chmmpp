@@ -12,10 +12,12 @@ void estimate_hmm(HMM &hmm, const std::vector<std::vector<int> > &obs,
 void learn_unconstrained(HMM &hmm, const std::vector<int> &obs);
 void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs);
 
+#if 0
 void learn_numZeros(HMM &hmm, const std::vector<int> &obs, const int numZeros,
                     const double eps = 10E-6);
 void learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs,
                     const std::vector<int> &numZeros, const double eps = 10E-6);
+#endif
 
 void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
                       const std::vector<std::function<bool(std::vector<int>&)> > &constraintOracle,

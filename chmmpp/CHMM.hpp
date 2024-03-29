@@ -24,6 +24,7 @@ class CHMM : public Options {
     }
 
     void set_seed(long int seed) { hmm.set_seed(seed); }
+    void reset_rng() { hmm.reset_rng(); }
 
     virtual void initialize_from_file(const std::string &json_filename)
     {
