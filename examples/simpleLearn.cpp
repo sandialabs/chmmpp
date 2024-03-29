@@ -19,13 +19,12 @@ int main()
     std::vector<double> SInitial{0.51, 0.49};
     std::vector<std::vector<double> > EInitial{{0.91, 0.09}, {0.1, 0.9}};
 
-    chmmpp::HMM_inference toLearn_unconstrained(
-        AInitial, SInitial, EInitial,
-        0);  // 0 is the seed of the RNG, can remove and it seeds by time
-    chmmpp::HMM_inference toLearn_numZeros(AInitial, SInitial, EInitial, 0);
-    chmmpp::HMM_inference toLearn_stochastic(AInitial, SInitial, EInitial, 0);
-    chmmpp::HMM_inference toLearn_hardEM(AInitial, SInitial, EInitial, 0);
-    chmmpp::HMM_inference trueHMM(A, S, E, 0);
+    size_t seed = 9238479387;
+    chmmpp::HMM toLearn_unconstrained( AInitial, SInitial, EInitial, seed);
+    chmmpp::HMM_inference toLearn_numZeros(AInitial, SInitial, EInitial, seed);
+    chmmpp::HMM_inference toLearn_stochastic(AInitial, SInitial, EInitial, seed);
+    chmmpp::HMM_inference toLearn_hardEM(AInitial, SInitial, EInitial, seed);
+    chmmpp::HMM_inference trueHMM(A, S, E, seed);
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<std::vector<int> > obs;
@@ -49,13 +48,13 @@ int main()
     }
 
     std::cout << "Learning without constraints.\n";
-    learn_unconstrained(toLearn_unconstrained, obs);
+    toLearn_unconstrained.baum_welch(obs);
     std::cout << "\nSoft learning with constraints.\n";
     learn_numZeros(toLearn_numZeros, obs, numZeros);
     std::cout << "\nStochastic Soft learning with constraints.\n";
-    learn_stochastic(toLearn_stochastic, obs, constraintOracleVec);
+    learn_stochastic(toLearn_stochastic, obs, constraintOracleVec, toLearn_numZeros.get_options());
     std::cout << "\nHard learning with constraints.\n";
-    learn_hardEM(toLearn_hardEM, obs, constraintOracleVec, 100, 1E-6);
+    learn_hardEM(toLearn_hardEM, obs, constraintOracleVec, 100, toLearn_hardEM.get_options());
 
     std::cout << "Learned parameters without constraints:\n\n";
     toLearn_unconstrained.print();

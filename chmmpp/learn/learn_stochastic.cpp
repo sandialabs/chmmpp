@@ -5,6 +5,32 @@
 
 namespace chmmpp {
 
+void process_options(const Options& options, double& convergence_tolerance, unsigned int& C)
+{
+    for (const auto& it : options.options) {
+        if (it.first == "C") {
+            if (std::holds_alternative<int>(it.second)) {
+                int tmp = std::get<int>(it.second);
+                if (tmp > 0)
+                    C = tmp;
+                else
+                    std::cerr << "WARNING: 'C' option must be a non-negative integer" << std::endl;
+                }
+            else if (std::holds_alternative<unsigned int>(it.second)) {
+                C = std::get<unsigned int>(it.second);
+                }
+            else
+                std::cerr << "WARNING: 'C' option must be a non-negative integer" << std::endl;
+        }
+        else if (it.first == "convergence_tolerance") {
+            if (std::holds_alternative<double>(it.second))
+                convergence_tolerance = std::get<double>(it.second);
+            else
+                std::cerr << "WARNING: 'convergence_tolerance' option must be a double" << std::endl;
+        }
+    }
+}
+
 // Will work best/fastest if the sets of hidden states which satisfy the constraints
 // This algorithm is TERRIBLE, I can't even get it to converge in a simple case with T = 10.
 // This is currently the only learning algorithm we have for having a constraint oracle rather than
@@ -12,7 +38,7 @@ namespace chmmpp {
 // transition matrix with 0's (which is NOT uncommon)
 void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
                       const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
-                      const double eps, const int C)
+                      const double convergence_tolerance, const int C)
 {
     auto A = hmm.getA();
     auto S = hmm.getS();
@@ -67,8 +93,8 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
     allHidden.resize(R);
 
     while (true) {
-        if ((totNumIt & (totNumIt - 1))
-            == 0) {  // Who knows what is best here... this runs if totNumIt is a power of two so
+        if ((totNumIt & (totNumIt - 1)) == 0) {
+            // Who knows what is best here... this runs if totNumIt is a power of two so
                      // that it becomes more rare as time goes on
             allHidden.clear();
             std::cout << "Generating hidden feasible hidden states randomly.\n";
@@ -241,23 +267,31 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
         }
         hmm.setE(E);
 
-        std::cout << "Tolerance: " << tol << "\n";
-        // tol = -1;
-        if (tol < eps) {
+        if (tol < convergence_tolerance) {
             break;
         }
     }
 }
 
+void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
+                      const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
+                      const Options& options)
+{
+double convergence_tolerance=10E-6;
+unsigned int C=10E4;
+process_options(options, convergence_tolerance, C);
+
+learn_stochastic(hmm, obs, constraintOracle, convergence_tolerance, C);
+}
+
 void learn_stochastic(HMM &hmm, const std::vector<int> &obs,
-                      const std::function<bool(std::vector<int>)> &constraintOracle,
-                      const double eps, const int C)
+                      const std::function<bool(std::vector<int>)> &constraintOracle, const Options& options)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);
     std::vector<std::function<bool(std::vector<int>)> > newConstraintOracle;
     newConstraintOracle.push_back(constraintOracle);
-    learn_stochastic(hmm, newObs, newConstraintOracle, eps, C);
+    learn_stochastic(hmm, newObs, newConstraintOracle, options);
 }
 
 }  // namespace chmmpp

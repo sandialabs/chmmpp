@@ -12,7 +12,7 @@ void run(T& hmm, V& obs, W& hid, size_t numSolns, const Z& fn)
 
     std::cout << "Top " << hidGuess.size() << " solutions.\n";
     for (size_t r = 0; r < hidGuess.size(); ++r) {
-        std::cout << "  Solution:";
+        std::cout << "  Solution: ";
         for (auto& v : hidGuess[r]) std::cout << v;
         std::cout << "\n";
 
@@ -61,7 +61,6 @@ int main()
     std::cout << "\nTrue solution:\n";
     for (auto& v : hid) std::cout << v;
     std::cout << std::endl << std::endl;
-    ;
 
     chmmpp::numZerosHMM nzhmm(numZeros);
     nzhmm.initialize(hmm);
@@ -73,6 +72,7 @@ int main()
            size_t num) { hmm.aStarMult_numZeros(obs, hs, logProb, num); });
 
     std::cout << "Running inference with constraint - generic aStar\n";
+    nzhmm.set_option("max_iterations", 1000);
     run(nzhmm, obs, hid, numSolns,
         [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<std::vector<int>>& hs,
            std::vector<double>& logProb, size_t num) { hmm.aStarMult(obs, hs, logProb, num); });

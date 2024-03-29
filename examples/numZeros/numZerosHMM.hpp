@@ -1,6 +1,6 @@
 #pragma once
 
-#include <chmmpp/CHMM.hpp>
+#include <chmmpp/chmmpp.hpp>
 
 namespace chmmpp {
 

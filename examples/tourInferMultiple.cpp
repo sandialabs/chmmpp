@@ -72,13 +72,13 @@ int main()
     std::vector<std::vector<int> > hidGuessNoConstraints;
     chmmpp::aStarMultOracle(
         myHMM, obs, hidGuessNoConstraints, logProbNoConstraints,
-        [](std::vector<int> /*myHid*/) -> bool { return true; }, numSolns);
+        [](std::vector<int> /*myHid*/) -> bool { return true; }, numSolns, myHMM.get_options());
 
     std::cout << "Running inference with constraints.\n";
     std::vector<double> logProbConstraints;
     std::vector<std::vector<int> > hidGuessConstraints;
     chmmpp::aStarMultOracle(myHMM, obs, hidGuessConstraints, logProbConstraints, oracleConstraint,
-                            numSolns);
+                            numSolns, myHMM.get_options());
 
     std::cout << "\nObserved:\n";
     for (size_t t = 0; t < T; ++t) {

@@ -270,7 +270,7 @@ void learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs,
         }
         hmm.setA(A);
 
-        std::cout << "Tolerance: " << tol << "\n";
+        //std::cout << "Tolerance: " << tol << "\n";
         // tol = 0.;
         if (tol < eps) {
             break;

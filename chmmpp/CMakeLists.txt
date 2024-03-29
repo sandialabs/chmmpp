@@ -7,6 +7,7 @@ set(chmmpp_link_directories)
 
 SET(sources
     util/vectorhash.cpp
+    util/Options.cpp
     HMM.cpp
     CHMM.cpp
     inference/lp_map.cpp
@@ -102,12 +103,12 @@ endif()
 
 install(FILES
         chmmpp.hpp
-        Options.hpp
         HMM.hpp
         CHMM.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chmmpp
         )
 install(FILES
+        Options.hpp
         vectorhash.hpp
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chmmpp/util
         )

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "HMM.hpp"
 #include "inference/inference.hpp"
+#include "learn/learn.hpp"
 #ifdef WITH_COEK
 #    include <coek/util/DataPortal.hpp>
 #endif
@@ -21,7 +22,6 @@ TODO
 // Return a random number from 0,1
 // Needs to be an internal function b/c we are calling random a bunch of different times in the run
 // function, possibly multiple times
-
 double HMM::getRandom() { return dist(generator); }
 
 HMM::HMM(long int seed) { initialize(A, S, E, seed); }
@@ -353,8 +353,7 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
     return;
 }
 
-// WEH - I reworked this to simplify the logic a little bit
-double HMM::logProb(const std::vector<int> obs, const std::vector<int> hidden_states) const
+double HMM::logProb(const std::vector<int>& obs, const std::vector<int>& hidden_states) const
 {
     size_t T = hidden_states.size();
 
@@ -365,22 +364,29 @@ double HMM::logProb(const std::vector<int> obs, const std::vector<int> hidden_st
     return output;
 }
 
-void HMM::viterbi(const std::vector<int>& observations, std::vector<int>& hidden_states,
-                  double& logProb)
+void HMM::viterbi(const std::vector<int>& observations, std::vector<int>& hidden_states, double& logProb)
 {
     chmmpp::viterbi(*this, observations, hidden_states, logProb);
 }
 
-void HMM::aStar(const std::vector<int>& observations, std::vector<int>& hidden_states,
-                double& logProb)
+void HMM::aStar(const std::vector<int>& observations, std::vector<int>& hidden_states, double& logProb)
 {
     chmmpp::aStar(*this, observations, hidden_states, logProb);
 }
 
-void HMM::lp_map_inference(const std::vector<int>& observations, std::vector<int>& hidden_states,
-                           double& logProb)
+void HMM::lp_map_inference(const std::vector<int>& observations, std::vector<int>& hidden_states, double& logProb)
 {
-    chmmpp::lp_map_inference(*this, observations, hidden_states, logProb);
+    chmmpp::lp_map_inference(*this, observations, hidden_states, logProb, this->get_options());
+}
+
+void HMM::baum_welch(const std::vector<int> &obs)
+{
+    chmmpp::learn_unconstrained(*this, obs);
+}
+
+void HMM::baum_welch(const std::vector<std::vector<int> > &obs)
+{
+    chmmpp::learn_unconstrained(*this, obs);
 }
 
 }  // namespace chmmpp

@@ -2,7 +2,7 @@
 
 #include <queue>
 #include <iostream>
-#include "HMM_inference.hpp"
+#include "inference.hpp"
 #include "../util/vectorhash.hpp"
 
 namespace chmmpp {
@@ -11,12 +11,46 @@ namespace chmmpp {
 //-----A* multiple with Oracle-----
 //---------------------------------
 
-// Same as above, but we now have an oracle for the constraints
-// WARNING this will not produce the correct number of solutions if it isn't possible
+namespace {
+
+void process_options(const Options& options, unsigned int& max_iterations)
+{
+    for (const auto& it : options.options) {
+        if (it.first == "max_iterations") {
+            if (std::holds_alternative<int>(it.second)) {
+                int tmp = std::get<int>(it.second);
+                if (tmp > 0)
+                    max_iterations = tmp;
+                else
+                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+                }
+            else if (std::holds_alternative<unsigned int>(it.second)) {
+                max_iterations = std::get<unsigned int>(it.second);
+                }
+            else
+                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+        }
+    }
+}
+
+}
+
 void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
                      const std::function<bool(std::vector<int>&)>& constraintOracle,
-                     const int numSolns)
+                     const int numSolns, const Options& options)
+{
+    unsigned int max_iterations = 0;
+    process_options(options, max_iterations);
+
+    aStarMultOracle(hmm, observations, hidden_states, logProb, constraintOracle, numSolns, max_iterations);
+}
+
+// This simpler API is used to simplify calls to aStarMultOracle from hardEM
+void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
+                     std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
+                     const std::function<bool(std::vector<int>&)>& constraintOracle,
+                     const int numSolns, unsigned int max_iterations)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -85,8 +119,13 @@ void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
     }
 
     int counter = 0;
+    int iterationCounter = 0;
 
     while (!openSet.empty()) {
+        if (max_iterations and (iterationCounter++ >= max_iterations)) {
+            break;
+        }
+
         auto tempPair = openSet.top();
         openSet.pop();
 

@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <random>
-#include <chmmpp/Options.hpp>
+#include <chmmpp/util/Options.hpp>
 
 namespace chmmpp {
 
@@ -56,16 +56,42 @@ class HMM : public Options {
 
     void run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
 
-    double logProb(const std::vector<int> obs, const std::vector<int> guess) const;
+    double logProb(const std::vector<int>& obs, const std::vector<int>& hidden_states) const;
 
-    // Inference methods
-
+    //
+    // Inference with the Viterbi algorithm
+    //
     void viterbi(const std::vector<int> &observations, std::vector<int> &hidden_states,
-                 double &logProb);
+                 double &logprob);
+
+    //
+    // Inference with the A* algorithm
+    //
     void aStar(const std::vector<int> &observations, std::vector<int> &hidden_states,
-               double &logProb);
+               double &logprob);
+    //
+    // Inference with a linear programming solver
+    //
+    // Options
+    //      solver_name (string):   Name of the linear programming solver (Default: gurobi).
+    //      keep_data (int):        If 1, then keep data used to generate the LP model (Default: 0).
+    //      y_binary (int):         If 1, then use binary flow variables in the LP model (Default: 0).
+    //      debug (int):            If 1, then print debugging information (Default: 0).
+    //      
     void lp_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states,
-                          double &logProb);
+                          double &logprob);
+
+    //
+    // Baum-Welch learning algorithm
+    //
+    //  Options
+    //      convergence_tolerance (double):     Stop learning if solution tolerance is below this threshold 
+    //                                          (Default: 10E-6).
+    //      max_iterations: unsigned int        Stop learning if number of iterations equals this threshold.
+    //                                          No threshold if this is 0 (Default: 0).
+    //
+    void baum_welch(const std::vector<int> &obs);
+    void baum_welch(const std::vector<std::vector<int> > &obs);
 };
 
 }  // namespace chmmpp

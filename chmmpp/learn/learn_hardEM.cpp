@@ -5,10 +5,45 @@
 #include "../inference/inference.hpp"
 
 namespace chmmpp {
+
+namespace {
+
+void process_options(const Options& options, double& convergence_tolerance, unsigned int& max_iterations)
+{
+    for (const auto& it : options.options) {
+        if (it.first == "max_iterations") {
+            if (std::holds_alternative<int>(it.second)) {
+                int tmp = std::get<int>(it.second);
+                if (tmp > 0)
+                    max_iterations = tmp;
+                else
+                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+                }
+            else if (std::holds_alternative<unsigned int>(it.second)) {
+                max_iterations = std::get<unsigned int>(it.second);
+                }
+            else
+                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+        }
+        else if (it.first == "convergence_tolerance") {
+            if (std::holds_alternative<double>(it.second))
+                convergence_tolerance = std::get<double>(it.second);
+            else
+                std::cerr << "WARNING: 'convergence_tolerance' option must be a double" << std::endl;
+        }
+    }
+}
+
+}
+
 void learn_hardEM(HMM &hmm, const std::vector<std::vector<int> > &obs,
                   const std::vector<std::function<bool(std::vector<int>)> > &constraintOracle,
-                  const int numSolns, const double eps)
+                  const int numSolns, const Options& options)
 {
+    double convergence_tolerance = 10E-6;
+    unsigned int max_iterations = 0;
+    process_options(options, convergence_tolerance, max_iterations);
+
     auto A = hmm.getA();
     auto S = hmm.getS();
     auto E = hmm.getE();
@@ -42,7 +77,7 @@ void learn_hardEM(HMM &hmm, const std::vector<std::vector<int> > &obs,
             std::vector<std::vector<int> > hidden;
             std::vector<double> temp;
 
-            aStarMultOracle(hmm, obs[r], hidden, temp, constraintOracle[r], numSolns);
+            aStarMultOracle(hmm, obs[r], hidden, temp, constraintOracle[r], numSolns, max_iterations);
             for (int i = 0; i < hidden.size();
                  ++i) {  // Use hidden.size() here incase there aren't numSolns # of solutions
                 ++SCounter[hidden[i][0]];
@@ -84,9 +119,7 @@ void learn_hardEM(HMM &hmm, const std::vector<std::vector<int> > &obs,
         hmm.setE(E);
         hmm.setA(A);
 
-        std::cout << "Tolerance: " << tol << "\n";
-
-        if (tol < eps) {
+        if (tol < convergence_tolerance) {
             break;
         }
     }
@@ -95,13 +128,15 @@ void learn_hardEM(HMM &hmm, const std::vector<std::vector<int> > &obs,
 
 void learn_hardEM(HMM &hmm, const std::vector<int> &obs,
                   const std::function<bool(std::vector<int>)> &constraintOracle, const int numSolns,
-                  const double eps)
+                  const Options& options)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);
     std::vector<std::function<bool(std::vector<int>)> > newConstraintOracle;
     newConstraintOracle.push_back(constraintOracle);
-    learn_stochastic(hmm, newObs, newConstraintOracle, numSolns, eps);
+    // WEH - Is this an error???
+    //learn_stochastic(hmm, newObs, newConstraintOracle, numSolns, options);
+    learn_stochastic(hmm, newObs, newConstraintOracle, options);
 }
 
 }  // namespace chmmpp

@@ -5,9 +5,40 @@
 
 namespace chmmpp {
 
-void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs, const double eps)
+namespace {
+
+void process_options(Options& options, double& convergence_tolerance, unsigned int& max_iterations)
 {
-    std::cout << "TEST" << std::endl;
+    for (auto& it : options.options) {
+        if (it.first == "convergence_tolerance") {
+            if (std::holds_alternative<double>(it.second))
+                convergence_tolerance = std::get<double>(it.second);
+        }
+        else if (it.first == "max_iterations") {
+            if (std::holds_alternative<int>(it.second)) {
+                int tmp = std::get<int>(it.second);
+                if (tmp > 0)
+                    max_iterations = tmp;
+                else
+                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+                }
+            else if (std::holds_alternative<unsigned int>(it.second))
+                max_iterations = std::get<unsigned int>(it.second);
+            else
+                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+        }
+    }
+}
+
+}
+
+
+void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs)
+{
+    double convergence_tolerance = 10E-6;
+    unsigned int max_iterations = 0;
+    process_options(hmm.get_options(), convergence_tolerance, max_iterations);
+
     auto A = hmm.getA();
     auto S = hmm.getS();
     auto E = hmm.getE();
@@ -19,7 +50,6 @@ void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs, co
     size_t numIt = 0;
 
     while (true) {
-        ++numIt;
         std::vector<std::vector<std::vector<double> > > totalGamma;
         std::vector<std::vector<std::vector<std::vector<double> > > > totalXi;
 
@@ -153,19 +183,19 @@ void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs, co
         }
         hmm.setA(A);
 
-        std::cout << "Tolerance: " << tol << "\n";
-
-        if (tol < eps) {
+        if (tol < convergence_tolerance) {
+            break;
+        if (max_iterations and (++numIt > max_iterations))
             break;
         }
     }
 }
 
-void learn_unconstrained(HMM &hmm, const std::vector<int> &obs, const double eps)
+void learn_unconstrained(HMM &hmm, const std::vector<int> &obs)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);
-    learn_unconstrained(hmm, newObs, eps);
+    learn_unconstrained(hmm, newObs);
 }
 
 }  // namespace chmmpp

@@ -115,7 +115,7 @@ void LPModel::set_options(const Options& options)
     for (auto& it : options.options) {
         if (it.first == "solver") {
             if (std::holds_alternative<std::string>(it.second))
-                solver_name == std::get<std::string>(it.second);
+                solver_name = std::get<std::string>(it.second);
             else
                 std::cerr << "WARNING: 'solver' option must be a string" << std::endl;
         }
