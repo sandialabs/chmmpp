@@ -116,7 +116,7 @@ void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vect
                 std::vector<int> newSequence = currentSequence;
                 newSequence.push_back(h2);
 
-                gScore[newSequence] = tempGScore;
+                gScore[newSequence] = -tempGScore;
                 openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
             }
         }
