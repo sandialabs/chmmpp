@@ -14,11 +14,11 @@ set(numZeros
     numZeros/numZeros_learn.cpp
 )
 
-add_executable(simpleInfer numZeros/simpleInfer.cpp ${numZeros})
-target_link_libraries(simpleInfer PRIVATE chmmpp::chmmpp)
+add_executable(numzeros_infer numZeros/simpleInfer.cpp ${numZeros})
+target_link_libraries(numzeros_infer PRIVATE chmmpp::chmmpp)
 
-add_executable(multInfer numZeros/multInfer.cpp ${numZeros})
-target_link_libraries(multInfer PRIVATE chmmpp::chmmpp)
+add_executable(numzeros_minfer numZeros/multInfer.cpp ${numZeros})
+target_link_libraries(numzeros_minfer PRIVATE chmmpp::chmmpp)
 
 add_executable(numzeros_learn numZeros/simpleLearn.cpp ${numZeros})
 target_link_libraries(numzeros_learn PRIVATE chmmpp::chmmpp)
