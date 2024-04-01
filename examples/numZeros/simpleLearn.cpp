@@ -44,7 +44,7 @@ void run_all(bool with_rejection, bool debug=false)
         while (not feasible) {
             hmm.run(T, obs[i], hid[i]);
             feasible = count(hid[i].begin(), hid[i].end(), 0) == numZeros;
-            if (not with_rejection) break;
+            if (not with_rejection) break; //CLM - What is happening here?? It feels like this is telling the HMM we have numZeros number of zeros even if we don't??
         }
 
     if (debug) {
@@ -61,6 +61,9 @@ void run_all(bool with_rejection, bool debug=false)
         }
     }
 
+    chmmpp::HMM hmmCopy;
+    chmmpp::numZerosHMM nzhmmCopy(numZeros);
+
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Initial HMM parameters\n";
     std::cout << "------------------------------------------------------------------------\n";
@@ -72,32 +75,37 @@ void run_all(bool with_rejection, bool debug=false)
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning without constraint - ML estimate using hidden states\n";
     std::cout << "------------------------------------------------------------------------\n";
-    hmm.estimate_hmm(obs, hid);
-    hmm.print();
+    hmmCopy = hmm;
+    hmmCopy.estimate_hmm(obs, hid);
+    hmmCopy.print();
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning without constraint - Baum-Welch\n";
     std::cout << "------------------------------------------------------------------------\n";
-    run(hmm, obs,
+    hmmCopy = hmm;
+    run(hmmCopy, obs,
         [](chmmpp::HMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.baum_welch(obs); });
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Customized Soft EM???\n";
     std::cout << "------------------------------------------------------------------------\n";
-    run(nzhmm, obs,
+    nzhmmCopy = nzhmm;
+    run(nzhmmCopy, obs,
         [](chmmpp::numZerosHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_numZeros(obs); });
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Soft EM\n";
     std::cout << "------------------------------------------------------------------------\n";
-    run(nzhmm, obs,
+    nzhmmCopy = nzhmm;
+    run(nzhmmCopy, obs,
         [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_stochastic(obs); });
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Hard EM\n";
     std::cout << "------------------------------------------------------------------------\n";
-    nzhmm.set_option("max_iterations", 100);
-    run(nzhmm, obs,
+    nzhmmCopy = nzhmm;
+    nzhmmCopy.set_option("max_iterations", 100);
+    run(nzhmmCopy, obs,
         [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs); });
     nzhmm.clear_options();
 
