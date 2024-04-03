@@ -26,11 +26,9 @@ int main()
     std::vector< std::vector<std::string> > testCategories;
     chmmpp::readFile(supervisedFile, testWords, testCategories);
 
-    chmmpp::citationHMM hmm(supervisedWords, supervisedCategories); //Initialize HMM
+    chmmpp::citationHMM chmm(supervisedWords, supervisedCategories); //Initialize HMM
 
-    for(const auto &myPair: hmm.categoryMap) {
-        std::cout << myPair.first << " " << myPair.second << "\n";
-    }
+    chmm.learn_citation_semisupervised_hard(supervisedWords, supervisedCategories, unsupervisedWords);
 
     return 0;
 }

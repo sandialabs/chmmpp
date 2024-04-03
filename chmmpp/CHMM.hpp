@@ -107,6 +107,18 @@ class CHMM : public Options {
     //                                          falls below this threshold (Default: 10E-6).
     //
     void learn_hardEM(const std::vector<int> &obs, const int numSolns = 1);
+
+    //CLM - IN PROGRESS
+    //
+    //  Options
+    //      convergence_tolerance (double):     Stop learning when difference in model parameters
+    //                                          falls below this threshold (Default: 10E-6).
+    //      gamma (double):                     Percent unsupervised solutions are under-weighted
+    //
+    //
+    void learn_semisupervised_hardEM(const std::vector< std::vector<int> > &supervisedObs, 
+                                const std::vector< std::vector<int> > &supervisedHidden, 
+                                const std::vector< std::vector<int> > &unsupervisedObs);
 };
 
 }  // namespace chmmpp

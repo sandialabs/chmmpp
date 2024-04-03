@@ -29,8 +29,7 @@ class citationHMM : public CHMM {
     void mip_map_inference_citation(const std::vector<int> &observations, std::vector<int> &hidden_states,
                            double &logProb);
 
-    void learn_citation(const std::vector<std::vector<int>> &observations);
-    void learn_citation(const std::vector<int> &observations);
+    void learn_citation_semisupervised_hard(const std::vector< std::vector<std::string> > &supervisedWords, const std::vector< std::vector<std::string> > &supervisedCategories, const std::vector< std::vector<std::string> > &unsupervisedWords);
 };
 
 void readFile(std::ifstream &inputFile, std::vector< std::vector<std::string> > &words, std::vector< std::vector<std::string> > &categories);  

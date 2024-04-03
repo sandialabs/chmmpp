@@ -51,5 +51,11 @@ void CHMM::learn_hardEM(const std::vector<int> &obs, int numSolns)
     chmmpp::learn_hardEM(hmm, obs, constraintOracle, numSolns, this->get_options());
 }
 
+void CHMM::learn_semisupervised_hardEM(const std::vector< std::vector<int> > &supervisedObs, 
+                                 const std::vector< std::vector<int> > &supervisedHidden, 
+                                 const std::vector< std::vector<int> > &unsupervisedObs) 
+{
+    chmmpp::learn_semisupervised_hardEM(hmm, supervisedObs, supervisedHidden, unsupervisedObs, this->get_options());
+}
 
 }  // namespace chmmpp

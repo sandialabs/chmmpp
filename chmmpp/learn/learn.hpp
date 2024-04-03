@@ -33,4 +33,9 @@ void learn_hardEM(HMM &hmm, const std::vector<int> &obs,
                   const std::function<bool(std::vector<int>&)> &constraintOracle, const int numSolns,
                   const Options &options);
 
+void learn_semisupervised_hardEM(HMM &hmm, const std::vector< std::vector<int> > &supervisedObs, 
+                           const std::vector< std::vector<int> > &supervisedHidden,
+                           const std::vector< std::vector<int> > &unsupervisedObs,
+                           const Options &options);
+
 }  // namespace chmmpp
