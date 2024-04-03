@@ -31,4 +31,6 @@ class citationHMM : public CHMM {
     void learn_citation(const std::vector<int> &observations);
 };
 
+void readFile(std::ifstream &inputFile, std::vector< std::vector<std::string> > &words, std::vector< std::vector<std::string> > &categories);
+
 }  // namespace chmmpp

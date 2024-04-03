@@ -19,6 +19,7 @@ set(citation
     citation/citation_mip.cpp
     citation/citationHMM.cpp
     citation/citation_astar.cpp
+    citation/readFile.cpp
 )
 
 add_executable(numzeros_infer numZeros/simpleInfer.cpp ${numZeros})
