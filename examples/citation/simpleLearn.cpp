@@ -9,21 +9,27 @@
 
 int main()
 {
-    std::ifstream supervisedFile;
-    supervisedFile.open("/Users/clmatte/Desktop/HMM/CHMMPP/chmmpp/examples/citation/data/supervised.txt"); //TODO: FIX when we decide what to do with data
-    if(!supervisedFile.is_open()) {
-        std::cout << "AHHHHHH" << std::endl;
-        return -1;
-    }
+    //Read in data from files
+    std::ifstream supervisedFile("/Users/clmatte/Desktop/HMM/CHMMPP/chmmpp/examples/citation/data/supervised.txt"); //TODO: FIX when we decide what to do with data
+    std::ifstream unsupervisedFile("/Users/clmatte/Desktop/HMM/CHMMPP/chmmpp/examples/citation/data/unsupervised.txt");
+    std::ifstream testFile("/Users/clmatte/Desktop/HMM/CHMMPP/chmmpp/examples/citation/data/test.txt");
+
     std::vector< std::vector<std::string> > supervisedWords;
     std::vector< std::vector<std::string> > supervisedCategories;
     chmmpp::readFile(supervisedFile, supervisedWords, supervisedCategories);
 
-    for(const auto &line: supervisedCategories) {
-        for(const auto &word: line) {
-            std::cout << word << " ";
-        }
-        std::cout << "\n";
+    std::vector< std::vector<std::string> > unsupervisedWords;
+    std::vector< std::vector<std::string> > unsupervisedCategories;
+    chmmpp::readFile(supervisedFile, unsupervisedWords, unsupervisedCategories);
+
+    std::vector< std::vector<std::string> > testWords;
+    std::vector< std::vector<std::string> > testCategories;
+    chmmpp::readFile(supervisedFile, testWords, testCategories);
+
+    chmmpp::citationHMM hmm(supervisedWords, supervisedCategories); //Initialize HMM
+
+    for(const auto &myPair: hmm.categoryMap) {
+        std::cout << myPair.first << " " << myPair.second << "\n";
     }
 
     return 0;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chmmpp/chmmpp.hpp>
+#include <unordered_map>
 
 namespace chmmpp {
 
@@ -9,10 +10,11 @@ namespace chmmpp {
 //
 class citationHMM : public CHMM {
    public:
-    int numZeros;
+    std::unordered_map<std::string, int> categoryMap;
+    std::unordered_map<std::string, int> wordMap;
 
    public:
-    citationHMM(int _numZeros);
+    citationHMM(const std::vector< std::vector<std::string> > &supervisedWords, const std::vector< std::vector<std::string> > &supervisedCategories);
 
     // A tailored aStar implementation
     void aStar_citation(const std::vector<int> &observations, std::vector<int> &hidden_states,
@@ -31,6 +33,6 @@ class citationHMM : public CHMM {
     void learn_citation(const std::vector<int> &observations);
 };
 
-void readFile(std::ifstream &inputFile, std::vector< std::vector<std::string> > &words, std::vector< std::vector<std::string> > &categories);
+void readFile(std::ifstream &inputFile, std::vector< std::vector<std::string> > &words, std::vector< std::vector<std::string> > &categories);  
 
 }  // namespace chmmpp
