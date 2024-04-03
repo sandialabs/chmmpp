@@ -5,7 +5,7 @@ namespace chmmpp {
 
 namespace {
 
-void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, const std::vector<int> &numZeros, const double convergence_tolerance)
+void local_learn_citation(HMM &hmm, const std::vector<std::vector<int> > &obs, const std::vector<int> &numZeros, const double convergence_tolerance)
 {
     auto A = hmm.getA();
     auto S = hmm.getS();
@@ -279,7 +279,7 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, c
 
 }
 
-void numZerosHMM::learn_numZeros(const std::vector<std::vector<int>> &obs)
+void citationHMM::learn_citation(const std::vector<std::vector<int>> &obs)
 {
     std::vector<int> newNumZeros;
     for (size_t i=0; i<obs.size(); i++)
@@ -289,14 +289,14 @@ void numZerosHMM::learn_numZeros(const std::vector<std::vector<int>> &obs)
     double convergence_tolerance = 10E-6;
     if (option.has_value())
         convergence_tolerance = *option;
-    local_learn_numZeros(hmm, obs, newNumZeros, convergence_tolerance);
+    local_learn_citation(hmm, obs, newNumZeros, convergence_tolerance);
 }
 
-void numZerosHMM::learn_numZeros(const std::vector<int> &obs)
+void citationHMM::learn_citation(const std::vector<int> &obs)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);
-    learn_numZeros(newObs);
+    learn_citation(newObs);
 }
 
 }  // namespace chmmpp

@@ -62,14 +62,14 @@ void run_all(bool with_rejection, bool debug=false)
     }
 
     chmmpp::HMM hmmCopy;
-    chmmpp::numZerosHMM nzhmmCopy(numZeros);
+    chmmpp::citationHMM nzhmmCopy(numZeros);
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Initial HMM parameters\n";
     std::cout << "------------------------------------------------------------------------\n";
     hmm.print();
 
-    chmmpp::numZerosHMM nzhmm(numZeros);
+    chmmpp::citationHMM nzhmm(numZeros);
     nzhmm.initialize(hmm);
 
     std::cout << "------------------------------------------------------------------------\n";
@@ -91,7 +91,7 @@ void run_all(bool with_rejection, bool debug=false)
     std::cout << "------------------------------------------------------------------------\n";
     nzhmmCopy = nzhmm;
     run(nzhmmCopy, obs,
-        [](chmmpp::numZerosHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_numZeros(obs); });
+        [](chmmpp::citationHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_citation(obs); });
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Soft EM\n";

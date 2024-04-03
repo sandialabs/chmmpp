@@ -44,7 +44,7 @@ void MIPModel::collect_solution(std::vector<int>& hidden_states)
 }
 #endif
 
-void numZerosHMM::mip_map_inference(const std::vector<int>& observations,
+void citationHMM::mip_map_inference_citation(const std::vector<int>& observations,
                                     std::vector<int>& hidden_states, double& logProb)
 {
 #ifdef WITH_COEK

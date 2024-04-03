@@ -13,7 +13,7 @@ namespace chmmpp {
 // The same as the function above, however here we are allowed to specify the number of times the
 // function is in hidden state 0 with the parameter numZeros Could also expand this to be general
 // linear constraints
-void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
+void citationHMM::aStar_citation(const std::vector<int>& observations,
                                  std::vector<int>& hidden_states, double& logProb)
 {
     const int T = observations.size();
@@ -156,7 +156,7 @@ void numZerosHMM::aStar_numZeros(const std::vector<int>& observations,
 
 // Returns the top numSolns solutions to the inference problem.
 // Uses the same inference technique as A*Oracle, so it is much slower than general A*
-void numZerosHMM::aStarMult_numZeros(const std::vector<int>& observations,
+void citationHMM::aStarMult_citation(const std::vector<int>& observations,
                                      std::vector<std::vector<int>>& hidden_states,
                                      std::vector<double>& logProb, int numSolns)
 {
