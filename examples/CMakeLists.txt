@@ -14,6 +14,13 @@ set(numZeros
     numZeros/numZeros_learn.cpp
 )
 
+set(citation
+    citation/citation_learn.cpp
+    citation/citation_mip.cpp
+    citation/citationHMM.cpp
+    citation/citation_astar.cpp
+)
+
 add_executable(numzeros_infer numZeros/simpleInfer.cpp ${numZeros})
 target_link_libraries(numzeros_infer PRIVATE chmmpp::chmmpp)
 
@@ -22,6 +29,11 @@ target_link_libraries(numzeros_minfer PRIVATE chmmpp::chmmpp)
 
 add_executable(numzeros_learn numZeros/simpleLearn.cpp ${numZeros})
 target_link_libraries(numzeros_learn PRIVATE chmmpp::chmmpp)
+
+
+
+add_executable(citation_learn citation/simpleLearn.cpp ${citation})
+target_link_libraries(citation_learn PRIVATE chmmpp::chmmpp)
 
 #Go through all files in examples and add an executable for each
 foreach( exampleFile ${EXAMPLES} )
