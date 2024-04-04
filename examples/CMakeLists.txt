@@ -18,7 +18,7 @@ set(citation
     citation/citation_learn.cpp
     citation/citation_mip.cpp
     citation/citationHMM.cpp
-    citation/citation_astar.cpp
+    citation/citation_aStar.cpp
     citation/readFile.cpp
 )
 
