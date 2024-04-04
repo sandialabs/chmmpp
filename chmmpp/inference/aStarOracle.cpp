@@ -16,8 +16,10 @@ namespace chmmpp {
 // complicated constraints Note: This may produce a different solution from other A* functions.
 // However, they will have the same logProb, and thus occur with the same probability Effectively
 // the same as the code above, but we can't restrict the space if we have too many 0's
+// partial Oracle is true if we can apply the constraint to partial sequences
 void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vector<int>& hidden,
-                 double& logProb, const std::function<bool(std::vector<int>&)>& constraintOracle)
+                 double& logProb, const std::function<bool(std::vector<int>&)>& constraintOracle,
+                 bool partialOracle)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -115,9 +117,16 @@ void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vect
                 double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                 std::vector<int> newSequence = currentSequence;
                 newSequence.push_back(h2);
-
-                gScore[newSequence] = -tempGScore;
-                openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
+                if(partialOracle) {
+                    if(constraintOracle(newSequence)) {
+                        gScore[newSequence] = -tempGScore;
+                        openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
+                    }
+                } 
+                else {
+                    gScore[newSequence] = -tempGScore;
+                    openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
+                }
             }
         }
     }

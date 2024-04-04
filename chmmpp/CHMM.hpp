@@ -12,6 +12,7 @@ class CHMM : public Options {
    public:
     HMM hmm;
     std::function<bool(std::vector<int> &)> constraintOracle;
+    bool partialOracle = false; //True if constraintOracle can be applied to partial sequences
 
    public:
     void initialize(const HMM &_hmm) { hmm = _hmm; }

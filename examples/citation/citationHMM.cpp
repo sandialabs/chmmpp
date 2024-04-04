@@ -65,6 +65,8 @@ citationHMM::citationHMM(const std::vector< std::vector<std::string> > &supervis
 
         return true;
     };
+
+    this->partialOracle = true; //Only needs partial sequences
 }
 
 }  // namespace chmmpp
