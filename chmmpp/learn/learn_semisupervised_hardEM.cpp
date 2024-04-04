@@ -1,5 +1,6 @@
 #include <iostream>
 #include "learn.hpp"
+#include "../inference/inference.hpp"
 
 namespace chmmpp {
 
@@ -32,22 +33,41 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
     }
 }
 
-// Will work best/fastest if the sets of hidden states which satisfy the constraints
-// This algorithm is TERRIBLE, I can't even get it to converge in a simple case with T = 10.
-// This is currently the only learning algorithm we have for having a constraint oracle rather than
-// ``simple'' constraints This also fails to work if we are converging towards values in the
-// transition matrix with 0's (which is NOT uncommon)
 void learn_semisupervised_hardEM(HMM &hmm, const std::vector< std::vector<int> > &supervisedObs, 
                            const std::vector< std::vector<int> > &supervisedHidden,
                            const std::vector< std::vector<int> > &unsupervisedObs,
+                           const std::function<bool(std::vector<int>&)> &constraintOracle,
                            const Options &options) 
 {    
-    double gamma = 0.1;
+    double gamma = 0.1; //Does it make sense to just have a double or should it depend on the size of
+                        //supervised vs. unsupervised data
     double convergence_tolerance = 1E-6;
 
+    //Idea: obs and hidden will contain all observations and hidden across sup and unsup
+    //Hidden for unsup will be generated using inference
+    //Then do normal hardEM BUT weight unsup examples by gamma
     std::vector< std::vector<int> > obs;
     std::vector< std::vector<int> > hidden;
     int supervisedSize = supervisedObs.size();
+
+    for(const auto &vec: supervisedObs)
+        obs.push_back(vec);
+
+    for(const auto &vec: unsupervisedObs) 
+        obs.push_back(vec);
+
+    for(const auto &vec: supervisedHidden) 
+        hidden.push_back(vec);
+
+    //estimate_hmm(hmm, supervisedObs, supervisedHidden);
+    hmm.print();
+
+    for(const auto &vec: unsupervisedObs) {  
+        std::vector<int> tempHidden;
+        double tempLogProb;
+        aStarOracle(hmm, vec, tempHidden, tempLogProb, constraintOracle);
+        hidden.push_back(tempHidden);
+    }
 }
 
 }  // namespace chmmpp

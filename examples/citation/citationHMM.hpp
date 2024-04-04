@@ -5,9 +5,7 @@
 
 namespace chmmpp {
 
-//
-// Constrained HMM inference where the number of times the hidden state 'zero' is visited is fixed.
-//
+//We assume that we may have unknown words (wordMap[UNKNOWN] = 0), but not unknown categories
 class citationHMM : public CHMM {
    public:
     std::unordered_map<std::string, int> categoryMap;

@@ -51,8 +51,9 @@ citationHMM::citationHMM(const std::vector< std::vector<std::string> > &supervis
     this->initialize(_A,_S,_E);
     
     //Constraint Oracle
+    //Categories appear in chunks and only at most once
     constraintOracle = [](std::vector<int>& hid) -> bool {
-        for(int i = 1; i < hid.size(); ++i) {
+        for(int i = 2; i < hid.size(); ++i) {
             if(hid[i] != hid[i-1]) {
                 for(int j = 0; j < i-1; ++j) {
                     if(hid[i] == hid[j]) {

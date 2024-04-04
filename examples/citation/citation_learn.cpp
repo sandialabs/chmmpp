@@ -3,6 +3,7 @@
 
 namespace chmmpp {
 
+
 void citationHMM::learn_citation_semisupervised_hard(const std::vector< std::vector<std::string> > &supervisedWords, const std::vector< std::vector<std::string> > &supervisedCategories, const std::vector< std::vector<std::string> > &unsupervisedWords)
 {
     //CLM - TODO -- I don't really understand how option works right now
@@ -49,6 +50,8 @@ void citationHMM::learn_citation_semisupervised_hard(const std::vector< std::vec
         ++index;
     }
 
+    //Just call our normal semisupervised learning algorithm
+    //No special tricks here since we just have a constraintOracle
     this->learn_semisupervised_hardEM(supervisedObs, supervisedHidden, unsupervisedObs);
 }
 
