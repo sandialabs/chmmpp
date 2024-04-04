@@ -20,11 +20,11 @@ int main()
 
     std::vector< std::vector<std::string> > unsupervisedWords;
     std::vector< std::vector<std::string> > unsupervisedCategories;
-    chmmpp::readFile(supervisedFile, unsupervisedWords, unsupervisedCategories);
+    chmmpp::readFile(unsupervisedFile, unsupervisedWords, unsupervisedCategories);
 
     std::vector< std::vector<std::string> > testWords;
     std::vector< std::vector<std::string> > testCategories;
-    chmmpp::readFile(supervisedFile, testWords, testCategories);
+    chmmpp::readFile(testFile, testWords, testCategories);
 
     chmmpp::citationHMM chmm(supervisedWords, supervisedCategories); //Initialize HMM
 

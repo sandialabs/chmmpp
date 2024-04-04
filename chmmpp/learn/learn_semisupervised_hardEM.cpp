@@ -3,6 +3,8 @@
 
 namespace chmmpp {
 
+//CLM - TODO -- I don't fully understand this part yet, I just need a parameter called gamma which 
+//    dictates how heavily the unsupervised samples are underweighted
 void process_options(const Options &options, double &convergence_tolerance, unsigned int &C, double &gamma)
 {
     for (const auto &it : options.options) {
@@ -40,7 +42,12 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector< std::vector<int> >
                            const std::vector< std::vector<int> > &unsupervisedObs,
                            const Options &options) 
 {    
-    std::cout << "TEST!" << std::endl;
+    double gamma = 0.1;
+    double convergence_tolerance = 1E-6;
+
+    std::vector< std::vector<int> > obs;
+    std::vector< std::vector<int> > hidden;
+    int supervisedSize = supervisedObs.size();
 }
 
 }  // namespace chmmpp
