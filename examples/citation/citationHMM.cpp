@@ -22,7 +22,7 @@ citationHMM::citationHMM(const std::vector< std::vector<std::string> > &supervis
         }
     }
 
-    counter = 1;
+    counter = 0;
     for(const auto &line :supervisedCategories) {
         for(const auto &word : line) {
             if(categoryMap.count(word) == 0) {

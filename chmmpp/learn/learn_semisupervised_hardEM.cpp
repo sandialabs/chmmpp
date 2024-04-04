@@ -64,8 +64,8 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector< std::vector<int> >
                         //supervised vs. unsupervised data
     double convergence_tolerance = 1E-6;
 
-    int H = hmm.getH();
-    int O = hmm.getO();
+    size_t H = hmm.getH();
+    size_t O = hmm.getO();
 
     //Idea: obs and hidden will contain all observations and hidden across sup and unsup
     //Hidden for unsup will be generated using inference
@@ -93,7 +93,7 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector< std::vector<int> >
 
     for(size_t h = 0; h < H; ++h) {
         
-        newS[h] += hmm.getSEntry(h);
+        newS[h] += gamma*hmm.getSEntry(h);
         for(size_t h2 = 0; h2 < H; ++h2) {
             newA[h][h2] += gamma*hmm.getAEntry(h,h2);
         }
@@ -111,18 +111,77 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector< std::vector<int> >
         normalize(vec);
 
     hmm.initialize(newA,newS,newE);
-    hmm.print();
 
-    for(const auto &vec: unsupervisedObs) { 
-        std::vector<int> tempHidden;
-        double tempLogProb;
-        aStarOracle(hmm, vec, tempHidden, tempLogProb, constraintOracle, partialOracle);
-        //hmm.viterbi(vec,tempHidden,tempLogProb);
-        for(const auto &val: tempHidden) {
-            std::cout << val << " ";
+    //Iteratively 
+    while(true) {
+        std::cout << "Running learning." << std::endl;
+        hidden.clear();
+        for(const auto &vec: supervisedHidden) 
+            hidden.push_back(vec);
+
+        //Hard part of hard EM
+        int temp = 1;
+        for(const auto &vec: unsupervisedObs) { 
+            std::vector<int> tempHidden;
+            double tempLogProb;
+            aStarOracle(hmm, vec, tempHidden, tempLogProb, constraintOracle, partialOracle); //Could replace with IP or specific aStar
+            hidden.push_back(tempHidden);
+            std::cout << "Iteration " << temp << " out of " << unsupervisedObs.size() << "\n";
+            ++temp;
         }
-        std::cout << std::endl;
-        hidden.push_back(tempHidden);
+        
+        std::vector<std::vector<double> > ACounter(H); //double not int b/c we multiply by gamma
+        std::vector<double> SCounter(H);
+        std::vector<std::vector<double> > ECounter(H);
+
+        for(auto &vec: ACounter)
+            vec.resize(H);
+        for(auto &vec: ECounter)
+            vec.resize(O);
+
+        size_t counter = 0;
+        //Do counts weighting unsupervised samples less
+        for(const auto &hiddenVec: hidden) {
+            size_t T = hiddenVec.size();
+            double incrementVal;
+
+            if(counter < supervisedSize)
+                incrementVal = 1;
+            else
+                incrementVal = gamma;
+
+            SCounter[hiddenVec[0]] += incrementVal;
+            ECounter[hiddenVec[T-1]][obs[counter][T-1]] += incrementVal;
+
+            for(int t = 0; t < T-1; ++t) {
+                ACounter[hiddenVec[t]][hiddenVec[t+1]] += incrementVal;
+                ECounter[hiddenVec[t]][obs[counter][t]] += incrementVal;
+            }
+
+            ++counter;
+        }
+
+        for(auto &vec: ACounter)
+            normalize(vec);
+            
+        normalize(SCounter);
+
+        for(auto &vec: ECounter)
+            normalize(vec);
+
+        double tol = -1.;
+        for(int h1 = 0; h1 < H; ++h1) {
+            for(int h2 = 0; h2 < H; ++h2) {
+                tol = std::max(std::abs(hmm.getAEntry(h1,h2) - ACounter[h1][h2]), tol);
+            }
+        }
+
+        hmm.initialize(ACounter, SCounter,ECounter);
+        hmm.print();
+        std::cout << tol << std::endl << std::endl << std::endl;
+
+        if(tol < convergence_tolerance)
+            break;
     }
 }
 
