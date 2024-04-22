@@ -58,5 +58,5 @@ echo ""
 \rm -Rf build
 mkdir build
 cd build
-cmake -DCMAKE_PREFIX_PATH=${SPACK_HOME}/var/spack/environments/dev/.spack-env/view -Dwith_coek=ON -Dwith_boost=ON ..
+cmake -DCMAKE_PREFIX_PATH=${SPACK_HOME}/var/spack/environments/dev/.spack-env/view -Dwith_coek=ON -Dwith_boost=ON -Dwith_tests=ON ..
 make -j20
