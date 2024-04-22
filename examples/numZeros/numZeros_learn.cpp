@@ -5,7 +5,8 @@ namespace chmmpp {
 
 namespace {
 
-void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, const std::vector<int> &numZeros, const double convergence_tolerance)
+void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int>> &obs,
+                          const std::vector<int> &numZeros, const double convergence_tolerance)
 {
     auto A = hmm.getA();
     auto S = hmm.getS();
@@ -16,11 +17,11 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, c
     size_t R = obs.size();
 
     while (true) {
-        std::vector<std::vector<std::vector<double> > > totalGamma;
-        std::vector<std::vector<std::vector<std::vector<double> > > > totalXi;
+        std::vector<std::vector<std::vector<double>>> totalGamma;
+        std::vector<std::vector<std::vector<std::vector<double>>>> totalXi;
         for (size_t r = 0; r < R; ++r) {
             // alpha
-            std::vector<std::vector<std::vector<double> > >
+            std::vector<std::vector<std::vector<double>>>
                 alpha;  // alpha[c][h][t] = P(O_0 = obs[0], ... ,O_t = obs[t], H_t = h | theta, c
                         // 0's)
             alpha.resize(numZeros[r] + 1);
@@ -79,7 +80,7 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, c
             }
 
             // beta
-            std::vector<std::vector<std::vector<double> > >
+            std::vector<std::vector<std::vector<double>>>
                 beta;  // beta[c][h][t] = P(O_{t+1} = o_{t+1} ... O_{T-1} = o_{T-1} | H_t = h theta,
                        // c 0's )
             beta.resize(numZeros[r] + 1);
@@ -166,7 +167,7 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, c
             }
 
             // Gamma
-            std::vector<std::vector<double> > gamma;  // gamma[h][t] = P(H_t = h | Y , theta)
+            std::vector<std::vector<double>> gamma;  // gamma[h][t] = P(H_t = h | Y , theta)
             gamma.resize(H);
             for (size_t h = 0; h < H; ++h) {
                 gamma[h].resize(T);
@@ -185,7 +186,7 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, c
             totalGamma.push_back(gamma);
 
             // xi
-            std::vector<std::vector<std::vector<double> > >
+            std::vector<std::vector<std::vector<double>>>
                 xi;  // xi[i][j][t] = P(H_t = i, H_t+1 = j, O| theta)
             xi.resize(H);
             for (size_t h1 = 0; h1 < H; ++h1) {
@@ -277,24 +278,22 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs, c
     }
 }
 
-}
+}  // namespace
 
 void numZerosHMM::learn_numZeros(const std::vector<std::vector<int>> &obs)
 {
     std::vector<int> newNumZeros;
-    for (size_t i=0; i<obs.size(); i++)
-        newNumZeros.push_back(numZeros);
+    for (size_t i = 0; i < obs.size(); i++) newNumZeros.push_back(numZeros);
 
     auto option = get_option<double>("convergence_tolerance");
     double convergence_tolerance = 10E-6;
-    if (option.has_value())
-        convergence_tolerance = *option;
+    if (option.has_value()) convergence_tolerance = *option;
     local_learn_numZeros(hmm, obs, newNumZeros, convergence_tolerance);
 }
 
 void numZerosHMM::learn_numZeros(const std::vector<int> &obs)
 {
-    std::vector<std::vector<int> > newObs;
+    std::vector<std::vector<int>> newObs;
     newObs.push_back(obs);
     learn_numZeros(newObs);
 }

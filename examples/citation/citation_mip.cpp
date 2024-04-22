@@ -19,7 +19,7 @@ class MIPModel : public LPModel {
 
 void MIPModel::initialize(const citationHMM& hmm, const std::vector<int>& observations)
 {
-#if 0
+#    if 0
     // Require the use of binary flow variables (y)
     y_binary = true;
     LPModel::initialize(hmm.hmm, observations);
@@ -35,7 +35,7 @@ void MIPModel::initialize(const citationHMM& hmm, const std::vector<int>& observ
         }
     }
     model.add(sum == hmm.numZeros);
-#endif
+#    endif
 }
 
 void MIPModel::collect_solution(std::vector<int>& hidden_states)
@@ -47,7 +47,7 @@ void MIPModel::collect_solution(std::vector<int>& hidden_states)
 #endif
 
 void citationHMM::mip_map_inference_citation(const std::vector<int>& observations,
-                                    std::vector<int>& hidden_states, double& logProb)
+                                             std::vector<int>& hidden_states, double& logProb)
 {
 #ifdef WITH_COEK
     MIPModel model;

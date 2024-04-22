@@ -29,15 +29,15 @@ void estimate_hmm(HMM& hmm, const std::vector<std::vector<int>>& obs,
             total += Acount[a][b];
             // std::cout << "Acount " << a << " " << b << " " << Acount[a][b] << std::endl;
         }
-        if(total != 0) {
+        if (total != 0) {
             for (size_t b = 0; b < H; b++) {
                 A[a][b] = Acount[a][b] / total;
                 // std::cout << "A " << a << " " << b << " " << A[a][b] << std::endl;
             }
         }
         else {
-            for(size_t b = 0; b < H; ++b) {
-                A[a][b] = 1./H;
+            for (size_t b = 0; b < H; ++b) {
+                A[a][b] = 1. / H;
             }
         }
     }
@@ -52,15 +52,15 @@ void estimate_hmm(HMM& hmm, const std::vector<std::vector<int>>& obs,
             total += Ecount[a][b];
             // std::cout << "Ecount " << a << " " << b << " " << Ecount[a][b] << std::endl;
         }
-        if(total != 0) {
+        if (total != 0) {
             for (size_t b = 0; b < O; b++) {
                 E[a][b] = Ecount[a][b] / total;
                 // std::cout << "E " << a << " " << b << " " << E[a][b] << std::endl;
             }
         }
         else {
-            for(size_t b = 0; b < O; ++b) {
-                E[a][b] = 1./O;
+            for (size_t b = 0; b < O; ++b) {
+                E[a][b] = 1. / O;
             }
         }
     }

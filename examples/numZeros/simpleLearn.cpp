@@ -18,7 +18,7 @@ void run(T& hmm, V& obs, const Z& fn)
     hmm.print();
 }
 
-void run_all(bool with_rejection, bool debug=false)
+void run_all(bool with_rejection, bool debug = false)
 {
     // Initial Guess
     std::vector<std::vector<double>> A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
@@ -26,7 +26,7 @@ void run_all(bool with_rejection, bool debug=false)
     std::vector<std::vector<double>> E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
     size_t T = 25;         // Time Horizon
-    size_t numIt = 5000;  // Number of runs
+    size_t numIt = 5000;   // Number of runs
     size_t numZeros = 10;  // Number of zeros in the hidden states
 
     chmmpp::HMM hmm(A, S, E, 1937309487);
@@ -44,20 +44,22 @@ void run_all(bool with_rejection, bool debug=false)
         while (not feasible) {
             hmm.run(T, obs[i], hid[i]);
             feasible = count(hid[i].begin(), hid[i].end(), 0) == numZeros;
-            if (not with_rejection) break; //CLM - What is happening here?? It feels like this is telling the HMM we have numZeros number of zeros even if we don't??
+            if (not with_rejection)
+                break;  // CLM - What is happening here?? It feels like this is telling the HMM we
+                        // have numZeros number of zeros even if we don't??
         }
 
-    if (debug) {
-        std::cout << "Trial: " << i << std::endl;
-        std::cout << "Observed:      ";
-        for (auto& v : obs[i]) std::cout << v;
-        std::cout << std::endl;
+        if (debug) {
+            std::cout << "Trial: " << i << std::endl;
+            std::cout << "Observed:      ";
+            for (auto& v : obs[i]) std::cout << v;
+            std::cout << std::endl;
 
-        std::cout << "Hidden states: ";
-        for (auto& v : hid[i]) std::cout << v;
-        std::cout << std::endl;
-        std::cout << "Num zeros: " << count(hid[i].begin(), hid[i].end(), 0) << std::endl;
-        std::cout << std::endl;
+            std::cout << "Hidden states: ";
+            for (auto& v : hid[i]) std::cout << v;
+            std::cout << std::endl;
+            std::cout << "Num zeros: " << count(hid[i].begin(), hid[i].end(), 0) << std::endl;
+            std::cout << std::endl;
         }
     }
 
@@ -90,15 +92,17 @@ void run_all(bool with_rejection, bool debug=false)
     std::cout << "Running learning with constraint - Customized Soft EM???\n";
     std::cout << "------------------------------------------------------------------------\n";
     nzhmmCopy = nzhmm;
-    run(nzhmmCopy, obs,
-        [](chmmpp::numZerosHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_numZeros(obs); });
+    run(nzhmmCopy, obs, [](chmmpp::numZerosHMM& hmm, const std::vector<std::vector<int>>& obs) {
+        hmm.learn_numZeros(obs);
+    });
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Soft EM\n";
     std::cout << "------------------------------------------------------------------------\n";
     nzhmmCopy = nzhmm;
-    run(nzhmmCopy, obs,
-        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_stochastic(obs); });
+    run(nzhmmCopy, obs, [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) {
+        hmm.learn_stochastic(obs);
+    });
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Hard EM\n";

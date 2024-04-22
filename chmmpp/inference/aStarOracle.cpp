@@ -117,12 +117,12 @@ void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vect
                 double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                 std::vector<int> newSequence = currentSequence;
                 newSequence.push_back(h2);
-                if(partialOracle) {
-                    if(constraintOracle(newSequence)) {
+                if (partialOracle) {
+                    if (constraintOracle(newSequence)) {
                         gScore[newSequence] = -tempGScore;
                         openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
                     }
-                } 
+                }
                 else {
                     gScore[newSequence] = -tempGScore;
                     openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));

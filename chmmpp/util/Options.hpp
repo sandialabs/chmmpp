@@ -31,8 +31,7 @@ class Options {
     {
         auto it = options.find(name);
         if (it == options.end()) return {};
-        if (not std::holds_alternative<T>(it->second))
-            return {};
+        if (not std::holds_alternative<T>(it->second)) return {};
         return {std::get<T>(it->second)};
     }
 

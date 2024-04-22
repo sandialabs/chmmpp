@@ -66,7 +66,7 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
         ECounter[h].resize(O);
     }
 
-    size_t iter=0;
+    size_t iter = 0;
     while (true) {
         fill(SCounter.begin(), SCounter.end(), 0);
         for (size_t h = 0; h < H; ++h) {
@@ -75,7 +75,7 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
         }
 
         for (size_t r = 0; r < R; ++r) {
-            //std::cout << "R = " << r << "\n";
+            // std::cout << "R = " << r << "\n";
             int T = obs[r].size();
             std::vector<std::vector<int> > hidden;
             std::vector<double> temp;
@@ -123,16 +123,14 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
         hmm.setE(E);
         hmm.setA(A);
 
-        if (tol < convergence_tolerance)
-            break;
-        if (++iter >= max_iterations)
-            break;
+        if (tol < convergence_tolerance) break;
+        if (++iter >= max_iterations) break;
     }
 }
 
 void learn_hardEM(HMM& hmm, const std::vector<int>& obs,
-                  const std::function<bool(std::vector<int>&)>& constraintOracle, const int numSolns,
-                  const Options& options)
+                  const std::function<bool(std::vector<int>&)>& constraintOracle,
+                  const int numSolns, const Options& options)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);

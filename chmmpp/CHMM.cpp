@@ -27,9 +27,8 @@ void CHMM::mip_map_inference(const std::vector<int> &observations, std::vector<i
 
 void CHMM::learn_stochastic(const std::vector<std::vector<int>> &obs)
 {
-    std::vector<std::function<bool(std::vector<int>&)>> oracles(obs.size());
-    for (size_t i=0; i<obs.size(); i++)
-        oracles[i] = constraintOracle;
+    std::vector<std::function<bool(std::vector<int> &)>> oracles(obs.size());
+    for (size_t i = 0; i < obs.size(); i++) oracles[i] = constraintOracle;
     chmmpp::learn_stochastic(hmm, obs, oracles, this->get_options());
 };
 
@@ -40,9 +39,8 @@ void CHMM::learn_stochastic(const std::vector<int> &obs)
 
 void CHMM::learn_hardEM(const std::vector<std::vector<int>> &obs, int numSolns)
 {
-    std::vector<std::function<bool(std::vector<int>&)>> oracles;
-    for (size_t i=0; i<obs.size(); i++)
-        oracles.push_back(constraintOracle);
+    std::vector<std::function<bool(std::vector<int> &)>> oracles;
+    for (size_t i = 0; i < obs.size(); i++) oracles.push_back(constraintOracle);
     chmmpp::learn_hardEM(hmm, obs, oracles, numSolns, this->get_options());
 }
 
@@ -51,11 +49,13 @@ void CHMM::learn_hardEM(const std::vector<int> &obs, int numSolns)
     chmmpp::learn_hardEM(hmm, obs, constraintOracle, numSolns, this->get_options());
 }
 
-void CHMM::learn_semisupervised_hardEM(const std::vector< std::vector<int> > &supervisedObs, 
-                                 const std::vector< std::vector<int> > &supervisedHidden, 
-                                 const std::vector< std::vector<int> > &unsupervisedObs) 
+void CHMM::learn_semisupervised_hardEM(const std::vector<std::vector<int>> &supervisedObs,
+                                       const std::vector<std::vector<int>> &supervisedHidden,
+                                       const std::vector<std::vector<int>> &unsupervisedObs)
 {
-    chmmpp::learn_semisupervised_hardEM(hmm, supervisedObs, supervisedHidden, unsupervisedObs, this->constraintOracle, this->partialOracle, this->get_options());
+    chmmpp::learn_semisupervised_hardEM(hmm, supervisedObs, supervisedHidden, unsupervisedObs,
+                                        this->constraintOracle, this->partialOracle,
+                                        this->get_options());
 }
 
 }  // namespace chmmpp

@@ -7,21 +7,22 @@
 
 namespace chmmpp {
 
-//Reads in data from file 
-//Fle is of the form:
-//Word Word ... Word                (counter % 4 == 0)
-//Category Category ... Category    (counter % 4 == 1)
-//                                  (counter % 4 == 2)
-//                                  (coutner % 4 == 3)
-void readFile(std::ifstream &inputFile, std::vector< std::vector<std::string> > &words, std::vector< std::vector<std::string> > &categories) {
+// Reads in data from file
+// Fle is of the form:
+// Word Word ... Word                (counter % 4 == 0)
+// Category Category ... Category    (counter % 4 == 1)
+//                                   (counter % 4 == 2)
+//                                   (coutner % 4 == 3)
+void readFile(std::ifstream &inputFile, std::vector<std::vector<std::string> > &words,
+              std::vector<std::vector<std::string> > &categories)
+{
     std::string line;
     int counter = 0;
     std::vector<std::string> lineVec;
-    
 
     while (std::getline(inputFile, line)) {
-        if(((counter % 4) != 2) && ((counter % 4) != 3)) {
-            lineVec.clear();     
+        if (((counter % 4) != 2) && ((counter % 4) != 3)) {
+            lineVec.clear();
             std::istringstream iss(line);
             std::string word;
 
@@ -29,7 +30,7 @@ void readFile(std::ifstream &inputFile, std::vector< std::vector<std::string> > 
                 lineVec.push_back(word);
             }
 
-            if((counter % 4) == 0) {
+            if ((counter % 4) == 0) {
                 words.push_back(lineVec);
             }
             else {
@@ -42,4 +43,4 @@ void readFile(std::ifstream &inputFile, std::vector< std::vector<std::string> > 
     return;
 }
 
-} // namespace chmmpp
+}  // namespace chmmpp

@@ -12,7 +12,7 @@ class CHMM : public Options {
    public:
     HMM hmm;
     std::function<bool(std::vector<int> &)> constraintOracle;
-    bool partialOracle = false; //True if constraintOracle can be applied to partial sequences
+    bool partialOracle = false;  // True if constraintOracle can be applied to partial sequences
 
    public:
     void initialize(const HMM &_hmm) { hmm = _hmm; }
@@ -42,10 +42,7 @@ class CHMM : public Options {
         return hmm.logProb(obs, guess);
     }
 
-    virtual void print() const
-    {
-        hmm.print();
-    }
+    virtual void print() const { hmm.print(); }
 
     //
     // inference methods
@@ -109,17 +106,17 @@ class CHMM : public Options {
     //
     void learn_hardEM(const std::vector<int> &obs, const int numSolns = 1);
 
-    //CLM - IN PROGRESS
+    // CLM - IN PROGRESS
     //
-    //  Options
-    //      convergence_tolerance (double):     Stop learning when difference in model parameters
-    //                                          falls below this threshold (Default: 10E-6).
-    //      gamma (double):                     Percent unsupervised solutions are under-weighted
+    //   Options
+    //       convergence_tolerance (double):     Stop learning when difference in model parameters
+    //                                           falls below this threshold (Default: 10E-6).
+    //       gamma (double):                     Percent unsupervised solutions are under-weighted
     //
     //
-    void learn_semisupervised_hardEM(const std::vector< std::vector<int> > &supervisedObs, 
-                                const std::vector< std::vector<int> > &supervisedHidden, 
-                                const std::vector< std::vector<int> > &unsupervisedObs);
+    void learn_semisupervised_hardEM(const std::vector<std::vector<int>> &supervisedObs,
+                                     const std::vector<std::vector<int>> &supervisedHidden,
+                                     const std::vector<std::vector<int>> &unsupervisedObs);
 };
 
 }  // namespace chmmpp
