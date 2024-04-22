@@ -10,15 +10,16 @@ class MIPModel : public LPModel {
    public:
     // virtual void set_options(const Options& options);
 
-    void initialize(const numZerosHMM& hmm, const std::vector<int>& observations);
+    void initialize(const citationHMM& hmm, const std::vector<int>& observations);
 
     // void optimize(double& log_likelihood, std::vector<int>& hidden_states);
 
     void collect_solution(std::vector<int>& hidden_states);
 };
 
-void MIPModel::initialize(const numZerosHMM& hmm, const std::vector<int>& observations)
+void MIPModel::initialize(const citationHMM& hmm, const std::vector<int>& observations)
 {
+#if 0
     // Require the use of binary flow variables (y)
     y_binary = true;
     LPModel::initialize(hmm.hmm, observations);
@@ -34,6 +35,7 @@ void MIPModel::initialize(const numZerosHMM& hmm, const std::vector<int>& observ
         }
     }
     model.add(sum == hmm.numZeros);
+#endif
 }
 
 void MIPModel::collect_solution(std::vector<int>& hidden_states)

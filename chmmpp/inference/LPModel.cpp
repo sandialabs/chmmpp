@@ -169,10 +169,12 @@ void LPModel::optimize(double& log_likelihood, std::vector<int>& hidden_states)
             solver.set_option(it.first, std::get<std::string>(it.second));
     }
 
-    auto status = solver.solve(model);
-    if (status)
-        std::cout << "Error executing linear programming solver: " + std::to_string(status)
-                  << std::endl;
+    auto res = solver.solve(model);
+    if (not coek::check_optimal_termination(res)) {
+        std::cout << "ERROR: optimizer terminated with non-optimal solution!" << std::endl << std::endl;
+        std::cout << res << std::endl;
+        throw std::runtime_error("Coek optimizer terminated with non-optimal solution!");
+        }
 
     collect_solution(hidden_states);
     log_likelihood = -log_likelihood_expr.value();
