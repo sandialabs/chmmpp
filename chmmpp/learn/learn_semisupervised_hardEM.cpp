@@ -36,21 +36,17 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
 template<typename T>
 void normalize(std::vector<T> &vec) {
     double sum = 0.;
-    double vecSizeInv = 1./vec.size();
-
-    for(const auto &val: vec) {
+    for(const auto &val: vec)
         sum += val;
-    }
 
     if(sum != 0) {
-        for(auto &val: vec) {
+        for(auto &val: vec)
             val /= sum;
-        }
     }
     else {
-        for(auto &val: vec) {
+        double vecSizeInv = 1./vec.size();
+        for(auto &val: vec)
             val = vecSizeInv;
-        }
     }
 }
 
