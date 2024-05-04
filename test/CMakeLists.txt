@@ -14,7 +14,6 @@ if (with_fmtlib)
 endif()
 
 SET(sources
-    runner.cpp
     test_foo.cpp
     )
 
@@ -28,7 +27,7 @@ enable_testing()
 
 # runner
 add_executable(runner ${sources})
-TARGET_LINK_LIBRARIES(runner PUBLIC chmmpp Catch2::Catch2 ${chmmpp_link_libraries} ${chmmpp_test_libraries})
+TARGET_LINK_LIBRARIES(runner PUBLIC chmmpp Catch2::Catch2WithMain ${chmmpp_link_libraries} ${chmmpp_test_libraries})
 TARGET_COMPILE_OPTIONS(runner PUBLIC ${chmmpp_compile_options})
 target_compile_definitions(runner PUBLIC CHMMPP_TEST_DIR="${CMAKE_CURRENT_SOURCE_DIR}/")
 
