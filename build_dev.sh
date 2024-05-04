@@ -6,13 +6,17 @@
 # This uses Spack to install third-party dependencies in the `spack` directory.
 #
 spack_dev=0
+spack_reinstall=0
 for arg ; do
     case "$arg" in
         --spack-dev)
                     spack_dev=1
         ;;
+        --spack-reinstall)
+                    spack_reinstall=1
+        ;;
         --help)
-                    echo "build_dev.sh [--python] [--help]"
+                    echo "build_dev.sh [--spack-reinstall] [--spack-dev] [--help]"
                     exit 
         ;;
         *)
@@ -22,7 +26,7 @@ for arg ; do
     esac
 done
 
-if [-n "${GUROBI_HOME}"]; then
+if [[ -n "${GUROBI_HOME}" ]]; then
     with_gurobi="+gurobi"
 else
     with_gurobi=""
@@ -31,7 +35,7 @@ fi
 export SPACK_HOME=`pwd`/spack
 echo "SPACK_HOME=${SPACK_HOME}"
 
-if test -d ${SPACK_HOME}; then
+if test -d ${SPACK_HOME} && [[ "$spack_reinstall" -eq 0 ]]; then
     echo ""
     echo "WARNING: Spack directory exists."
     echo ""
@@ -54,6 +58,7 @@ else
     spack env deactivate
 fi
 
+echo ""
 echo "Building Chmmpp"
 echo ""
 \rm -Rf build
