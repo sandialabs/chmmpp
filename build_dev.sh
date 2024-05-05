@@ -26,16 +26,18 @@ for arg ; do
     esac
 done
 
-if [[ -n "${GUROBI_HOME}" ]]; then
-    with_gurobi="+gurobi"
-else
-    with_gurobi=""
-fi
-   
 export SPACK_HOME=`pwd`/spack
 echo "SPACK_HOME=${SPACK_HOME}"
+if [[ -z "${GUROBI_HOME}" ]]; then
+    with_gurobi=""
+else
+    with_gurobi="+gurobi"
+fi
 
-if test -d ${SPACK_HOME} && [[ "$spack_reinstall" -eq 0 ]]; then
+if [[ "$spack_reinstall" -eq 1 ]]; then
+    rm -Rf spack
+fi
+if test -d ${SPACK_HOME}; then
     echo ""
     echo "WARNING: Spack directory exists."
     echo ""
