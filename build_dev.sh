@@ -53,8 +53,7 @@ else
     . ${SPACK_HOME}/share/spack/setup-env.sh
     spack env create dev
     spack env activate dev
-    spack add python
-    spack add coek@dev ${with_gurobi} -highs
+    spack add coek@dev ${with_gurobi}
     spack add catch2
     spack install
     spack env deactivate
