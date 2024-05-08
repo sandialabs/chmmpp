@@ -25,7 +25,7 @@ class LPModel {
 
    public:
     // Configuration options
-    std::string solver_name = "gurobi";
+    std::string solver_name = "highs";
     bool y_binary = false;
     bool keep_data = true;
     bool debug = false;
