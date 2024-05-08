@@ -40,16 +40,13 @@ void normalize(std::vector<T> &vec)
     double sum = 0.;
     double vecSizeInv = 1. / vec.size();
 
-    for (const auto &val : vec)
-        sum += val;
+    for (const auto &val : vec) sum += val;
 
     if (sum != 0) {
-        for (auto &val : vec)
-            val /= sum;
+        for (auto &val : vec) val /= sum;
     }
     else {
-        for (auto &val : vec)
-            val = vecSizeInv;
+        for (auto &val : vec) val = vecSizeInv;
     }
 }
 

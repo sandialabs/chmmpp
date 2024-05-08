@@ -154,10 +154,16 @@ void LPModel::optimize(double& log_likelihood, std::vector<int>& hidden_states)
     if (not solver.available()) std::cout << "Error setting up solver " + solver_name << std::endl;
 
     // Set solver options
-    if (solver_name == "gurobi")  // Suppress default Gurobi output
-        solver.set_option("OutputFlag", 0);
-    else if (solver_name == "highs")  // Suppress default Gurobi output
-        solver.set_option("output_flag", false);
+    if (not debug) {
+        if (solver_name == "gurobi") {
+            // Suppress default Gurobi output
+            solver.set_option("OutputFlag", 0);
+        }
+        else if (solver_name == "highs") {
+            // Suppress default Highs output
+            solver.set_option("output_flag", false);
+        }
+    }
     for (auto& it : solver_options.options) {
         if (std::holds_alternative<int>(it.second))
             solver.set_option(it.first, std::get<int>(it.second));

@@ -96,11 +96,10 @@ void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vect
         }
     }
 
-
     int numIt = 0;
     while (!openSet.empty()) {
         ++numIt;
-        if((numIt % 100000) == 0) std::cout << openSet.size() << std::endl;
+        if ((numIt % 100000) == 0) std::cout << openSet.size() << std::endl;
         auto tempPair = openSet.top();
         std::vector<int> currentSequence = std::get<1>(tempPair);
         int t = currentSequence.size();

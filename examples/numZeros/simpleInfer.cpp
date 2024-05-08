@@ -88,6 +88,7 @@ int main()
            double& logProb) { hmm.aStar(obs, hs, logProb); });
 
     std::cout << "Running inference with constraint - MIP \n";
+    // nzhmm.set_option("debug", 1);
     run(nzhmm, obs, hid,
         [](chmmpp::numZerosHMM& hmm, const std::vector<int>& obs, std::vector<int>& hs,
            double& logProb) { hmm.mip_map_inference(obs, hs, logProb); });
