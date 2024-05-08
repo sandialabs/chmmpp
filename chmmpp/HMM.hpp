@@ -58,6 +58,9 @@ class HMM : public Options {
     void print() const;
 
     void run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
+    
+    //Similar to run, but we take into account the observed states
+    std::vector<int> generateHidden(int T, const std::vector<int> &observedStates); 
 
     double logProb(const std::vector<int> &obs, const std::vector<int> &hidden_states) const;
 

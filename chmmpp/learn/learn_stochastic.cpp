@@ -92,6 +92,7 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
     allHidden.resize(R);
 
     while (true) {
+        std::cout << "TEST2" << std::endl;
         if ((totNumIt & (totNumIt - 1)) == 0) {
             // Who knows what is best here... this runs if totNumIt is a power of two so
             // that it becomes more rare as time goes on
@@ -100,14 +101,13 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
             int tempCounter = 0;
             for (size_t r = 0; r < R; ++r) {
                 size_t numIt = 0;
-                std::vector<int> observed;
                 std::vector<int> hidden;
                 int T = obs[r].size();
 
                 while (numIt <= C * H * std::max(H, O)
                                     / (R * (totTime - 1))) {  // This is so that we have enough
                                                               // counts for A[h][h'] and E[h][o]
-                    hmm.run(T, observed, hidden);
+                    hidden = hmm.generateHidden(T, obs[r]);
                     if (constraintOracle[r](hidden)) {
                         allHidden[r].push_back(hidden);
                         ++numIt;

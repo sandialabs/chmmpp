@@ -365,6 +365,45 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
     }
 }
 
+std::vector<int> HMM::generateHidden(int T, const std::vector<int> &observedStates) {
+    std::vector<int> hiddenStates;
+
+    // Initial Hidden State
+    double startProb = getRandom();
+    double prob = 0;
+    double den = 0;
+    for(size_t h = 0; h < H; ++h) {
+        den += S[h]*E[h][observedStates[0]];
+    }
+    for (size_t h = 0; h < H; ++h) {
+        prob += S[h]*E[h][observedStates[0]]/den;
+        if (startProb <= prob) {
+            hiddenStates.push_back(h);
+            break;
+        }
+    }
+
+    // All other states
+    for (int t = 1; t < T; ++t) {
+        startProb = getRandom();
+        prob = 0;
+        auto h_prev = hiddenStates[t - 1];
+        den = 0;
+        for(size_t h = 0; h < H; ++h) {
+            den += A[h_prev][h]*E[h][observedStates[t]];
+        }
+        for (size_t h = 0; h < H; ++h) {
+            prob += A[h_prev][h]*E[h][observedStates[t]]/den;
+            if (startProb <= prob) {
+                hiddenStates.push_back(h);
+                break;
+            }
+        }
+    }
+    
+    return hiddenStates;
+}
+
 double HMM::logProb(const std::vector<int>& obs, const std::vector<int>& hidden_states) const
 {
     size_t T = hidden_states.size();
