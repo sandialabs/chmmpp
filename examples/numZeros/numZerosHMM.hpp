@@ -14,6 +14,12 @@ class numZerosHMM : public CHMM {
    public:
     numZerosHMM(int _numZeros);
 
+    //
+    // Inference methods
+    //
+    // TODO - Consistent naming scheme for inference
+    //
+
     // A tailored aStar implementation
     void aStar_numZeros(const std::vector<int> &observations, std::vector<int> &hidden_states,
                         double &logProb);
@@ -27,7 +33,15 @@ class numZerosHMM : public CHMM {
     void mip_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states,
                            double &logProb);
 
+    //
+    // Learning methods
+    //
+    // TODO - Consistent naming scheme
+
+    //
     void learn_numZeros(const std::vector<std::vector<int>> &observations);
+
+    //
     void learn_numZeros(const std::vector<int> &observations);
 };
 
