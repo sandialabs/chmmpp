@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include "LPModel.hpp"
 
 namespace chmmpp {
@@ -151,7 +152,10 @@ void LPModel::set_options(const Options& options)
 void LPModel::optimize(double& log_likelihood, std::vector<int>& hidden_states)
 {
     coek::Solver solver(solver_name);
-    if (not solver.available()) std::cout << "Error setting up solver " + solver_name << std::endl;
+    if (not solver.available()) {
+        std::cout << "Error setting up solver " + solver_name << std::endl;
+        return;
+    }
 
     // Set solver options
     if (not debug) {

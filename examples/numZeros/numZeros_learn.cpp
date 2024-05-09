@@ -5,6 +5,7 @@ namespace chmmpp {
 
 namespace {
 
+// A customized Soft EM???
 void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int>> &obs,
                           const std::vector<int> &numZeros, const double convergence_tolerance)
 {

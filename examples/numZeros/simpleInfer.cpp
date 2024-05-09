@@ -1,5 +1,6 @@
-// main.cpp
-
+//
+// Infer HMM hidden states
+//
 #include <iostream>
 #include <coek/coek.hpp>
 #include "numZerosHMM.hpp"
@@ -19,6 +20,9 @@ void run(T& hmm, V& obs, W& hid, const Z& fn)
         }
     }
     auto tdiff = coek::toc();
+
+    hmm.print_options();
+    std::cout << std::endl;
 
     std::cout << "  Solution: ";
     for (auto& v : hidGuess) std::cout << v;

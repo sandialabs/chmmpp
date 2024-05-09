@@ -4,49 +4,65 @@
 // Generating random trials where the number of nonzeros is fixed
 //
 #include <iostream>
+#include <coek/coek.hpp>
 #include "numZerosHMM.hpp"
 
 template <typename T, typename V, typename Z>
 void run(T& hmm, V& obs, const Z& fn)
 {
+    coek::tic();
     hmm.reset_rng();
+    fn(hmm, obs);
+    auto tdiff = coek::toc();
+
+    std::cout << "Time (sec): " << tdiff << std::endl << std::endl;
     hmm.print_options();
     std::cout << std::endl;
 
-    fn(hmm, obs);
-
+    std::cout << "HMM Parameters" << std::endl;
+    std::cout << "~~~~~~~~~~~~~~" << std::endl;
     hmm.print();
 }
 
 void run_all(bool with_rejection, bool debug = false)
 {
-    // Initial Guess
+    size_t T = 25;         // Time Horizon
+    size_t numIt = 5000;   // Number of runs
+    size_t numZeros = 10;  // Number of zeros in the hidden states
+    size_t seed = 1937309487;
+    std::cout << "Num Obs:   " << T << std::endl;
+    std::cout << "Num Runs:  " << numIt << std::endl;
+    std::cout << "Num Zeros: " << numZeros << std::endl << std::endl;
+
+    // Initial guess of HMM parameters
     std::vector<std::vector<double>> A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
     std::vector<double> S = {0.9, 0.1};                                  // Start probabilities
     std::vector<std::vector<double>> E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
-    size_t T = 25;         // Time Horizon
-    size_t numIt = 5000;   // Number of runs
-    size_t numZeros = 10;  // Number of zeros in the hidden states
-
-    chmmpp::HMM hmm(A, S, E, 1937309487);
+    // Create HMM
+    chmmpp::HMM hmm(A, S, E, seed);
+    chmmpp::HMM original_hmm = hmm;
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<std::vector<int>> obs(numIt);
     std::vector<std::vector<int>> hid(numIt);
 
-    std::cout << "Num Obs:   " << T << std::endl;
-    std::cout << "Num Runs:  " << numIt << std::endl;
-    std::cout << "Num Zeros: " << numZeros << std::endl << std::endl;
     hmm.reset_rng();
     for (size_t i = 0; i < numIt; ++i) {
         bool feasible = false;
-        while (not feasible) {
+
+        if (with_rejection) {
+            // Iterate until we generate a sample with numZeros zeros
+            while (not feasible) {
+                hmm.run(T, obs[i], hid[i]);
+                feasible = count(hid[i].begin(), hid[i].end(), 0) == numZeros;
+            }
+        }
+        else {
+            // Generate sequence of hidden states and observables
+            // Don't worry if the observations match numZeros
             hmm.run(T, obs[i], hid[i]);
             feasible = count(hid[i].begin(), hid[i].end(), 0) == numZeros;
-            if (not with_rejection)
-                break;  // CLM - What is happening here?? It feels like this is telling the HMM we
-                        // have numZeros number of zeros even if we don't??
         }
 
         if (debug) {
@@ -63,55 +79,66 @@ void run_all(bool with_rejection, bool debug = false)
         }
     }
 
-    chmmpp::HMM hmmCopy;
-    chmmpp::numZerosHMM nzhmmCopy(numZeros);
+    chmmpp::numZerosHMM nzhmm(numZeros);
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Initial HMM parameters\n";
     std::cout << "------------------------------------------------------------------------\n";
     hmm.print();
 
-    chmmpp::numZerosHMM nzhmm(numZeros);
-    nzhmm.initialize(hmm);
+    // HMM Tests
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning without constraint - ML estimate using hidden states\n";
     std::cout << "------------------------------------------------------------------------\n";
-    hmmCopy = hmm;
-    hmmCopy.estimate_hmm(obs, hid);
-    hmmCopy.print();
+    hmm = original_hmm;
+    hmm.estimate_hmm(obs, hid);
+    hmm.print();
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning without constraint - Baum-Welch\n";
     std::cout << "------------------------------------------------------------------------\n";
-    hmmCopy = hmm;
-    run(hmmCopy, obs,
+    hmm = original_hmm;
+    run(hmm, obs,
         [](chmmpp::HMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.baum_welch(obs); });
 
-    std::cout << "------------------------------------------------------------------------\n";
-    std::cout << "Running learning with constraint - Customized Soft EM???\n";
-    std::cout << "------------------------------------------------------------------------\n";
-    nzhmmCopy = nzhmm;
-    run(nzhmmCopy, obs, [](chmmpp::numZerosHMM& hmm, const std::vector<std::vector<int>>& obs) {
-        hmm.learn_numZeros(obs);
-    });
+    // CHMM Tests
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Soft EM\n";
     std::cout << "------------------------------------------------------------------------\n";
-    nzhmmCopy = nzhmm;
-    run(nzhmmCopy, obs, [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) {
-        hmm.learn_stochastic(obs);
+    nzhmm.initialize(original_hmm);
+    run(nzhmm, obs, [](chmmpp::CHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
+        nzhmm.learn_stochastic(obs);
     });
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Hard EM\n";
     std::cout << "------------------------------------------------------------------------\n";
-    nzhmmCopy = nzhmm;
-    nzhmmCopy.set_option("max_iterations", 100);
-    run(nzhmmCopy, obs,
-        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs); });
+    nzhmm.initialize(original_hmm);
+    nzhmm.set_option("max_iterations", 100);
+    run(nzhmm, obs, [](chmmpp::CHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
+        nzhmm.learn_hardEM(obs);
+    });
     nzhmm.clear_options();
+
+    // NZHMM Tests
+
+    std::cout << "------------------------------------------------------------------------\n";
+    std::cout << "Running learning with constraint - Customized Soft EM???\n";
+    std::cout << "------------------------------------------------------------------------\n";
+    nzhmm.initialize(original_hmm);
+    run(nzhmm, obs, [](chmmpp::numZerosHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
+        nzhmm.learn_numZeros(obs);
+    });
+
+    std::cout << "------------------------------------------------------------------------\n";
+    std::cout << "Running learning with constraint - SAEM with MIP\n";
+    std::cout << "------------------------------------------------------------------------\n";
+    nzhmm.initialize(original_hmm);
+    run(nzhmm, obs, [](chmmpp::numZerosHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
+        nzhmm.learn_mip(obs);
+    });
 
     std::cout << std::endl;
 }

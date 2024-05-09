@@ -1,7 +1,7 @@
 // HMM.cpp
 
 #include <queue>
-#include <iostream>
+// #include <iostream>
 #include "inference.hpp"
 #include "../util/vectorhash.hpp"
 

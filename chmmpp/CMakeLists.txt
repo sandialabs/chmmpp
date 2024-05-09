@@ -34,6 +34,7 @@ if (with_boost)
 
 	        learn/learn_unconstrained.cpp
 	        learn/learn_stochastic.cpp
+	        learn/LearnStochastic.cpp
 	        learn/learn_hardEM.cpp
             learn/learn_semisupervised_hardEM.cpp
             )
