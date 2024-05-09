@@ -111,9 +111,11 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
                         allHidden[r].push_back(hidden);
                         ++numIt;
                         ++tempCounter;
-                        // if ((tempCounter % 1) == 0) {  // This seems like a good pace for
-                        // printing std::cout << tempCounter << "\n";
-                        //}
+                        /*if ((tempCounter % 1000) == 0) {  // This seems like a good pace for
+                        // printing
+                        std::cout << tempCounter << " out of " << C * H * std::max(H, O)
+                                    / (R * (totTime - 1)) << "\n";
+                        }*/
                     }
                 }
             }
