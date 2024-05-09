@@ -92,7 +92,6 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
     allHidden.resize(R);
 
     while (true) {
-        std::cout << "TEST2" << std::endl;
         if ((totNumIt & (totNumIt - 1)) == 0) {
             // Who knows what is best here... this runs if totNumIt is a power of two so
             // that it becomes more rare as time goes on
