@@ -15,6 +15,7 @@ class LPModel {
     size_t Tmax;
     size_t N;
 
+    coek::Objective obj;
     std::map<std::tuple<int, int, int>, coek::Variable> y;
     coek::Expression log_likelihood_expr;
 
@@ -25,7 +26,7 @@ class LPModel {
 
    public:
     // Configuration options
-    std::string solver_name = "highs";
+    std::string solver_name = "gurobi";
     bool y_binary = false;
     bool keep_data = true;
     bool debug = false;

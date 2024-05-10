@@ -82,20 +82,25 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
 
     int totNumIt = 0;
     while (true) {
-        if ((totNumIt & (totNumIt - 1)) == 0) {
+        //if ((totNumIt & (totNumIt - 1)) == 0) {
             // Who knows what is best here... this runs if totNumIt is a power of two so
             // that it becomes more rare as time goes on
             allHidden.clear();
             // std::cout << "Generating hidden feasible hidden states randomly.\n";
             int tempCounter = 0;
             for (size_t r = 0; r < R; ++r) {
-                std::vector<int> hidden = generate_feasible_hidden(obs[r].size(), obs[r]);
-                allHidden[r].push_back(hidden);
-                ++tempCounter;
-                // if ((tempCounter % 1) == 0) {  // This seems like a good pace for
-                // printing std::cout << tempCounter << "\n";
+                size_t numIt=0;
+                while (numIt <= C * H * std::max(H, O) / (R * (totTime - 1))) {  // This is so that we have enough counts for A[h][h'] and E[h][o]
+                    std::vector<int> hidden = generate_feasible_hidden(obs[r].size(), obs[r]);
+                    allHidden[r].push_back(hidden);
+                    ++tempCounter;
+                    ++numIt;
+                    if ((tempCounter % 100) == 0) {
+                        std::cout << "Counter: " << totNumIt << " " << r << " " << R << " " << numIt << " " << C * H * std::max(H, O) / (R * (totTime - 1)) << "\n";
+                    }
+                }
             }
-        }
+        //}
 
         ++totNumIt;
 
@@ -131,7 +136,7 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
         // Normalize
         for (size_t r = 0; r < R; ++r) {
             for (size_t h = 0; h < H; ++h) {
-                if (SStarCounter[r][h] == 0) {
+                if (SStarCounter[r][h] == 0) {  // WEH - Isn't this always true?
                     SStar[r][h] = 0;
                 }
                 else {
@@ -243,8 +248,10 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
         }
         hmm.setE(E);
 
+        std::cout << "Tolerance: " << totNumIt << " " << tol << " " << convergence_tolerance << std::endl;
         if (tol < convergence_tolerance) {
             break;
+        std::cout << "Tolerance: " << totNumIt << " " << tol << std::endl;
         }
     }
 }

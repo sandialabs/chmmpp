@@ -98,7 +98,7 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
         auto O = coek::expression();
         for (auto& ff : FF) O += y[ff];
         for (auto& g : G) log_likelihood_expr += g.second * y[g.first];
-        model.add_objective(log_likelihood_expr - pow(10.0, 6) * O).sense(model.maximize);
+        obj = model.add_objective(log_likelihood_expr - pow(10.0, 6) * O).sense(model.maximize);
     }
 
     if (not keep_data) {

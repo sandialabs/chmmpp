@@ -83,6 +83,9 @@ void LearningModel::initialize(numZerosHMM& nzhmm, const std::vector<int>& obser
 
     auto unconstrained_hidden = nzhmm.hmm.generateHidden(observations.size(), observations);
 
+    // Deactivate the old objective
+    obj.deactivate();
+
     // objective
     {
         auto O = coek::expression();

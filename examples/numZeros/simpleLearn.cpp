@@ -27,7 +27,8 @@ void run(T& hmm, V& obs, const Z& fn)
 void run_all(bool with_rejection, bool debug = false)
 {
     size_t T = 25;         // Time Horizon
-    size_t numIt = 5000;   // Number of runs
+    //size_t numIt = 5000;   // Number of runs
+    size_t numIt = 50;   // Number of runs
     size_t numZeros = 10;  // Number of zeros in the hidden states
     size_t seed = 1937309487;
     std::cout << "Num Obs:   " << T << std::endl;
@@ -136,8 +137,10 @@ void run_all(bool with_rejection, bool debug = false)
     std::cout << "Running learning with constraint - SAEM with MIP\n";
     std::cout << "------------------------------------------------------------------------\n";
     nzhmm.initialize(original_hmm);
+    //nzhmm.set_option("debug", 1);
     run(nzhmm, obs, [](chmmpp::numZerosHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
         nzhmm.learn_mip(obs);
+    //nzhmm.reset_options();
     });
 
     std::cout << std::endl;

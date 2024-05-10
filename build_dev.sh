@@ -75,7 +75,12 @@ if [[ "$coek_dev" -eq 1 ]]; then
     git pull
     mkdir build
     cd build
-    cmake -DCMAKE_PREFIX_PATH=${SPACK_HOME}/var/spack/environments/dev/.spack-env/view -Dwith_highs=ON -Dwith_cppad=OFF -Dwith_fmtlib=ON -Dwith_rapidjson=ON -Dwith_catch2=ON -Dwith_tests=ON -Dwith_asl=ON -Dwith_openmp=OFF ..
+    if [[ -z "${GUROBI_HOME}" ]]; then
+        with_gurobi="OFF"
+    else
+        with_gurobi="ON"
+    fi
+    cmake -DCMAKE_PREFIX_PATH=${SPACK_HOME}/var/spack/environments/dev/.spack-env/view -Dwith_highs=ON -Dwith_cppad=OFF -Dwith_fmtlib=ON -Dwith_rapidjson=ON -Dwith_catch2=ON -Dwith_tests=ON -Dwith_asl=ON -Dwith_openmp=OFF -Dwith_gurobi=${with_gurobi} ..
     make -j20
     make install
 fi
