@@ -14,6 +14,10 @@ set(numZeros
     numZeros/numZeros_learn.cpp
 )
 
+set(syntheticCitation
+    syntheticCitation/syntheticCitationHMM.cpp
+)
+
 set(citation
     citation/citation_learn.cpp
     citation/citation_mip.cpp
@@ -22,6 +26,7 @@ set(citation
     citation/readFile.cpp
 )
 
+#numZeros
 add_executable(numzeros_infer numZeros/simpleInfer.cpp ${numZeros})
 target_link_libraries(numzeros_infer PRIVATE chmmpp::chmmpp)
 
@@ -32,7 +37,12 @@ add_executable(numzeros_learn numZeros/simpleLearn.cpp ${numZeros})
 target_link_libraries(numzeros_learn PRIVATE chmmpp::chmmpp)
 
 
+#syntheticCitation
+add_executable(syntheticCitation_learn syntheticCitation/simpleLearn.cpp ${syntheticCitation})
+target_link_libraries(syntheticCitation_learn PRIVATE chmmpp::chmmpp)
 
+
+#citation
 add_executable(citation_learn citation/simpleLearn.cpp ${citation})
 target_link_libraries(citation_learn PRIVATE chmmpp::chmmpp)
 
