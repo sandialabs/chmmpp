@@ -331,13 +331,16 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
     }
 #endif
 
+    std::vector<std::vector<int>> hcache(R);
     std::set<std::vector<int>> hidden;
 
     // Maximum number of hidden sequences that we try to generate per major iteration
     size_t max_iterations = 100;
-    size_t max_hidden_per_iteration = R*4;
-    size_t max_trials = 10;
+    size_t max_hidden_per_iteration = 2*R;
+    size_t max_trials = 2;
 
+    size_t wprev=-1;
+    size_t ngen=0;
     int totNumIt = 0;
     while (totNumIt < max_iterations) {
         size_t num=0;
@@ -345,25 +348,46 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
         // WEH - Should this be monotonically increasing?
         double total_ll=0.0;
 
-        // Find feasible hidden states with maximal likelihood
-        for (auto& obs: observations) {
-            auto [hid,log_likelihood] = generate_feasible_hidden(T, obs);
-            total_ll += log_likelihood;
-            auto results = hidden.insert(hid);
-            if (results.second)
-                num++;
+        if ((wprev == hidden.size()) and (totNumIt % 10 != 0)) {
+            // If the number of feasible hidden states hasn't changed, then our updated HMM parameters
+            //      aren't likely to impact the prediction of the most likely hidden states.
+            //      Hence, we just update the log-likelihood estimate except that we occassionally
+            //      double-check that we haven't predicted different most likely hidden states.
+            for (size_t r=0; r<R; ++r)
+                total_ll += hmm.logProb(observations[r], hcache[r]);
         }
-        std::cout << "Total Log-Liklihood: " << total_ll << std::endl;
-        // Randomized trials
-        for (size_t i=0; i<max_trials; ++i) {
+        else {
+            wprev = hidden.size();
+
+            // Find feasible hidden states with maximal likelihood
+            size_t nobs=0;
             for (auto& obs: observations) {
-                auto results = hidden.insert(generate_random_feasible_hidden(T, obs));
+                auto [hid,log_likelihood] = generate_feasible_hidden(T, obs);
+                ngen++;
+                double tmp = hmm.logProb(obs,hid);
+                //std::cout << "  Observation " << nobs++ << " log-likelihood=" << log_likelihood << std::endl;
+                if (std::fabs(tmp-log_likelihood) > 1e-7)
+                    std::cout << "ERROR: Differing estimates of log-liklihood nobs=" << nobs << " mip=" << std::to_string(log_likelihood) << " HMM=" << tmp << std::endl;
+                total_ll += log_likelihood;
+                auto results = hidden.insert(hid);
                 if (results.second)
                     num++;
+                hcache[nobs] = hid;
+                nobs++;
+            }
+            std::cout << "Total Log-Liklihood: " << total_ll << std::endl;
+            // Randomized trials
+            for (size_t i=0; i<max_trials; ++i) {
+                for (auto& obs: observations) {
+                    auto results = hidden.insert(generate_random_feasible_hidden(T, obs));
+                    ngen++;
+                    if (results.second)
+                        num++;
+                    if (num >= max_hidden_per_iteration) break;
+                    }
                 if (num >= max_hidden_per_iteration) break;
-                }
-            if (num >= max_hidden_per_iteration) break;
-            }    
+                }    
+        }
 
         // Clear weighted parameters data
         for (size_t r = 0; r < R; ++r) {
@@ -378,6 +402,7 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
         }
 
         std::cout << "Wsize: " << hidden.size() << std::endl;
+        std::cout << "Num solutions generated: " << ngen << std::endl;
         std::vector<double> w(hidden.size());       // Weights of each hidden state sequence
 
         for (size_t r = 0; r < R; ++r) {
@@ -537,11 +562,11 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
         ++totNumIt;
 
         std::cout << "Tolerance: " << totNumIt << " " << tol << " " << convergence_tolerance << std::endl;
-        if (tol < convergence_tolerance) {
-            break;
-        std::cout << "Tolerance: " << totNumIt << " " << tol << std::endl;
+        std::cout << std::endl;
         hmm.print();
-        }
+
+        if (tol < convergence_tolerance)
+            break;
     }
 }
 

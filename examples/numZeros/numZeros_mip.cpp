@@ -121,12 +121,13 @@ std::pair<std::vector<int>,double> LearnStochastic_numZeros::generate_feasible_h
     std::vector<int> hidden(obs.size());
     double log_likelihood = 0;
 #ifdef WITH_COEK
+    nzhmm.hmm = hmm;
     InferenceModel model;
     //model.set_options(nzhmm.get_options());
     model.initialize(nzhmm, obs);
     model.optimize(log_likelihood, hidden);
 #endif
-    return {hidden, log_likelihood};
+    return {hidden, -log_likelihood};
 }
 
 std::vector<int> LearnStochastic_numZeros::generate_random_feasible_hidden(size_t T,
@@ -135,6 +136,7 @@ std::vector<int> LearnStochastic_numZeros::generate_random_feasible_hidden(size_
     std::vector<int> hidden(obs.size());
     double log_likelihood = 0;
 #ifdef WITH_COEK
+    nzhmm.hmm = hmm;
     LearningModel model;
     //model.set_options(nzhmm.get_options());
     model.initialize(nzhmm, obs);
