@@ -7,7 +7,7 @@ namespace {
 
 // A customized Soft EM???
 void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int>> &obs,
-                          const std::vector<int> &numZeros, const double convergence_tolerance)
+                          const std::vector<int> &numZeros, const double convergence_tolerance, unsigned int max_iterations)
 {
     auto A = hmm.getA();
     auto S = hmm.getS();
@@ -17,6 +17,7 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int>> &obs,
     int T = obs[0].size();
     size_t R = obs.size();
 
+    unsigned int totNumIt=0;
     while (true) {
         std::vector<std::vector<std::vector<double>>> totalGamma;
         std::vector<std::vector<std::vector<std::vector<double>>>> totalXi;
@@ -273,9 +274,11 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int>> &obs,
 
         // std::cout << "Tolerance: " << tol << "\n";
         //  tol = 0.;
-        if (tol < convergence_tolerance) {
+        totNumIt++;
+        if (totNumIt >= max_iterations)
             break;
-        }
+        if (tol < convergence_tolerance)
+            break;
     }
 }
 
@@ -289,7 +292,9 @@ void numZerosHMM::learn_numZeros(const std::vector<std::vector<int>> &obs)
     auto option = get_option<double>("convergence_tolerance");
     double convergence_tolerance = 10E-6;
     if (option.has_value()) convergence_tolerance = *option;
-    local_learn_numZeros(hmm, obs, newNumZeros, convergence_tolerance);
+
+    unsigned int max_iterations = 1000;
+    local_learn_numZeros(hmm, obs, newNumZeros, convergence_tolerance, max_iterations);
 }
 
 void numZerosHMM::learn_numZeros(const std::vector<int> &obs)

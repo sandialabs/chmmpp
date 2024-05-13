@@ -36,9 +36,12 @@ void run_all(bool with_rejection, bool debug = false)
     std::cout << "Num Zeros: " << numZeros << std::endl << std::endl;
 
     // Initial guess of HMM parameters
-    std::vector<std::vector<double>> A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
-    std::vector<double> S = {0.9, 0.1};                                  // Start probabilities
-    std::vector<std::vector<double>> E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
+    std::vector<std::vector<double>> A{{0.6, 0.4}, {0.4, 0.6}};  // Transition Matrix
+    std::vector<double> S = {0.4, 0.6};                          // Start probabilities
+    std::vector<std::vector<double>> E{{0.6, 0.4}, {0.4, 0.6}};  // Emission Matrix
+    //std::vector<std::vector<double>> A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
+    //std::vector<double> S = {0.9, 0.1};                                  // Start probabilities
+    //std::vector<std::vector<double>> E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
     // Create HMM
     chmmpp::HMM hmm(A, S, E, seed);

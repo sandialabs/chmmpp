@@ -10,11 +10,11 @@ class LearnStochastic {
     void initialize(HMM &hmm_) { hmm = hmm_; }
 
     // select == 0
-    void learn(const std::vector<std::vector<int> > &obs, const double convergence_tolerance,
-               const int C);
+    void learn(const std::vector<std::vector<int> > &obs, double convergence_tolerance,
+               unsigned int C, unsigned int max_iterations);
     // select == 1
-    void learn1(const std::vector<std::vector<int> > &obs, const double convergence_tolerance,
-               const int C);
+    void learn1(const std::vector<std::vector<int> > &obs, double convergence_tolerance,
+               unsigned int C, unsigned int max_iterations);
     void learn(const std::vector<std::vector<int> > &obs, const Options &options);
     void learn(const std::vector<int> &obs, const Options &options);
 

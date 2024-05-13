@@ -3,7 +3,7 @@
 
 namespace chmmpp {
 
-void process_options(const Options &options, double &convergence_tolerance, unsigned int &C)
+void process_options(const Options &options, double &convergence_tolerance, unsigned int &C, unsigned int& max_iterations)
 {
     for (const auto &it : options.options) {
         if (it.first == "C") {
@@ -19,6 +19,20 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
             }
             else
                 std::cerr << "WARNING: 'C' option must be a non-negative integer" << std::endl;
+        }
+        else if (it.first == "max_iterations") {
+            if (std::holds_alternative<int>(it.second)) {
+                int tmp = std::get<int>(it.second);
+                if (tmp > 0)
+                    max_iterations = tmp;
+                else
+                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+            }
+            else if (std::holds_alternative<unsigned int>(it.second)) {
+                max_iterations = std::get<unsigned int>(it.second);
+            }
+            else
+                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
         }
         else if (it.first == "convergence_tolerance") {
             if (std::holds_alternative<double>(it.second))
@@ -37,7 +51,7 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
 // transition matrix with 0's (which is NOT uncommon)
 void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
                       const std::vector<std::function<bool(std::vector<int> &)> > &constraintOracle,
-                      const double convergence_tolerance, const int C)
+                      const double convergence_tolerance, unsigned int C, unsigned int max_iterations)
 {
     auto A = hmm.getA();
     auto S = hmm.getS();
@@ -87,7 +101,7 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
         }
     }
 
-    int totNumIt = 0;
+    size_t totNumIt = 0;
     std::vector<std::vector<std::vector<int> > > allHidden;
     allHidden.resize(R);
 
@@ -267,9 +281,10 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
         }
         hmm.setE(E);
 
-        if (tol < convergence_tolerance) {
+        if (totNumIt >= max_iterations)
             break;
-        }
+        if (tol < convergence_tolerance)
+            break;
     }
 }
 
@@ -279,9 +294,10 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
 {
     double convergence_tolerance = 10E-6;
     unsigned int C = 10E4;
-    process_options(options, convergence_tolerance, C);
+    unsigned int max_iterations = 1000;
+    process_options(options, convergence_tolerance, C, max_iterations);
 
-    learn_stochastic(hmm, obs, constraintOracle, convergence_tolerance, C);
+    learn_stochastic(hmm, obs, constraintOracle, convergence_tolerance, C, max_iterations);
 }
 
 void learn_stochastic(HMM &hmm, const std::vector<int> &obs,

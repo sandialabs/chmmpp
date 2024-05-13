@@ -7,7 +7,7 @@ namespace chmmpp {
 
 namespace {
 
-void process_options(const Options &options, double &convergence_tolerance, unsigned int &C, unsigned int& select)
+void process_options(const Options &options, double &convergence_tolerance, unsigned int &C, unsigned int& select, unsigned int& max_iterations)
 {
     for (const auto &it : options.options) {
         if (it.first == "C") {
@@ -36,7 +36,21 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
                 select = std::get<unsigned int>(it.second);
             }
             else
-                std::cerr << "WARNING: 'C' option must be a non-negative integer" << std::endl;
+                std::cerr << "WARNING: 'select' option must be a non-negative integer" << std::endl;
+        }
+        else if (it.first == "max_iterations") {
+            if (std::holds_alternative<int>(it.second)) {
+                int tmp = std::get<int>(it.second);
+                if (tmp >= 0)
+                    max_iterations = static_cast<unsigned int>(tmp);
+                else
+                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
+            }
+            else if (std::holds_alternative<unsigned int>(it.second)) {
+                max_iterations = std::get<unsigned int>(it.second);
+            }
+            else
+                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
         }
         else if (it.first == "convergence_tolerance") {
             if (std::holds_alternative<double>(it.second))
@@ -56,7 +70,7 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
 // ``simple'' constraints This also fails to work if we are converging towards values in the
 // transition matrix with 0's (which is NOT uncommon)
 void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
-                            const double convergence_tolerance, const int C)
+                            double convergence_tolerance, unsigned int C, unsigned int max_iterations)
 {
     auto A = hmm.getA();
     auto S = hmm.getS();
@@ -265,17 +279,27 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
         hmm.setE(E);
 
         std::cout << "Tolerance: " << totNumIt << " " << tol << " " << convergence_tolerance << std::endl;
+        if (totNumIt >= max_iterations)
+            break;
         if (tol < convergence_tolerance) {
             break;
-        std::cout << "Tolerance: " << totNumIt << " " << tol << std::endl;
         }
     }
 }
 
 
 void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
-                            const double convergence_tolerance, const int C)
+                            double convergence_tolerance, unsigned int C, unsigned int max_iterations)
 {
+    //
+    // Control parameters
+    //
+
+    size_t max_hidden_per_iteration = 2*observations.size();
+    size_t max_trials = 2;
+    size_t freq_revisit = 10;
+    bool quiet = true;
+
     // For simplicity, this algorithm assumes that all observations have the same length
     size_t T = observations[0].size();
     for (auto& obs: observations)
@@ -334,21 +358,17 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
     std::vector<std::vector<int>> hcache(R);
     std::set<std::vector<int>> hidden;
 
-    // Maximum number of hidden sequences that we try to generate per major iteration
-    size_t max_iterations = 100;
-    size_t max_hidden_per_iteration = 2*R;
-    size_t max_trials = 2;
 
     size_t wprev=-1;
     size_t ngen=0;
     int totNumIt = 0;
-    while (totNumIt < max_iterations) {
+    while (true) {
         size_t num=0;
-        // The sum of log_liklihoods for hidden states generated for all observations
+        // The sum of log_likelihoods for hidden states generated for all observations
         // WEH - Should this be monotonically increasing?
         double total_ll=0.0;
 
-        if ((wprev == hidden.size()) and (totNumIt % 10 != 0)) {
+        if ((wprev == hidden.size()) and (totNumIt % freq_revisit != 0)) {
             // If the number of feasible hidden states hasn't changed, then our updated HMM parameters
             //      aren't likely to impact the prediction of the most likely hidden states.
             //      Hence, we just update the log-likelihood estimate except that we occassionally
@@ -367,7 +387,7 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
                 double tmp = hmm.logProb(obs,hid);
                 //std::cout << "  Observation " << nobs++ << " log-likelihood=" << log_likelihood << std::endl;
                 if (std::fabs(tmp-log_likelihood) > 1e-7)
-                    std::cout << "ERROR: Differing estimates of log-liklihood nobs=" << nobs << " mip=" << std::to_string(log_likelihood) << " HMM=" << tmp << std::endl;
+                    std::cout << "ERROR: Differing estimates of log-likelihood Iteration=" << totNumIt << " Observation=" << nobs << " mip=" << std::to_string(log_likelihood) << " HMM=" << tmp << std::endl;
                 total_ll += log_likelihood;
                 auto results = hidden.insert(hid);
                 if (results.second)
@@ -375,7 +395,6 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
                 hcache[nobs] = hid;
                 nobs++;
             }
-            std::cout << "Total Log-Liklihood: " << total_ll << std::endl;
             // Randomized trials
             for (size_t i=0; i<max_trials; ++i) {
                 for (auto& obs: observations) {
@@ -388,6 +407,8 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
                 if (num >= max_hidden_per_iteration) break;
                 }    
         }
+        if (not quiet)
+            std::cout << "Total Log-Liklihood: " << total_ll << std::endl;
 
         // Clear weighted parameters data
         for (size_t r = 0; r < R; ++r) {
@@ -401,10 +422,12 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
             }
         }
 
-        std::cout << "Wsize: " << hidden.size() << std::endl;
-        std::cout << "Num solutions generated: " << ngen << std::endl;
-        std::vector<double> w(hidden.size());       // Weights of each hidden state sequence
+        if (not quiet) {
+            std::cout << "Wsize: " << hidden.size() << std::endl;
+            std::cout << "Num solutions generated: " << ngen << std::endl;
+        }
 
+        std::vector<double> w(hidden.size());       // Weights of each hidden state sequence
         for (size_t r = 0; r < R; ++r) {
             auto& obs = observations[r];
 
@@ -559,14 +582,17 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
         }
         hmm.setE(E);
 
-        ++totNumIt;
+        if (not quiet) {
+            std::cout << "Iteration= " << totNumIt << " Tolerance= " << tol << std::endl;
+            std::cout << std::endl;
+            //hmm.print();
+        }
 
-        std::cout << "Tolerance: " << totNumIt << " " << tol << " " << convergence_tolerance << std::endl;
-        std::cout << std::endl;
-        hmm.print();
-
+        if (totNumIt >= max_iterations)
+            break;
         if (tol < convergence_tolerance)
             break;
+        ++totNumIt;
     }
 }
 
@@ -574,13 +600,14 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs, const Opt
 {
     double convergence_tolerance = 10E-6;
     unsigned int C = 10E4;
+    unsigned int max_iterations = 1000;
     unsigned int select = 0;
-    process_options(options, convergence_tolerance, C, select);
+    process_options(options, convergence_tolerance, C, select, max_iterations);
 
     if (select == 0)
-        learn(obs, convergence_tolerance, C);
+        learn(obs, convergence_tolerance, C, max_iterations);
     else if (select == 1)
-        learn1(obs, convergence_tolerance, C);
+        learn1(obs, convergence_tolerance, C, max_iterations);
 }
 
 void LearnStochastic::learn(const std::vector<int> &obs, const Options &options)
