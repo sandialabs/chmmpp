@@ -137,7 +137,7 @@ void run_all(bool with_rejection, bool debug = false)
     std::cout << "Running learning with constraint - SAEM with MIP\n";
     std::cout << "------------------------------------------------------------------------\n";
     nzhmm.initialize(original_hmm);
-    //nzhmm.set_option("debug", 1);
+    nzhmm.set_option("select", 1);
     run(nzhmm, obs, [](chmmpp::numZerosHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
         nzhmm.learn_mip(obs);
     //nzhmm.reset_options();

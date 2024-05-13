@@ -52,17 +52,17 @@ void InferenceModel::collect_solution(std::vector<int>& hidden_states)
 #endif
 
 void numZerosHMM::mip_map_inference(const std::vector<int>& observations,
-                                    std::vector<int>& hidden_states, double& logProb)
+                                    std::vector<int>& hidden_states, double& log_likelihood)
 {
 #ifdef WITH_COEK
     InferenceModel model;
 
     model.set_options(get_options());
     model.initialize(*this, observations);
-    model.optimize(logProb, hidden_states);
+    model.optimize(log_likelihood, hidden_states);
 #else
     hidden_states.resize(hmm.getH());
-    logProb = 0;
+    log_likelihood = 0;
 #endif
 }
 
@@ -111,19 +111,34 @@ class LearnStochastic_numZeros : public LearnStochastic {
 
     LearnStochastic_numZeros(numZerosHMM& nzhmm_) : nzhmm(nzhmm_) { initialize(nzhmm.hmm); }
 
-    std::vector<int> generate_feasible_hidden(size_t T, const std::vector<int>& obs);
+    std::pair<std::vector<int>,double> generate_feasible_hidden(size_t T, const std::vector<int>& obs);
+    std::vector<int> generate_random_feasible_hidden(size_t T, const std::vector<int>& obs);
 };
 
-std::vector<int> LearnStochastic_numZeros::generate_feasible_hidden(size_t T,
+std::pair<std::vector<int>,double> LearnStochastic_numZeros::generate_feasible_hidden(size_t T,
                                                                     const std::vector<int>& obs)
 {
     std::vector<int> hidden(obs.size());
-    double logProb = 0;
+    double log_likelihood = 0;
+#ifdef WITH_COEK
+    InferenceModel model;
+    //model.set_options(nzhmm.get_options());
+    model.initialize(nzhmm, obs);
+    model.optimize(log_likelihood, hidden);
+#endif
+    return {hidden, log_likelihood};
+}
+
+std::vector<int> LearnStochastic_numZeros::generate_random_feasible_hidden(size_t T,
+                                                                    const std::vector<int>& obs)
+{
+    std::vector<int> hidden(obs.size());
+    double log_likelihood = 0;
 #ifdef WITH_COEK
     LearningModel model;
-    model.set_options(nzhmm.get_options());
+    //model.set_options(nzhmm.get_options());
     model.initialize(nzhmm, obs);
-    model.optimize(logProb, hidden);
+    model.optimize(log_likelihood, hidden);
 #endif
     return hidden;
 }
