@@ -37,6 +37,7 @@ if (with_boost)
 	        learn/LearnStochastic.cpp
 	        learn/learn_hardEM.cpp
             learn/learn_semisupervised_hardEM.cpp
+            learn/learn_batch.cpp
             )
     list(APPEND chmmpp_link_libraries "Boost::boost")
     list(APPEND chmmpp_compile_options "-DWITH_BOOST")

@@ -114,7 +114,7 @@ void LearningModel::initialize(numZerosHMM& nzhmm, const std::vector<int>& obser
     InferenceModel::initialize(nzhmm, observations);
 
 #if 0
-    unconstrained_hidden = nzhmm.hmm.generateHidden(observations.size(), observations);
+    unconstrained_hidden = nzhmm.hmm.generateHidden(observations);
 #else
     unconstrained_hidden.resize(observations.size());
     for (auto& val : unconstrained_hidden) {

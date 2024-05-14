@@ -372,8 +372,9 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
     }
 }
 
-std::vector<int> HMM::generateHidden(int T, const std::vector<int>& observedStates)
+std::vector<int> HMM::generateHidden(const std::vector<int>& observedStates)
 {
+    size_t T = observedStates.size();
     std::vector<int> hiddenStates;
 
     // Initial Hidden State

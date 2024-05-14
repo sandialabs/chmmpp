@@ -44,6 +44,26 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
     }
 }
 
+std::vector<std::vector<std::vector<int>>> generator (
+                    HMM &hmm, const int& num_solutions, const int& max_iterations, 
+                    const std::vector<std::vector<int>>& obs, 
+                    const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle)
+{
+    std::vector<std::vector<std::vector<int>>> output;
+
+    for(size_t r = 0; r < obs.size(); ++r) {
+        std::vector<std::vector<int>> tempHiddenVec;
+        while(tempHiddenVec.size() < num_solutions) {
+            auto tempHidden = hmm.generateHidden(obs[r]);
+            if(constraintOracle[r](tempHidden)) {
+                tempHiddenVec.push_back(tempHidden);
+            }
+        }
+        output.push_back(tempHiddenVec);
+    }
+    return output;
+}
+
 // Will work best/fastest if the sets of hidden states which satisfy the constraints
 // This algorithm is TERRIBLE, I can't even get it to converge in a simple case with T = 10.
 // This is currently the only learning algorithm we have for having a constraint oracle rather than
@@ -53,7 +73,7 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
                       const std::vector<std::function<bool(std::vector<int> &)> > &constraintOracle,
                       const double convergence_tolerance, unsigned int C, unsigned int max_iterations)
 {
-    auto A = hmm.getA();
+    /*auto A = hmm.getA();
     auto S = hmm.getS();
     auto E = hmm.getE();
     auto H = hmm.getH();
@@ -125,11 +145,11 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
                         allHidden[r].push_back(hidden);
                         ++numIt;
                         ++tempCounter;
-                        /*if ((tempCounter % 1000) == 0) {  // This seems like a good pace for
+                        //if ((tempCounter % 1000) == 0) {  // This seems like a good pace for
                         // printing
-                        std::cout << tempCounter << " out of " << C * H * std::max(H, O)
-                                    / (R * (totTime - 1)) << "\n";
-                        }*/
+                        //std::cout << tempCounter << " out of " << C * H * std::max(H, O)
+                        //            / (R * (totTime - 1)) << "\n";
+                        //}
                     }
                 }
             }
@@ -285,7 +305,9 @@ void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
             break;
         if (tol < convergence_tolerance)
             break;
-    }
+    }*/
+    Options options;
+    learn_batch(hmm, obs, constraintOracle, generator, options);
 }
 
 void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,

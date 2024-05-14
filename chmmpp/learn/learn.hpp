@@ -19,6 +19,14 @@ void learn_numZeros(HMM &hmm, const std::vector<std::vector<int> > &obs,
                     const std::vector<int> &numZeros, const double eps = 10E-6);
 #endif
 
+void learn_batch(HMM &hmm, const std::vector<std::vector<int>> &obs, 
+                const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
+                const std::function<std::vector<std::vector<std::vector<int>>>(
+                    HMM&, const int&, const int&, const std::vector<std::vector<int>>&, 
+                    const std::vector<std::function<bool(std::vector<int>&)> >&
+                )> generator,
+                const Options& options);
+
 void learn_stochastic(HMM &hmm, const std::vector<std::vector<int> > &obs,
                       const std::vector<std::function<bool(std::vector<int> &)> > &constraintOracle,
                       const Options &options);

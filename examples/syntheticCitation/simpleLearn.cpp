@@ -18,7 +18,7 @@ void run(T& hmm, V& obs, const Z& fn)
     hmm.print();
 }
 
-bool valid(std::vector<int> hid) {
+bool valid(std::vector<int> hid) { //Constraint Oracle
     for(size_t t1 = 1; t1 < hid.size(); ++t1) {
         if(hid[t1] != hid[t1-1]) {
             for(size_t t2 = 0; t2 < t1-1; ++t2) {
@@ -51,9 +51,9 @@ void run_all(bool debug = false)
     };  // Emission Matrix
 
     size_t T = 25;         // Time Horizon
-    size_t numIt = 2;   // Number of runs
+    size_t numIt = 100;   // Number of runs
 
-    chmmpp::HMM hmm(A, S, E, 1937309487);
+    chmmpp::HMM hmm(A, S, E, 0);
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<std::vector<int>> obs(numIt);
@@ -113,18 +113,19 @@ void run_all(bool debug = false)
     schmmCopy = schmm;
     schmmCopy.set_option("C", 1000);
     //TODO This is seg faulting right 
-    //run(schmmCopy, obs, [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) {
-    //    hmm.learn_stochastic(obs);
-    //});
+    run(schmmCopy, obs, [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) {
+        hmm.learn_stochastic(obs);
+    });
 
 
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Hard EM\n";
     std::cout << "------------------------------------------------------------------------\n";
     schmmCopy = schmm;
-    schmmCopy.set_option("max_iterations", 10);
+    schmmCopy.set_option("max_iterations", 100000000);
+    //TODO- make the number of best solutions an option
     run(schmmCopy, obs,
-        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs); });
+        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs, 100); });
     schmm.clear_options();
 
     std::cout << std::endl;
@@ -137,7 +138,7 @@ int main()
     std::cout << " Generating samples\n";
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "------------------------------------------------------------------------\n";
-    run_all(false);
+    run_all(true);
 
     return 0;
 }

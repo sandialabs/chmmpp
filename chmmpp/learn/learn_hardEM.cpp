@@ -36,13 +36,32 @@ void process_options(const Options& options, double& convergence_tolerance,
     }
 }
 
+std::vector<std::vector<std::vector<int>>> generator (
+                    const HMM &hmm, const int& num_solutions, const int& max_iterations, 
+                    const std::vector<std::vector<int>>& obs, 
+                    const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle)
+{
+    std::vector<std::vector<std::vector<int>>> output;
+
+    for(size_t r = 0; r < obs.size(); ++r) {
+        std::vector<std::vector<int>> tempHidden;
+        std::vector<double> temp;
+        aStarMultOracle(hmm, obs[r], tempHidden, temp, constraintOracle[r], num_solutions,
+                            max_iterations);
+        output.push_back(tempHidden);
+    }
+    return output;
+}
+
 }  // namespace
+
+
 
 void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
                   const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
                   const int numSolns, const Options& options)
 {
-    double convergence_tolerance = 10E-6;
+    /*double convergence_tolerance = 10E-6;
     unsigned int max_iterations = 0;
     process_options(options, convergence_tolerance, max_iterations);
 
@@ -75,7 +94,6 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
         }
 
         for (size_t r = 0; r < R; ++r) {
-            // std::cout << "R = " << r << "\n";
             int T = obs[r].size();
             std::vector<std::vector<int> > hidden;
             std::vector<double> temp;
@@ -125,7 +143,10 @@ void learn_hardEM(HMM& hmm, const std::vector<std::vector<int> >& obs,
 
         if (tol < convergence_tolerance) break;
         if (++iter >= max_iterations) break;
-    }
+    }*/
+    
+
+    learn_batch(hmm, obs, constraintOracle, generator, options);
 }
 
 void learn_hardEM(HMM& hmm, const std::vector<int>& obs,
