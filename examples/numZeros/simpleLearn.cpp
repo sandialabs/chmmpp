@@ -4,7 +4,9 @@
 // Generating random trials where the number of nonzeros is fixed
 //
 #include <iostream>
+#ifdef WITH_COEK
 #include <coek/coek.hpp>
+#endif
 #include "numZerosHMM.hpp"
 
 template <typename T, typename V, typename Z>
@@ -17,10 +19,16 @@ void run(T& hmm, V& observations, const Z& fn)
     hmm.print_options();
     std::cout << std::endl;
 
+#ifdef WITH_COEK
     coek::tic();
+#endif
     hmm.reset_rng();
     fn(hmm, observations);
+#ifdef WITH_COEK
     auto tdiff = coek::toc();
+#else
+    double tdiff = 0.0;
+#endif
 
     std::cout << "Time (sec): " << tdiff << std::endl << std::endl;
 
@@ -117,7 +125,7 @@ void run_all(bool with_rejection, bool debug = false)
     hmm.estimate_hmm(obs, hid);
     hmm.print();
 
-#if 0
+#if 1
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning without constraint - Baum-Welch\n";
     std::cout << "------------------------------------------------------------------------\n";
@@ -158,6 +166,7 @@ void run_all(bool with_rejection, bool debug = false)
 
 #endif
 
+#ifdef WITH_COEK
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - SAEM with MIP\n";
     std::cout << "------------------------------------------------------------------------\n";
@@ -169,6 +178,7 @@ void run_all(bool with_rejection, bool debug = false)
     run(nzhmm, obs, [](chmmpp::numZerosHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
         nzhmm.learn_mip(obs);
     });
+#endif
 
     std::cout << std::endl;
 }

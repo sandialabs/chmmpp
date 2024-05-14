@@ -29,15 +29,18 @@ class InferenceModel : public LPModel {
 
 void InferenceModel::print_solution()
 {
+#ifdef WITH_COEK
     std::cout << "y size=" << y.size() << std::endl;
     for (auto& it: y) {
         auto [t,a,b] = it.first;
         std::cout << "y id=" << it.second.id() << " t=" << t << " a=" << a << " b=" << b << " value=" << it.second.value() << std::endl;
         }
+#endif
 }
 
 void InferenceModel::initialize(const numZerosHMM& nzhmm, const std::vector<int>& observations)
 {
+#ifdef WITH_COEK
     // Require the use of binary flow variables (y)
     y_binary = true;
     LPModel::initialize(nzhmm.hmm, observations);
@@ -53,6 +56,7 @@ void InferenceModel::initialize(const numZerosHMM& nzhmm, const std::vector<int>
         }
     }
     model.add(sum == nzhmm.numZeros);
+#endif
 }
 
 void InferenceModel::collect_solution(std::vector<int>& hidden_states)
@@ -84,12 +88,11 @@ void numZerosHMM::mip_map_inference(const std::vector<int>& observations,
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
 
+#ifdef WITH_COEK
 class LearningModel : public InferenceModel {
    public:
     std::vector<double> unconstrained_hidden;
-#ifdef WITH_COEK
     std::map<std::pair<size_t,size_t>,coek::Variable> z;
-#endif
 
     void initialize(numZerosHMM& nzhmm, const std::vector<int>& observations);
     void print_solution();
@@ -147,6 +150,7 @@ void LearningModel::initialize(numZerosHMM& nzhmm, const std::vector<int>& obser
         model.add_objective(O).sense(model.minimize);
     }
 }
+#endif
 
 class LearnStochastic_numZeros : public LearnStochastic {
    public:

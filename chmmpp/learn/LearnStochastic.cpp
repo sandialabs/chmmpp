@@ -1,7 +1,9 @@
 #include <cassert>
 #include <iostream>
 #include <set>
+#ifdef WITH_COEK
 #include <coek/util/io_utils.hpp>
+#endif
 #include "chmmpp/learn/LearnStochastic.hpp"
 
 namespace chmmpp {
@@ -337,8 +339,10 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
                 double log_likelihood = hmm.logProb(obs,hid);
                 if (std::fabs(tmp-log_likelihood) > 1e-3) {
                     std::cout << "WARNING: Differing estimates of log-likelihood Iteration=" << totNumIt << " Observation=" << nobs << " mip=" << tmp << " HMM=" << log_likelihood << std::endl;
+#ifdef WITH_COEK
                     std::cout << "Observations: " << obs << std::endl;
                     std::cout << "Hidden:       " << hid << std::endl;
+#endif
                     hmm.print();
                     }
                 total_ll += log_likelihood;

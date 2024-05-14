@@ -2,13 +2,17 @@
 // Infer HMM hidden states
 //
 #include <iostream>
+#ifdef WITH_COEK
 #include <coek/coek.hpp>
+#endif
 #include "numZerosHMM.hpp"
 
 template <typename T, typename V, typename W, typename Z>
 void run(T& hmm, V& obs, W& hid, const Z& fn)
 {
+#ifdef WITH_COEK
     coek::tic();
+#endif
     double logProb;
     std::vector<int> hidGuess;
     fn(hmm, obs, hidGuess, logProb);
@@ -19,7 +23,11 @@ void run(T& hmm, V& obs, W& hid, const Z& fn)
             ++numDiff;
         }
     }
+#ifdef WITH_COEK
     auto tdiff = coek::toc();
+#else
+    double tdiff = 0.0;
+#endif
 
     hmm.print_options();
     std::cout << std::endl;
