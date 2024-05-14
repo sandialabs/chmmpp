@@ -289,11 +289,15 @@ void numZerosHMM::learn_numZeros(const std::vector<std::vector<int>> &obs)
     std::vector<int> newNumZeros;
     for (size_t i = 0; i < obs.size(); i++) newNumZeros.push_back(numZeros);
 
-    auto option = get_option<double>("convergence_tolerance");
     double convergence_tolerance = 10E-6;
-    if (option.has_value()) convergence_tolerance = *option;
+    get_option("convergence_tolerance", convergence_tolerance);
+    clear_option("convergence_tolerance");
+    
 
     unsigned int max_iterations = 1000;
+    get_option("max_iterations", max_iterations);
+    clear_option("max_iterations");
+
     local_learn_numZeros(hmm, obs, newNumZeros, convergence_tolerance, max_iterations);
 }
 

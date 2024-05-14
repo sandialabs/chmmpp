@@ -1,68 +1,38 @@
 #include <cassert>
 #include <iostream>
 #include <set>
+#include <coek/util/io_utils.hpp>
 #include "chmmpp/learn/LearnStochastic.hpp"
 
 namespace chmmpp {
 
 namespace {
 
-void process_options(const Options &options, double &convergence_tolerance, unsigned int &C, unsigned int& select, unsigned int& max_iterations)
+void process_options(Options &options, double &convergence_tolerance, unsigned int &C, unsigned int& select, unsigned int& max_iterations, unsigned int& quiet)
 {
-    for (const auto &it : options.options) {
-        if (it.first == "C") {
-            if (std::holds_alternative<int>(it.second)) {
-                int tmp = std::get<int>(it.second);
-                if (tmp >= 0)
-                    C = static_cast<unsigned int>(tmp);
-                else
-                    std::cerr << "WARNING: 'C' option must be a non-negative integer" << std::endl;
-            }
-            else if (std::holds_alternative<unsigned int>(it.second)) {
-                C = std::get<unsigned int>(it.second);
-            }
-            else
-                std::cerr << "WARNING: 'C' option must be a non-negative integer" << std::endl;
-        }
-        else if (it.first == "select") {
-            if (std::holds_alternative<int>(it.second)) {
-                int tmp = std::get<int>(it.second);
-                if (tmp >= 0)
-                    select = static_cast<unsigned int>(tmp);
-                else
-                    std::cerr << "WARNING: 'select' option must be a non-negative integer" << std::endl;
-            }
-            else if (std::holds_alternative<unsigned int>(it.second)) {
-                select = std::get<unsigned int>(it.second);
-            }
-            else
-                std::cerr << "WARNING: 'select' option must be a non-negative integer" << std::endl;
-        }
-        else if (it.first == "max_iterations") {
-            if (std::holds_alternative<int>(it.second)) {
-                int tmp = std::get<int>(it.second);
-                if (tmp >= 0)
-                    max_iterations = static_cast<unsigned int>(tmp);
-                else
-                    std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
-            }
-            else if (std::holds_alternative<unsigned int>(it.second)) {
-                max_iterations = std::get<unsigned int>(it.second);
-            }
-            else
-                std::cerr << "WARNING: 'max_iterations' option must be a non-negative integer" << std::endl;
-        }
-        else if (it.first == "convergence_tolerance") {
-            if (std::holds_alternative<double>(it.second))
-                convergence_tolerance = std::get<double>(it.second);
-            else
-                std::cerr << "WARNING: 'convergence_tolerance' option must be a double"
-                          << std::endl;
-        }
-    }
+    options.get_option("C", C);
+    options.get_option("select", select);
+    options.get_option("max_iterations", max_iterations);
+    options.get_option("quiet", quiet);
+
+    options.clear_option("C");
+    options.clear_option("select");
+    options.clear_option("max_iterations");
+    options.clear_option("quiet");
 }
 
 }  // namespace
+
+void LearnStochastic::set_seed(long int seed)
+{
+    std::random_device rand_dev;
+    std::mt19937 myGenerator(rand_dev());
+    generator = myGenerator;
+    generator.seed(seed);
+}
+
+long int LearnStochastic::generate_seed()
+{ return generator(); }
 
 // Will work best/fastest if the sets of hidden states which satisfy the constraints
 // This algorithm is TERRIBLE, I can't even get it to converge in a simple case with T = 10.
@@ -72,6 +42,8 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
 void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
                             double convergence_tolerance, unsigned int C, unsigned int max_iterations)
 {
+    set_seed(hmm.get_seed());
+
     auto A = hmm.getA();
     auto S = hmm.getS();
     auto E = hmm.getE();
@@ -121,7 +93,7 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
             for (size_t r = 0; r < R; ++r) {
                 size_t numIt=0;
                 while (numIt <= C * H * std::max(H, O) / (R * (totTime - 1))) {  // This is so that we have enough counts for A[h][h'] and E[h][o]
-                    std::vector<int> hidden = generate_random_feasible_hidden(obs[r].size(), obs[r]);
+                    std::vector<int> hidden = generate_random_feasible_hidden(obs[r].size(), obs[r], generate_seed());
                     allHidden[r].push_back(hidden);
                     ++tempCounter;
                     ++numIt;
@@ -289,7 +261,7 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
 
 
 void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
-                            double convergence_tolerance, unsigned int C, unsigned int max_iterations)
+                            double convergence_tolerance, unsigned int C, unsigned int max_iterations, unsigned int quiet)
 {
     //
     // Control parameters
@@ -298,7 +270,6 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
     size_t max_hidden_per_iteration = 2*observations.size();
     size_t max_trials = 2;
     size_t freq_revisit = 10;
-    bool quiet = true;
 
     // For simplicity, this algorithm assumes that all observations have the same length
     size_t T = observations[0].size();
@@ -306,6 +277,7 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
         assert( T == obs.size() );
     size_t R = observations.size();
 
+    set_seed(hmm.get_seed());
     auto A = hmm.getA();
     auto S = hmm.getS();
     auto E = hmm.getE();
@@ -324,36 +296,6 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
             Estar[r][h].resize(O);
         }
     }
-
-    //std::vector<size_t> Scount;
-    //std::vector<size_t> Acount;
-    //std::vector<std::vector<size_t>> Ecount;
-
-#if 0
-    std::vector<std::vector<double> > SStar(R);
-    std::vector<std::vector<std::vector<double> > > AStar(R);
-    std::vector<std::vector<std::vector<double> > > EStar(R);
-
-    std::vector<std::vector<int> > SStarCounter(R);
-    std::vector<std::vector<std::vector<int> > > AStarCounter(R);
-    std::vector<std::vector<std::vector<int> > > EStarCounter(R);
-
-    for (size_t r = 0; r < R; ++r) {
-        SStar[r].resize(H);
-        AStar[r].resize(H);
-        EStar[r].resize(H);
-        SStarCounter[r].resize(R);
-        AStarCounter[r].resize(R);
-        EStarCounter[r].resize(R);
-
-        for (size_t h = 0; h < H; ++h) {
-            AStar[r][h].resize(H);
-            AStarCounter[r][h].resize(H);
-            EStar[r][h].resize(O);
-            EStarCounter[r][h].resize(O);
-        }
-    }
-#endif
 
     std::vector<std::vector<int>> hcache(R);
     std::set<std::vector<int>> hidden;
@@ -382,12 +324,23 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
             // Find feasible hidden states with maximal likelihood
             size_t nobs=0;
             for (auto& obs: observations) {
-                auto [hid,log_likelihood] = generate_feasible_hidden(T, obs);
+                auto [hid,tmp] = generate_feasible_hidden(T, obs);
+#if 0
+                auto nz_ = count(hid.begin(), hid.end(), 0);
+                if (nz_ != 10) {
+                    std::cout
+                    std::cout << "Hidden:       " << hid << std::endl;
+                    std::cout << "Num Zeros:    " << nz_ << std::endl;
+                }
+#endif
                 ngen++;
-                double tmp = hmm.logProb(obs,hid);
-                //std::cout << "  Observation " << nobs++ << " log-likelihood=" << log_likelihood << std::endl;
-                if (std::fabs(tmp-log_likelihood) > 1e-7)
-                    std::cout << "ERROR: Differing estimates of log-likelihood Iteration=" << totNumIt << " Observation=" << nobs << " mip=" << std::to_string(log_likelihood) << " HMM=" << tmp << std::endl;
+                double log_likelihood = hmm.logProb(obs,hid);
+                if (std::fabs(tmp-log_likelihood) > 1e-3) {
+                    std::cout << "WARNING: Differing estimates of log-likelihood Iteration=" << totNumIt << " Observation=" << nobs << " mip=" << tmp << " HMM=" << log_likelihood << std::endl;
+                    std::cout << "Observations: " << obs << std::endl;
+                    std::cout << "Hidden:       " << hid << std::endl;
+                    hmm.print();
+                    }
                 total_ll += log_likelihood;
                 auto results = hidden.insert(hid);
                 if (results.second)
@@ -398,7 +351,7 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
             // Randomized trials
             for (size_t i=0; i<max_trials; ++i) {
                 for (auto& obs: observations) {
-                    auto results = hidden.insert(generate_random_feasible_hidden(T, obs));
+                    auto results = hidden.insert(generate_random_feasible_hidden(T, obs, generate_seed()));
                     ngen++;
                     if (results.second)
                         num++;
@@ -413,12 +366,9 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
         // Clear weighted parameters data
         for (size_t r = 0; r < R; ++r) {
             fill(Sstar[r].begin(), Sstar[r].end(), 0.);
-            //fill(SStarCounter[r].begin(), SStarCounter[r].end(), 0);
             for (size_t h = 0; h < H; ++h) {
                 fill(Astar[r][h].begin(), Astar[r][h].end(), 0.);
-                //fill(AStarCounter[r][h].begin(), AStarCounter[r][h].end(), 0);
                 fill(Estar[r][h].begin(), Estar[r][h].end(), 0.);
-                //fill(EStarCounter[r][h].begin(), EStarCounter[r][h].end(), 0);
             }
         }
 
@@ -427,53 +377,48 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
             std::cout << "Num solutions generated: " << ngen << std::endl;
         }
 
-        std::vector<double> w(hidden.size());       // Weights of each hidden state sequence
+        std::map<std::vector<int>,double> w;
         for (size_t r = 0; r < R; ++r) {
             auto& obs = observations[r];
 
             // Reweight hidden states for these observations
             {
+#if 1
+            // WEH - What justifies this bias?
             double wsum=0.0;
-            for (size_t i=0; auto& hid: hidden)
-                wsum += w[i++] = std::exp(hmm.logProb(obs, hid));
+            for (auto& hid: hidden)
+                wsum += w[hid] = std::exp(hmm.logProb(obs, hid));
             for (auto& val: w)
-                val /= wsum;
+                val.second /= wsum;
+#else
+            for (auto& hid: hidden)
+                w[hid] = 1.0/hidden.size();
+#endif
             }
 
+#if 0
+            if ((r == 0) and (debug)) {
+                std::cout << "Obs: " << obs << std::endl;
+                for (auto& hid: hidden)
+                    std::cout << w[hid] << " : " << hid << std::endl;
+                }
+#endif
+
             // Collect weighted parameters
-            for (size_t i=0; auto& hid: hidden) {
-                auto p = w[i++];
+            for (auto& hid: hidden) {
+                auto p = w[hid];
 
                 Sstar[r][hid[0]] += p;
-                //++Scount[r][hid[0]];
 
                 for (int t = 0; t < T - 1; ++t) {
                     Astar[r][hid[t]][hid[t + 1]] += p;
-                    //++Acount[r][hid[i][t]][hid[t + 1]];
                 }
 
                 for (int t = 0; t < T; ++t) {
                     Estar[r][hid[t]][obs[t]] += p;
-                    //++Ecount[r][hid[t]][obs[t]];
                 }
             }
         }
-
-#if 0
-        // Normalize Sstar over possible hidden state values
-        for (size_t r = 0; r < R; ++r) {
-            for (size_t h = 0; h < H; ++h) {
-                if (Scount[r][h] == 0)
-                    Sstar[r][h] = 0;
-                else
-                    Sstar[r][h] /= Scount[r][h];
-            }
-            double SSum = std::accumulate(Sstar[r].begin(), Sstar[r].end(), 0.);
-            for (size_t h = 0; h < H; ++h) {
-                Sstar[r][h] = Star[r][h] / SSum;
-            }
-        }
-#endif
 
         // Compute S
         for (size_t h = 0; h < H; ++h) {
@@ -484,31 +429,6 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
             S[h] = tempSum / R;
         }
         hmm.setS(S);
-
-#if 0
-        for (size_t r = 0; r < R; ++r) {
-            for (size_t h1 = 0; h1 < H; ++h1) {
-                for (size_t h2 = 0; h2 < H; ++h2) {
-                    if (AStarCounter[r][h1][h2] == 0) {
-                        AStar[r][h1][h2] = 0;
-                    }
-                    else {
-                        AStar[r][h1][h2] = AStar[r][h1][h2] / AStarCounter[r][h1][h2];
-                    }
-                }
-            }
-
-            double ASum = 0;
-            for (size_t h1 = 0; h1 < H; ++h1) {
-                ASum += std::accumulate(AStar[r][h1].begin(), AStar[r][h1].end(), 0.);
-            }
-            for (size_t h1 = 0; h1 < H; ++h1) {
-                for (size_t h2 = 0; h2 < H; ++h2) {
-                    AStar[r][h1][h2] /= ASum;
-                }
-            }
-        }
-#endif
 
         double tol = 0.;
         std::vector<std::vector<double> > newA(H);
@@ -537,31 +457,6 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
         }
         hmm.setA(A);
 
-#if 0
-        for (size_t r = 0; r < R; ++r) {
-            for (size_t h = 0; h < H; ++h) {
-                for (size_t o = 0; o < O; ++o) {
-                    if (EStarCounter[r][h][o] == 0) {
-                        EStar[r][h][o] = 0;
-                    }
-                    else {
-                        EStar[r][h][o] /= EStarCounter[r][h][o];
-                    }
-                }
-            }
-
-            double ESum = 0.;
-            for (size_t h = 0; h < H; ++h) {
-                ESum += std::accumulate(EStar[r][h].begin(), EStar[r][h].end(), 0.);
-            }
-            for (size_t h = 0; h < H; ++h) {
-                for (size_t o = 0; o < O; ++o) {
-                    EStar[r][h][o] /= ESum;
-                }
-            }
-        }
-#endif
-
         for (size_t h = 0; h < H; ++h) {
             for (size_t o = 0; o < O; ++o) {
                 double tempSum = 0.;
@@ -585,7 +480,7 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
         if (not quiet) {
             std::cout << "Iteration= " << totNumIt << " Tolerance= " << tol << std::endl;
             std::cout << std::endl;
-            //hmm.print();
+            hmm.print();
         }
 
         if (totNumIt >= max_iterations)
@@ -596,21 +491,22 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
     }
 }
 
-void LearnStochastic::learn(const std::vector<std::vector<int> > &obs, const Options &options)
+void LearnStochastic::learn(const std::vector<std::vector<int> > &obs, Options &options)
 {
     double convergence_tolerance = 10E-6;
     unsigned int C = 10E4;
     unsigned int max_iterations = 1000;
     unsigned int select = 0;
-    process_options(options, convergence_tolerance, C, select, max_iterations);
+    unsigned int quiet = 1;
+    process_options(options, convergence_tolerance, C, select, max_iterations, quiet);
 
     if (select == 0)
         learn(obs, convergence_tolerance, C, max_iterations);
     else if (select == 1)
-        learn1(obs, convergence_tolerance, C, max_iterations);
+        learn1(obs, convergence_tolerance, C, max_iterations, quiet);
 }
 
-void LearnStochastic::learn(const std::vector<int> &obs, const Options &options)
+void LearnStochastic::learn(const std::vector<int> &obs, Options &options)
 {
     std::vector<std::vector<int> > newObs;
     newObs.push_back(obs);

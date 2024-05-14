@@ -34,6 +34,13 @@ HMM::HMM(const std::vector<std::vector<double>>& inputA, const std::vector<doubl
     set_seed(_seed);
 }
 
+HMM& HMM::operator=(const HMM& other)
+{
+    initialize(other.A, other.S, other.E);
+    set_seed(other.seed);
+    return *this;
+}
+
 void HMM::initialize(const std::vector<std::vector<double>>& inputA,
                      const std::vector<double>& inputS,
                      const std::vector<std::vector<double>>& inputE)
@@ -287,7 +294,7 @@ void HMM::printA() const
 
 void HMM::printO() const
 {
-    std::cout << "Emission matrix: (Columns are hidden states, rows are observed states)\n";
+    std::cout << "Emission matrix: (Rows are hidden states, columns are observed states)\n";
     for (size_t h = 0; h < H; ++h) {
         for (size_t o = 0; o < O; ++o) {
             std::cout << std::fixed << std::setprecision(4) << E[h][o] << " ";

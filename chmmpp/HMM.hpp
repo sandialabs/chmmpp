@@ -18,9 +18,7 @@ class HMM : public Options {
     std::vector<std::vector<double> > E;          // Emission probs, size HxO
     std::mt19937 generator;                       // Needed for running the HMM
     std::uniform_real_distribution<double> dist;  // Ditto
-
     long int seed;
-    double getRandom();
 
    public:
     HMM(long int seed = time(NULL));
@@ -28,11 +26,16 @@ class HMM : public Options {
     HMM(const std::vector<std::vector<double> > &inputA, const std::vector<double> &inputS,
         const std::vector<std::vector<double> > &inputE, long int seed = time(NULL));
 
+    HMM& operator=(const HMM& other);
+
     void initialize(const std::vector<std::vector<double> > &inputA,
                     const std::vector<double> &inputS,
                     const std::vector<std::vector<double> > &inputE);
+    long int get_seed() {return seed;}
     void set_seed(long int seed);
     void reset_rng();
+
+    double getRandom();
 
     void initialize_from_file(const std::string &json_filename);
 

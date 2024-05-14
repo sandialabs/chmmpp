@@ -47,9 +47,9 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
     //           (t,  i, -2) when t==Tmax
 
     for (auto i : coek::range(N)) E.push_back({-1, -1, i});
-    for (auto t : coek::range(Tmax))
+    for (auto t : coek::range(Tmax-1))
         for (auto& g : F) E.push_back({t, std::get<0>(g), std::get<1>(g)});
-    for (auto i : coek::range(N)) E.push_back({Tmax, i, -2});
+    for (auto i : coek::range(N)) E.push_back({Tmax-1, i, -2});
 
     if (y_binary) {
         for (auto& e : E) y[e] = model.add(coek::variable().bounds(0, 1).within(coek::Boolean));
@@ -59,7 +59,7 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
     }
 
     // flow constraints
-    for (auto t : coek::range(Tmax + 1)) {
+    for (auto t : coek::range(Tmax)) {
         for (auto b : coek::range(N)) {
             auto lhs = coek::expression();
             auto rhs = coek::expression();
@@ -69,7 +69,7 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
                 for (auto a : coek::range(N))
                     if (not(F.find({a, b}) == F.end())) lhs += y[{t - 1, a, b}];
             }
-            if (t == Tmax)
+            if (t == Tmax-1)
                 rhs = y[{t, b, -2}];
             else {
                 for (auto aa : coek::range(N))
@@ -89,7 +89,7 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
     // flow end
     {
         auto lhs = coek::expression();
-        for (auto a : coek::range(N)) lhs += y[{Tmax, a, -2}];
+        for (auto a : coek::range(N)) lhs += y[{Tmax-1, a, -2}];
         model.add(lhs == 1);
     }
 
@@ -107,8 +107,6 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
         FF.clear();
         G.clear();
     }
-
-    if (debug) model.print_equations();
 }
 
 void LPModel::set_options(const Options& options)
@@ -198,7 +196,7 @@ void LPModel::collect_solution(std::vector<int>& hidden_states)
     hidden_states.resize(Tmax);
 
     for (auto& it : y) {
-        if (it.second.value() > 0) {
+        if (it.second.value() >= 0.5) {
             auto& [t, a, b] = it.first;
             size_t i = static_cast<size_t>(t + 1);
             if (i < Tmax) hidden_states[i] = b;

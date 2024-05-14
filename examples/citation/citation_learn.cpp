@@ -8,10 +8,9 @@ void citationHMM::learn_citation_semisupervised_hard(
     const std::vector<std::vector<std::string> > &supervisedCategories,
     const std::vector<std::vector<std::string> > &unsupervisedWords)
 {
-    // CLM - TODO -- I don't really understand how option works right now
-    auto option = get_option<double>("convergence_tolerance");
     double convergence_tolerance = 10E-6;
-    if (option.has_value()) convergence_tolerance = *option;
+    get_option("convergence_tolerance", convergence_tolerance);
+    clear_option("convergence_tolerance");
 
     // Convert from strings to ints using our maps
     std::vector<std::vector<int> > supervisedObs;

@@ -2,8 +2,8 @@
 
 #include <map>
 #include <variant>
-#include <optional>
 #include <string>
+#include <iostream>
 
 namespace chmmpp {
 
@@ -16,6 +16,9 @@ class Options {
 
     void clear_options() { options.clear(); }
 
+    void clear_option(const std::string& name)
+        { options.erase(name); }
+
     Options& get_options() { return *this; }
 
     const Options& get_options() const { return *this; }
@@ -27,15 +30,41 @@ class Options {
     }
 
     template <typename T>
-    std::optional<T> get_option(const std::string& name) const
+    void get_option(const std::string& name, T& value) const
     {
         auto it = options.find(name);
-        if (it == options.end()) return {};
-        if (not std::holds_alternative<T>(it->second)) return {};
-        return {std::get<T>(it->second)};
+        if (it == options.end()) return;
+        if (std::holds_alternative<T>(it->second)) {
+            value = std::get<T>(it->second);
+            return;
+            }
+        std::cerr << "WARNING: unexpected type for option '" << name << "'" << std::endl;
+        return;
     }
 
     void print_options() const;
 };
+
+template <>
+inline void Options::get_option(const std::string& name, unsigned int& value) const
+{
+auto it = options.find(name);
+if (it == options.end()) return;
+
+if (std::holds_alternative<unsigned int>(it->second)) {
+    value = std::get<unsigned int>(it->second);
+    return;
+    }
+if (std::holds_alternative<int>(it->second)) 
+    {
+    int tmp = std::get<int>(it->second);
+    if (tmp >= 0) {
+        value = static_cast<unsigned int>(tmp);
+        return;
+        }
+    }
+std::cerr << "WARNING: unexpected type for option '" << name << "'" << std::endl;
+return;
+}
 
 }  // namespace chmmpp

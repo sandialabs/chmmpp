@@ -1,6 +1,7 @@
 #include "numZerosHMM.hpp"
 #include <chmmpp/learn/LearnStochastic.hpp>
 #ifdef WITH_COEK
+#    include <coek/util/io_utils.hpp>
 #    include <chmmpp/inference/LPModel.hpp>
 #endif
 
@@ -22,7 +23,18 @@ class InferenceModel : public LPModel {
     // void optimize(double& log_likelihood, std::vector<int>& hidden_states);
 
     void collect_solution(std::vector<int>& hidden_states);
+
+    virtual void print_solution();
 };
+
+void InferenceModel::print_solution()
+{
+    std::cout << "y size=" << y.size() << std::endl;
+    for (auto& it: y) {
+        auto [t,a,b] = it.first;
+        std::cout << "y id=" << it.second.id() << " t=" << t << " a=" << a << " b=" << b << " value=" << it.second.value() << std::endl;
+        }
+}
 
 void InferenceModel::initialize(const numZerosHMM& nzhmm, const std::vector<int>& observations)
 {
@@ -74,33 +86,64 @@ void numZerosHMM::mip_map_inference(const std::vector<int>& observations,
 
 class LearningModel : public InferenceModel {
    public:
+    std::vector<double> unconstrained_hidden;
+#ifdef WITH_COEK
+    std::map<std::pair<size_t,size_t>,coek::Variable> z;
+#endif
+
     void initialize(numZerosHMM& nzhmm, const std::vector<int>& observations);
+    void print_solution();
 };
+
+void LearningModel::print_solution()
+{
+    InferenceModel::print_solution();
+
+    std::cout << "z size=" << z.size() << std::endl;
+    for (auto& it: z) {
+        auto [t,b] = it.first;
+        std::cout << "z id=" << it.second.id() << " t=" << t << " b=" << b << " value=" << it.second.value() << std::endl;
+        }
+}
 
 void LearningModel::initialize(numZerosHMM& nzhmm, const std::vector<int>& observations)
 {
     InferenceModel::initialize(nzhmm, observations);
 
-    auto unconstrained_hidden = nzhmm.hmm.generateHidden(observations.size(), observations);
+#if 0
+    unconstrained_hidden = nzhmm.hmm.generateHidden(observations.size(), observations);
+#else
+    unconstrained_hidden.resize(observations.size());
+    for (auto& val : unconstrained_hidden) {
+        val = nzhmm.hmm.getRandom();
+    }
+#endif
 
     // Deactivate the old objective
     obj.deactivate();
 
     // objective
     {
-        auto O = coek::expression();
-        for (auto t : coek::range(Tmax + 1)) {
-            auto lhs = coek::expression();
+        for (auto t : coek::range(Tmax))
+            for (auto b : coek::range(N))
+                z[{t,b}] = model.add( coek::variable().bounds(0,1) );
+
+        for (auto t : coek::range(Tmax)) {
             for (auto b : coek::range(N)) {
+                auto rhs = coek::expression();
                 if (t == 0)
-                    lhs = y[{t - 1, -1, b}];
+                    rhs = y[{t - 1, -1, b}];
                 else {
                     for (auto a : coek::range(N))
-                        if (not(F.find({a, b}) == F.end())) lhs += y[{t - 1, a, b}];
+                        if (not(F.find({a, b}) == F.end())) rhs += y[{t - 1, a, b}];
                 }
+                model.add( z[{t,b}] == rhs );
             }
-            O += (unconstrained_hidden[t] - lhs) * (unconstrained_hidden[t] - lhs);
         }
+
+        auto O = coek::expression();
+        for (auto t : coek::range(Tmax))
+            O += (unconstrained_hidden[t] - z[{t,1}]) * (unconstrained_hidden[t] - z[{t,1}]);
         model.add_objective(O).sense(model.minimize);
     }
 }
@@ -112,7 +155,7 @@ class LearnStochastic_numZeros : public LearnStochastic {
     LearnStochastic_numZeros(numZerosHMM& nzhmm_) : nzhmm(nzhmm_) { initialize(nzhmm.hmm); }
 
     std::pair<std::vector<int>,double> generate_feasible_hidden(size_t T, const std::vector<int>& obs);
-    std::vector<int> generate_random_feasible_hidden(size_t T, const std::vector<int>& obs);
+    std::vector<int> generate_random_feasible_hidden(size_t T, const std::vector<int>& obs, long int seed);
 };
 
 std::pair<std::vector<int>,double> LearnStochastic_numZeros::generate_feasible_hidden(size_t T,
@@ -123,24 +166,35 @@ std::pair<std::vector<int>,double> LearnStochastic_numZeros::generate_feasible_h
 #ifdef WITH_COEK
     nzhmm.hmm = hmm;
     InferenceModel model;
-    //model.set_options(nzhmm.get_options());
+    model.set_options(nzhmm.get_options());
     model.initialize(nzhmm, obs);
+    //model.print();
     model.optimize(log_likelihood, hidden);
+    //model.print_solution();
 #endif
     return {hidden, -log_likelihood};
 }
 
 std::vector<int> LearnStochastic_numZeros::generate_random_feasible_hidden(size_t T,
-                                                                    const std::vector<int>& obs)
+                                                                    const std::vector<int>& obs, long int seed)
 {
     std::vector<int> hidden(obs.size());
     double log_likelihood = 0;
 #ifdef WITH_COEK
     nzhmm.hmm = hmm;
+    nzhmm.hmm.set_seed(seed);
     LearningModel model;
-    //model.set_options(nzhmm.get_options());
+    model.set_options(nzhmm.get_options());
     model.initialize(nzhmm, obs);
+    //model.print();
     model.optimize(log_likelihood, hidden);
+    //model.print_solution();
+
+#if 0
+    std::cout << "Random Hidden:           " << model.unconstrained_hidden << std::endl;
+    std::cout << "Closest Feasible Hidden: " << hidden << std::endl;
+    std::cout << std::endl;
+#endif
 #endif
     return hidden;
 }
