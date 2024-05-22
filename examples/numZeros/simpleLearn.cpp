@@ -8,6 +8,8 @@
 #include <coek/coek.hpp>
 #endif
 #include "numZerosHMM.hpp"
+#include <chmmpp/learn/LearnStochastic.hpp>
+
 
 template <typename T, typename V, typename Z>
 void run(T& hmm, V& observations, const Z& fn)
@@ -139,7 +141,6 @@ void run_all(bool with_rejection, bool debug = false)
     std::cout << "Running learning with constraint - Soft EM\n";
     std::cout << "------------------------------------------------------------------------\n";
     nzhmm.initialize(original_hmm);
-    nzhmm.set_option("max_iterations", 1000);
     run(nzhmm, obs, [](chmmpp::CHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
         nzhmm.learn_stochastic(obs);
     });

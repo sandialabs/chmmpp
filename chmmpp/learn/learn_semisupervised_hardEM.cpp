@@ -2,6 +2,24 @@
 #include "learn.hpp"
 #include "../inference/inference.hpp"
 
+namespace {
+    template <typename T>
+    void normalize(std::vector<T> &vec)
+    {
+        double sum = 0.;
+        double vecSizeInv = 1. / vec.size();
+
+        for (const auto &val : vec) sum += val;
+
+        if (sum != 0) {
+            for (auto &val : vec) val /= sum;
+        }
+        else {
+            for (auto &val : vec) val = vecSizeInv;
+        }
+    }
+}
+
 namespace chmmpp {
 
 // CLM - TODO -- I don't fully understand this part yet, I just need a parameter called gamma which
@@ -31,22 +49,6 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
                 std::cerr << "WARNING: 'convergence_tolerance' option must be a double"
                           << std::endl;
         }
-    }
-}
-
-template <typename T>
-void normalize(std::vector<T> &vec)
-{
-    double sum = 0.;
-    double vecSizeInv = 1. / vec.size();
-
-    for (const auto &val : vec) sum += val;
-
-    if (sum != 0) {
-        for (auto &val : vec) val /= sum;
-    }
-    else {
-        for (auto &val : vec) val = vecSizeInv;
     }
 }
 

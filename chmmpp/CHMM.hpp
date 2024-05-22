@@ -2,6 +2,8 @@
 
 #include <functional>
 #include <chmmpp/HMM.hpp>
+#include <chmmpp/learn/LearnStochastic.hpp>
+
 
 namespace chmmpp {
 
@@ -13,6 +15,7 @@ class CHMM : public Options {
     HMM hmm;
     std::function<bool(std::vector<int> &)> constraintOracle;
     bool partialOracle = false;  // True if constraintOracle can be applied to partial sequences
+    
 
    public:
     void initialize(const HMM &_hmm) { hmm = _hmm; }

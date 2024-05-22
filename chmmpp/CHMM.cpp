@@ -29,7 +29,9 @@ void CHMM::learn_stochastic(const std::vector<std::vector<int>> &obs)
 {
     std::vector<std::function<bool(std::vector<int> &)>> oracles(obs.size());
     for (size_t i = 0; i < obs.size(); i++) oracles[i] = constraintOracle;
-    chmmpp::learn_stochastic(hmm, obs, oracles, this->get_options());
+    LearnStochastic solver;
+    solver.initialize(hmm);
+    chmmpp::learn_stochastic2(obs, oracles, this->get_options());
 };
 
 void CHMM::learn_stochastic(const std::vector<int> &obs)
