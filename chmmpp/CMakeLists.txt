@@ -32,10 +32,8 @@ if (with_boost)
             inference/aStarMultOracle.cpp
             inference/aStarOracle.cpp
 
-	        learn/learn_unconstrained.cpp
-	        learn/learn_stochastic.cpp
-	        learn/LearnStochastic.cpp
-	        learn/learn_hardEM.cpp
+	    learn/learn_unconstrained.cpp
+	    learn/LearnStochastic.cpp
             learn/learn_semisupervised_hardEM.cpp
             learn/learn_batch.cpp
             )

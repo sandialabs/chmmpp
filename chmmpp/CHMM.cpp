@@ -25,30 +25,53 @@ void CHMM::mip_map_inference(const std::vector<int> &observations, std::vector<i
     logProb = 0;
 }
 
-void CHMM::learn_stochastic(const std::vector<std::vector<int>> &obs)
+void CHMM::learn_batch(const std::vector<std::vector<int>> &obs, 
+                const std::function<std::vector<std::vector<std::vector<int>>> (
+                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
+                        const std::vector<std::vector<int>>&, 
+                        const int&, const int&
+                    )> generator)
 {
     std::vector<std::function<bool(std::vector<int> &)>> oracles(obs.size());
     for (size_t i = 0; i < obs.size(); i++) oracles[i] = constraintOracle;
-    LearnStochastic solver;
-    solver.initialize(hmm);
-    chmmpp::learn_stochastic2(obs, oracles, this->get_options());
+    chmmpp::learn_batch(hmm, oracles, obs, generator, this->get_options());
+} 
+
+void CHMM::learn_stochastic(const std::vector<std::vector<int>> &obs)
+{
+    learn_batch(obs, generator_stochastic);
 };
 
 void CHMM::learn_stochastic(const std::vector<int> &obs)
 {
-    chmmpp::learn_stochastic(hmm, obs, constraintOracle, this->get_options());
+    std::vector<std::vector<int>> obsVec;
+    obsVec.push_back(obs);
+    learn_stochastic(obsVec);
 }
 
-void CHMM::learn_hardEM(const std::vector<std::vector<int>> &obs, int numSolns)
+void CHMM::learn_hardEM(const std::vector<std::vector<int>> &obs)
 {
-    std::vector<std::function<bool(std::vector<int> &)>> oracles;
-    for (size_t i = 0; i < obs.size(); i++) oracles.push_back(constraintOracle);
-    chmmpp::learn_hardEM(hmm, obs, oracles, numSolns, this->get_options());
+    learn_batch(obs, generator_hardEM);
 }
 
-void CHMM::learn_hardEM(const std::vector<int> &obs, int numSolns)
+void CHMM::learn_hardEM(const std::vector<int> &obs)
 {
-    chmmpp::learn_hardEM(hmm, obs, constraintOracle, numSolns, this->get_options());
+    std::vector<std::vector<int>> obsVec;
+    obsVec.push_back(obs);
+    learn_hardEM(obsVec);
+}
+
+//Give an IP generator for this to work
+void CHMM::learn_IP(const std::vector<std::vector<int>> &obs)
+{
+    learn_batch(obs, generator_IP);
+}
+
+void CHMM::learn_hardEM(const std::vector<int> &obs)
+{
+    std::vector<std::vector<int>> obsVec;
+    obsVec.push_back(obs);
+    learn_IP(obsVec);
 }
 
 void CHMM::learn_semisupervised_hardEM(const std::vector<std::vector<int>> &supervisedObs,

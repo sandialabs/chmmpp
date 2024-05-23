@@ -2,10 +2,52 @@
 
 #include <functional>
 #include <chmmpp/HMM.hpp>
-#include <chmmpp/learn/LearnStochastic.hpp>
-
+#include <chmmpp/inference/inference.hpp>
 
 namespace chmmpp {
+
+namespace {
+
+std::vector<std::vector<std::vector<int>>> _generator_stochastic(
+                    HMM& hmm, const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
+                    const std::vector<std::vector<int>> &obs, 
+                    const int& num_solutions, const int& max_iterations)
+
+{
+    std::vector<std::vector<std::vector<int>>> output;
+
+    for(size_t r = 0; r < obs.size(); ++r) {
+        std::vector<std::vector<int>> tempHiddenVec;
+        while(tempHiddenVec.size() < num_solutions) {
+            auto tempHidden = hmm.generateHidden(obs[r]);
+            if(constraintOracle[r](tempHidden)) {
+                tempHiddenVec.push_back(tempHidden);
+            }
+        }
+        output.push_back(tempHiddenVec);
+    }
+    return output;
+}
+
+std::vector<std::vector<std::vector<int>>> _generator_hardEM(
+                    const HMM& hmm, const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
+                    const std::vector<std::vector<int>> &obs, 
+                    const int& num_solutions, const int& max_iterations)
+
+{
+    std::vector<std::vector<std::vector<int>>> output;
+
+    for(size_t r = 0; r < obs.size(); ++r) {
+        std::vector<std::vector<int>> tempHidden;
+        std::vector<double> temp;
+        aStarMultOracle(hmm, obs[r], tempHidden, temp, constraintOracle[r], num_solutions,
+                            max_iterations);
+        output.push_back(tempHidden);
+    }
+    return output;
+}
+
+} //namespace
 
 //
 // A base class that supports various methods for constrained inference.
@@ -72,8 +114,39 @@ class CHMM : public Options {
                                    std::vector<int> &hidden_states, double &logProb);
 
     //
+    // generator
+    //        
+
+    std::function<std::vector<std::vector<std::vector<int>>> (
+                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
+                        const std::vector<std::vector<int>>&, 
+                        const int&, const int&
+                    )> generator_stochastic = _generator_stochastic;
+
+    std::function<std::vector<std::vector<std::vector<int>>> (
+                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
+                        const std::vector<std::vector<int>>&, 
+                        const int&, const int&
+                    )> generator_hardEM = _generator_hardEM;
+
+    std::function<std::vector<std::vector<std::vector<int>>> (
+                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
+                        const std::vector<std::vector<int>>&, 
+                        const int&, const int&
+                    )> generator_IP;
+
+
+    //
     // learning methods
     //
+
+    //Most general learning method called by all the others
+    void learn_batch(const std::vector<std::vector<int>> &obs, 
+                const std::function<std::vector<std::vector<std::vector<int>>> (
+                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
+                        const std::vector<std::vector<int>>&, 
+                        const int&, const int&
+                    )> generator);
 
     // TODO
     //
@@ -99,7 +172,7 @@ class CHMM : public Options {
     //      convergence_tolerance (double):     Stop learning when difference in model parameters
     //                                          falls below this threshold (Default: 10E-6).
     //
-    void learn_hardEM(const std::vector<std::vector<int>> &obs, const int numSolns = 1);
+    void learn_hardEM(const std::vector<std::vector<int>> &obs);
 
     // TODO
     //
@@ -107,7 +180,23 @@ class CHMM : public Options {
     //      convergence_tolerance (double):     Stop learning when difference in model parameters
     //                                          falls below this threshold (Default: 10E-6).
     //
-    void learn_hardEM(const std::vector<int> &obs, const int numSolns = 1);
+    void learn_hardEM(const std::vector<int> &obs);
+
+    // TODO
+    //
+    //  Options
+    //      convergence_tolerance (double):     Stop learning when difference in model parameters
+    //                                          falls below this threshold (Default: 10E-6).
+    //
+    void learn_IP(const std::vector<std::vector<int>> &obs);
+
+    // TODO
+    //
+    //  Options
+    //      convergence_tolerance (double):     Stop learning when difference in model parameters
+    //                                          falls below this threshold (Default: 10E-6).
+    //
+    void learn_IP(const std::vector<int> &obs);
 
     // CLM - IN PROGRESS
     //
