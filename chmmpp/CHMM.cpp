@@ -70,7 +70,7 @@ void CHMM::learn_hardEM(const std::vector<std::vector<int>> &obs) {
         learn_batch(obs, *generator_hardEM);
     }
     else if(constraint_oracle) {
-        Generator_Stochastic _generator_hardEM(constraint_oracle);
+        Generator_HardEM _generator_hardEM(constraint_oracle);
         learn_batch(obs,_generator_hardEM);
     }
     else {

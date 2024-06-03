@@ -127,7 +127,6 @@ void run_all(bool with_rejection, bool debug = false)
     hmm.estimate_hmm(obs, hid);
     hmm.print();
 
-#if 1
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning without constraint - Baum-Welch\n";
     std::cout << "------------------------------------------------------------------------\n";
@@ -144,7 +143,7 @@ void run_all(bool with_rejection, bool debug = false)
     run(nzhmm, obs, [](chmmpp::CHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
         nzhmm.learn_stochastic(obs);
     });
-
+    
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running learning with constraint - Hard EM\n";
     std::cout << "------------------------------------------------------------------------\n";
@@ -165,7 +164,7 @@ void run_all(bool with_rejection, bool debug = false)
         nzhmm.learn_numZeros(obs);
     });
 
-#endif
+
 
 #ifdef WITH_COEK
     std::cout << "------------------------------------------------------------------------\n";

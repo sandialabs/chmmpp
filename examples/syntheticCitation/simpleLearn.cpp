@@ -57,7 +57,7 @@ void run_all(bool debug = false)
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<std::vector<int>> obs(numIt);
     std::vector<std::vector<int>> hid(numIt);
-    #if 0
+    
     std::cout << "Num Obs:   " << T << std::endl;
     std::cout << "Num Runs:  " << numIt << std::endl;
     hmm.reset_rng();
@@ -122,13 +122,11 @@ void run_all(bool debug = false)
     std::cout << "------------------------------------------------------------------------\n";
     schmmCopy = schmm;
     schmmCopy.set_option("max_iterations", 100000000);
-    //TODO- make the number of best solutions an option
     run(schmmCopy, obs,
-        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs, 100); });
+        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs); });
     schmm.clear_options();
 
     std::cout << std::endl;
-    #endif 
 }
 
 int main()
