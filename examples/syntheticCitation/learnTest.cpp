@@ -3,19 +3,24 @@
 //
 // Generating random trials where the number of nonzeros is fixed
 //
+#if 0
 #include <iostream>
+#include <chrono>
 #include "syntheticCitationHMM.hpp"
 
 template <typename T, typename V, typename Z>
-void run(T& hmm, V& obs, const Z& fn)
+int time(T& hmm, V& obs, const Z& fn)
 {
-    hmm.reset_rng();
+    //hmm.reset_rng();
     //hmm.print_options();
     //std::cout << std::endl;
-
+    auto start = std::chrono::high_resolution_clock::now();
     fn(hmm, obs);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    return static_cast<int>(duration);
 
-    hmm.print();
+    //hmm.print();
 }
 
 bool valid(std::vector<int> hid) { //Constraint Oracle
@@ -31,8 +36,25 @@ bool valid(std::vector<int> hid) { //Constraint Oracle
     return true;
 }
 
+//perturbs the values in a vector multiplicatively by (perturb parameter)^c
+//where c is uniform in [-1,1]
+//Also normalizes
+void perturb(std::vector<double> vec, double perturbParam) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-1., 1.);
+
+    for(auto& val: vec) val*=pow(perturbParam,dis(gen));
+
+    //Normalize
+    double sum = 0.;
+    for(const auto& val: vec) sum += val;
+    for(auto& val: vec) val /= sum;
+}
+
 //No checks
-double vecError(std::vector<double> v1, std::vector<double> v2) {
+//l_infinity norm
+double vecError(const std::vector<double> &v1, const std::vector<double> &v2) {
     double output = 0.;
 
     for(size_t i = 0; i < v1.size(); ++i) {
@@ -42,7 +64,7 @@ double vecError(std::vector<double> v1, std::vector<double> v2) {
     return output;
 }
 
-double matError(std::vector<std::vector<double>> A1, std::vector<std::vector<double>> A2) {
+double matError(const std::vector<std::vector<double>> &A1, const std::vector<std::vector<double>> &A2) {
     double output = 0.;
 
     for(size_t i = 0; i < A1.size(); ++i) {
@@ -54,8 +76,29 @@ double matError(std::vector<std::vector<double>> A1, std::vector<std::vector<dou
     return output;
 }
 
-void run_all(bool debug = false)
+template <typename T>
+double mean(const std::vector<T>& data) {
+    double sum = 0.;
+    for(const auto& val: data) sum += static_cast<double>(val);
+    return sum/data.size();
+}
+
+//Standard Deviation
+template <typename T>
+double stdDev(const std::vector<T>& data) {
+    double sum = 0.;
+    double standardDeviation = 0.;
+
+    auto mean = mean(Data);
+
+    for (const auto& value : data) standardDeviation += pow(static_cast<double>(value) - mean, 2);
+
+    return sqrt(standardDeviation / data.size());
+}
+
+void run_tests(bool debug = false)
 {
+    #if 0
     // Initial Guess
     std::vector<std::vector<double>> A{
         {0.59, 0.11, 0.1, 0.1, 0.1}, 
@@ -73,92 +116,105 @@ void run_all(bool debug = false)
         {0.1, 0.1, 0.1, 0.1, 0.6}  
     };  // Emission Matrix
 
-    size_t T = 25;         // Time Horizon
+    size_t T = 25;                                // Time Horizon
+    size_t testSize = 100;                        // Number of iterations for average and stddev
+    std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
+    double perturbParam = 0.9;                         // How much the parameters are perturbed
 
-    std::vector<int> numItVec = {1,10,100,1000}; 
+    std::vector<std::vector<double>> HMM_runTimes(numObsVec.size());
+    std::vector<std::vector<double>> stochastic_runTimes(numObsVec.size());
+    std::vector<std::vector<double>> hardEM_runTimes(numObsVec.size());
 
-    chmmpp::HMM hmm(A, S, E, 2);
+    std::vector<std::vector<double>> HMM_error(numObsVec.size());
+    std::vector<std::vector<double>> stochastic_error(numObsVec.size());
+    std::vector<std::vector<double>> hardEM_error(numObsVec.size());
 
-    for(const auto &numIt: numItVec) {
-        // Store the observed and hidden variables as well as the number of zeros
-        std::vector<std::vector<int>> obs(numIt);
-        std::vector<std::vector<int>> hid(numIt);
+    chmmpp::CHMM originalCHMM;
+    originalCHMM.initialize(A,S,E);
+    originalCHMM.set_seed(0);
 
-        std::cout << "------------------------------------------------------------------------\n";
-        std::cout << "Num Runs:  " << numIt << std::endl;
-        std::cout << "------------------------------------------------------------------------\n";
-        hmm.reset_rng();
-        for (size_t i = 0; i < numIt; ++i) {
-            while(true) {
-                hmm.run(T, obs[i], hid[i]);
-                if(valid(hid[i])) {
-                    break;
-                }
+    for(size_t i = 0; i < numObsVec.size(); ++i) {
+        int numObs = numObsVec[i];
+
+        for(size_t j = 0; j < testSize; ++j) {
+            std::cout << numObs << " number of observations and iteration " << j << " out of " << testSize << "\n";
+
+            //Create Observations
+            std::vector<std::vector<int>> obsVec(numObs);
+            for(size_t k = 0; k < numObs; ++k) {
+                std::vector<int> hid;
+                std::vector<int> obs;
+                originalCHMM.run(T,obs,hid);
+                obsVec[k] = obs;
             }
 
-            if (debug) {
-                std::cout << "Trial: " << i << std::endl;
-                std::cout << "Observed:      ";
-                for (auto& v : obs[i]) std::cout << v;
-                std::cout << std::endl;
+            //Create a new CHMM where we don't exactly know the parameters
+            auto perturbedA = A;
+            auto perturbedS = S;
+            auto perturbedE = E;
 
-                std::cout << "Hidden states: ";
-                for (auto& v : hid[i]) std::cout << v;
-                std::cout << std::endl;
+            for(auto &vec: perturbedA) {
+                perturb(vec, perturbParam);
             }
+            perturb(S,perturbParam);
+            for(auto &vec: perturbedE) {
+                perturb(vec, perturbParam);
+            }
+            
+            //Unconstrained HMM
+            std::cout << "Running unconstrained learning.\n";
+            chmmpp::HMM unconstrained_HMM(perturbedA,perturbedS,perturbedE,0);
+            HMM_runTimes[i].push_back(
+                time(unconstrained_HMM,obsVec,
+                    [](chmmpp::HMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.baum_welch(obs); })
+            );
+            HMM_error.push_back(std::max( matError(unconstrained_HMM.getA(),A) 
+                std::max(vecError(unconstrained_HMM.getS(),S), matError(unconstrained_HMM.getE(), E))
+            ));
+
+            //CHMM -- hardEM
+            std::cout << "Running hardEM batch learning.\n";
+            chmmpp::CHMM hardEM_CHMM;
+            hardEM_CHMM.initialize(perturbedA,perturbedS, perturbedE);
+            hardEM_CHMM.set_seed(0);
+            hardEM_runTimes[i].push_back(
+                time(hardEM_CHMM,obsVec,
+                    [](chmmpp::CHMM& chmm, const std::vector<std::vector<int>>& obs) { chmm.learn_hardEM(obs); })
+            );
+            HMM_error.push_back(std::max( matError(hardEM_CHMM.hmm.getA(),A) 
+                std::max(vecError(hardEM_CHMM.hmm.getS(),S), matError(unconstrained_HMM.hmm.getE(), E))
+            ));
+
+            //CHMM -- stochastic
+            std::cout << "Running stochastic batch learning.\n";
+            chmmpp::CHMM stochastic_CHMM;
+            stochastic_CHMM.initialize(perturbedA,perturbedS, perturbedE);
+            stochastic_CHMM.set_seed(0);
+            stochastic_runTimes[i].push_back(
+                time(stochastic_CHMM,obsVec,
+                    [](chmmpp::CHMM& chmm, const std::vector<std::vector<int>>& obs) { chmm.learn_stochastic(obs); })
+            );
+            HMM_error.push_back(std::max( matError(stochastic_CHMM.hmm.getA(),A) 
+                std::max(vecError(stochastic_CHMM.hmm.getS(),S), matError(unconstrained_HMM.hmm.getE(), E))
+            )); 
         }
-
-        chmmpp::HMM hmmTrue;
-        chmmpp::syntheticCitationHMM schmmCopy;
-
-
-        chmmpp::syntheticCitationHMM schmm;
-        schmm.initialize(hmm);
-
-        hmmTrue = hmm;
-        hmmTrie.estimate_hmm(obs, hid);
-        hmmCopy.print();
-
-        std::cout << "------------------------------------------------------------------------\n";
-        std::cout << "Running learning without constraint - Baum-Welch\n";
-        std::cout << "------------------------------------------------------------------------\n";
-        hmmCopy = hmm;
-        run(hmmCopy, obs,
-            [](chmmpp::HMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.baum_welch(obs); });
-
-        std::cout << "------------------------------------------------------------------------\n";
-        std::cout << "Running learning with constraint - Soft EM\n";
-        std::cout << "------------------------------------------------------------------------\n";
-        schmmCopy = schmm;
-        schmmCopy.set_option("C", 1000);
-        //TODO This is seg faulting right 
-        run(schmmCopy, obs, [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) {
-            hmm.learn_stochastic(obs);
-        });
-
-
-        std::cout << "------------------------------------------------------------------------\n";
-        std::cout << "Running learning with constraint - Hard EM\n";
-        std::cout << "------------------------------------------------------------------------\n";
-        schmmCopy = schmm;
-        schmmCopy.set_option("max_iterations", 100000000);
-        //TODO- make the number of best solutions an option
-        run(schmmCopy, obs,
-            [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs, 100); });
-        schmm.clear_options();
-
-        std::cout << std::endl;
     }
-}
 
+    for(size_t i = 0; i < numObsVec.size(); ++i) {
+        auto numObs = numObsVec[i];
+        std::cout << "Printing statistics with " << numObs << " observations.\n";
+        std::cout << "----------------------------------------------------------\n\n";
+
+        
+    }
+    #endif
+
+}
+#endif
 int main()
 {
-    std::cout << "------------------------------------------------------------------------\n";
-    std::cout << "------------------------------------------------------------------------\n";
-    std::cout << " Generating samples\n";
-    std::cout << "------------------------------------------------------------------------\n";
-    std::cout << "------------------------------------------------------------------------\n";
-    run_all(false);
+
+    //run_tests(false);
 
     return 0;
 }

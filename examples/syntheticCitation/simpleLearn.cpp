@@ -5,7 +5,6 @@
 //
 #include <iostream>
 #include "syntheticCitationHMM.hpp"
-
 template <typename T, typename V, typename Z>
 void run(T& hmm, V& obs, const Z& fn)
 {
@@ -58,7 +57,7 @@ void run_all(bool debug = false)
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<std::vector<int>> obs(numIt);
     std::vector<std::vector<int>> hid(numIt);
-
+    #if 0
     std::cout << "Num Obs:   " << T << std::endl;
     std::cout << "Num Runs:  " << numIt << std::endl;
     hmm.reset_rng();
@@ -129,6 +128,7 @@ void run_all(bool debug = false)
     schmm.clear_options();
 
     std::cout << std::endl;
+    #endif 
 }
 
 int main()

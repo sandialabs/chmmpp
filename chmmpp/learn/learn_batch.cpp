@@ -35,13 +35,8 @@ namespace chmmpp {
 
 //Each itertation of generated hidden states are underweighted by 1, 1/2, 1/3, ...
 void learn_batch(HMM &hmm, 
-                const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
                 const std::vector<std::vector<int>> &obs, 
-                std::function<std::vector<std::vector<std::vector<int>>> (
-                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
-                        const std::vector<std::vector<int>>&, 
-                        const int&, const int&
-                    )> generator,
+                const Generator_Base &generator,
                 const Options& options) 
 {
     //TODO Make into options
@@ -68,22 +63,7 @@ void learn_batch(HMM &hmm,
 
     while(true) {
         ++numIt;//==gamma.size();
-        auto newHidden = generator(hmm, constraintOracle, obs, num_solutions, max_iteration_generator); //r,n, t
-        //0 <= n < num_solutions
-        /*for(size_t r = 0; r < R; ++r) {
-            std::cout << std::endl;
-            std::cout << "Observation:" << std::endl;
-            for(size_t t = 0; t < obs[r].size(); ++t) {
-                std::cout << obs[r][t];
-            }
-            std::cout << std::endl;
-            for(size_t n = 0; n < newHidden[r].size(); ++n) {
-                for(size_t t = 0; t < obs[r].size(); ++t) {
-                    std::cout << newHidden[r][n][t];
-                }
-                std::cout << std::endl;
-            }
-        }*/
+        auto newHidden = generator(hmm, obs); //r,n, t
 
         std::vector<std::vector<double>> newProbs(obs.size()); //r,n
         for(size_t r = 0; r < obs.size(); ++r) { 

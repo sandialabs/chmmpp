@@ -3,8 +3,76 @@
 #include <functional>
 #include <vector>
 #include <chmmpp/HMM.hpp>
+#include <chmmpp/inference/inference.hpp>
 
 namespace chmmpp {
+
+class Generator_Base {
+public:
+    int num_solutions = 1;
+    int max_iterations = 1000000; //TODO implement
+    virtual std::vector<std::vector<std::vector<int>>> operator() (
+        HMM &hmm, const std::vector<std::vector<int>> obs
+    ) const = 0;
+};
+
+class Generator_Stochastic : public Generator_Base {
+public:
+    std::shared_ptr<Constraint_Oracle_Base> constraint_oracle;
+
+    virtual std::vector<std::vector<std::vector<int>>> operator()(
+        HMM &hmm, const std::vector<std::vector<int>> obs
+    ) const
+    {
+        std::vector<std::vector<std::vector<int>>> output;
+
+        for(size_t r = 0; r < obs.size(); ++r) {
+            std::vector<std::vector<int>> tempHiddenVec;
+            while(tempHiddenVec.size() < num_solutions) {
+                auto tempHidden = hmm.generateHidden(obs[r]);
+                if((*constraint_oracle)(tempHidden)) {
+                    tempHiddenVec.push_back(tempHidden);
+                }
+            }
+            output.push_back(tempHiddenVec);
+        }
+        return output;
+    }
+
+    Generator_Stochastic(std::shared_ptr<Constraint_Oracle_Base> _constraint_oracle) {
+        constraint_oracle = _constraint_oracle;
+    }
+};
+
+class Generator_HardEM : public Generator_Base {
+public:
+    std::shared_ptr<Constraint_Oracle_Base> constraint_oracle;
+
+    virtual std::vector<std::vector<std::vector<int>>> operator()(
+        HMM &hmm, const std::vector<std::vector<int>> obs
+    ) const
+    {
+        std::vector<std::vector<std::vector<int>>> output;
+
+        auto constraintOracle = [this](std::vector<int> _obs) {
+            return (*constraint_oracle)(_obs);
+        };
+
+        for(size_t r = 0; r < obs.size(); ++r) {
+            std::vector<std::vector<int>> tempHidden;
+            std::vector<double> temp;
+            aStarMultOracle(hmm, obs[r], tempHidden, temp, constraintOracle, num_solutions,
+                                max_iterations);
+            output.push_back(tempHidden);
+        }
+        return output;
+    }
+
+    Generator_HardEM(std::shared_ptr<Constraint_Oracle_Base> _constraint_oracle) {
+        constraint_oracle = _constraint_oracle;
+    }
+};
+
 
 void estimate_hmm(HMM &hmm, const std::vector<std::vector<int> > &obs,
                   const std::vector<std::vector<int> > &hid);
@@ -13,13 +81,8 @@ void learn_unconstrained(HMM &hmm, const std::vector<int> &obs);
 void learn_unconstrained(HMM &hmm, const std::vector<std::vector<int> > &obs);
 
 void learn_batch(HMM &hmm, 
-                const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
-                const std::vector<std::vector<int>> &obs, 
-                const std::function<std::vector<std::vector<std::vector<int>>> (
-                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
-                        const std::vector<std::vector<int>>&, 
-                        const int&, const int&
-                    )> generator,
+                const std::vector<std::vector<int>>& obs, 
+                const Generator_Base& generator,
                 const Options& options); 
 
 void learn_semisupervised_hardEM(HMM &hmm, const std::vector<std::vector<int> > &supervisedObs,

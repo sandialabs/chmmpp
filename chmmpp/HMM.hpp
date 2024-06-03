@@ -110,4 +110,10 @@ class HMM : public Options {
     void baum_welch(const std::vector<std::vector<int> > &obs);
 };
 
+//TODO - Move this
+class Constraint_Oracle_Base {
+public:
+    virtual bool operator()(std::vector<int> hid) = 0;
+};
+
 }  // namespace chmmpp
