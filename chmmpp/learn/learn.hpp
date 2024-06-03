@@ -54,14 +54,10 @@ public:
     {
         std::vector<std::vector<std::vector<int>>> output;
 
-        auto constraintOracle = [this](std::vector<int> _obs) {
-            return (*constraint_oracle)(_obs);
-        };
-
         for(size_t r = 0; r < obs.size(); ++r) {
             std::vector<std::vector<int>> tempHidden;
             std::vector<double> temp;
-            aStarMultOracle(hmm, obs[r], tempHidden, temp, constraintOracle, num_solutions,
+            aStarMultOracle(hmm, obs[r], tempHidden, temp, constraint_oracle, num_solutions,
                                 max_iterations);
             output.push_back(tempHidden);
         }

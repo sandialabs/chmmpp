@@ -48,7 +48,7 @@ void run(T& hmm, V& obs, W& hid, const Z& fn)
 int main()
 {
     // Top-level config parameters
-    size_t T = 25;                  // Time Horizon
+    size_t T = 50;                  // Time Horizon
     size_t inference_numZeros = 0;  // Number of zeros used for inference.
     size_t seed = 1937309487;
 
@@ -108,10 +108,12 @@ int main()
     std::cout << "------------------------------------------------------------------------\n";
     std::cout << "Running inference without constraint - LP\n";
     std::cout << "------------------------------------------------------------------------\n";
+    #if 0
     run(hmm, obs, hid,
         [](chmmpp::HMM& hmm, const std::vector<int>& obs, std::vector<int>& hs, double& logProb) {
             hmm.lp_map_inference(obs, hs, logProb);
         });
+    #endif
 
     // NZHMM Tests
 
@@ -133,9 +135,11 @@ int main()
     std::cout << "Running inference with constraint - MIP \n";
     std::cout << "------------------------------------------------------------------------\n";
     // nzhmm.set_option("debug", 1);
+    #if 0
     run(nzhmm, obs, hid,
         [](chmmpp::numZerosHMM& nzhmm, const std::vector<int>& obs, std::vector<int>& hs,
            double& logProb) { nzhmm.mip_map_inference(obs, hs, logProb); });
+    #endif
 
     return 0;
 }

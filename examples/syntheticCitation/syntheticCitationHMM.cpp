@@ -16,6 +16,10 @@ public:
         }
         return true;
     }
+    
+    Constraint_Oracle_Synthetic_Citation() {
+        partial_oracle = true;
+    }
 };
 
 syntheticCitationHMM::syntheticCitationHMM() 

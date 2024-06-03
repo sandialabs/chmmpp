@@ -5,6 +5,7 @@
 
 int main()
 {
+    #if 0 
     // bool oracleConstraint(std::vector<int> hid, double numZeros);
 
     std::vector<std::vector<double> > A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
@@ -68,6 +69,6 @@ int main()
     toLearn_hardEM.print();
     std::cout << "True parameter values:\n\n";
     trueHMM.print();
-
+#endif
     return 0;
 }

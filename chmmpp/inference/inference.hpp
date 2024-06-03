@@ -24,16 +24,15 @@ void viterbi(const HMM &hmm, const std::vector<int> &observations, std::vector<i
 
 void aStarOracle(const HMM &hmm, const std::vector<int> &observations,
                  std::vector<int> &hidden_states, double &logProb,
-                 const std::function<bool(std::vector<int> &)> &constraintOracle,
-                 bool partialOracle = false);
+                 const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle);
 
 void aStarMultOracle(const HMM &hmm, const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
-                     const std::function<bool(std::vector<int> &)> &constraintOracle,
+                     const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
                      const int numSolns, const Options &options);
 void aStarMultOracle(const HMM &hmm, const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
-                     const std::function<bool(std::vector<int> &)> &constraintOracle,
+                     const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
                      const int numSolns, unsigned int max_iterations);
 
 }  // namespace chmmpp

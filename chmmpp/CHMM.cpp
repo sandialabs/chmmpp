@@ -6,9 +6,13 @@ namespace chmmpp {
 //TODO - add max_iterations
 void CHMM::run(const int &T, std::vector<int> &observedStates, std::vector<int> &hiddenStates)
 {
+    if(!constraint_oracle) {
+        std::cout << "Error: To call the function run in CHMM, you must overload it or provide a constraint oracle." << std::endl << std::endl;
+        return;
+    }
     while(true) {
         hmm.run(T,observedStates,hiddenStates);
-        if(constraintOracle(hiddenStates)) {
+        if((*constraint_oracle)(hiddenStates)) {
             break;
         }
     }
@@ -17,20 +21,39 @@ void CHMM::run(const int &T, std::vector<int> &observedStates, std::vector<int> 
 void CHMM::aStar(const std::vector<int> &observations, std::vector<int> &hidden_states,
                  double &logProb)
 {
-    chmmpp::aStarOracle(hmm, observations, hidden_states, logProb, constraintOracle);
+    if(!constraint_oracle) {
+        std::cout << "Error: To call the function aStar in CHMM, you must overload it or provide a constraint oracle." << std::endl << std::endl;
+        return;
+    }
+    chmmpp::aStarOracle(hmm, observations, hidden_states, logProb, constraint_oracle);
 }
 
 void CHMM::aStarMult(const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
                      const int numSolns)
 {
-    chmmpp::aStarMultOracle(hmm, observations, hidden_states, logProb, constraintOracle, numSolns,
+    if(!constraint_oracle) {
+        std::cout << "Error: To call the function aStarMult in CHMM, you must overload it or provide a constraint oracle." << std::endl << std::endl;
+        return;
+    }
+    if(numSolns == 1) {
+        std::vector<int> _hidden_states;
+        double _logProb;
+        aStar(observations, _hidden_states, _logProb);
+        hidden_states.clear();
+        hidden_states.push_back(_hidden_states);
+        logProb.clear();
+        logProb.push_back(_logProb);
+        return;
+    }
+    chmmpp::aStarMultOracle(hmm, observations, hidden_states, logProb, constraint_oracle, numSolns,
                             this->get_options());
 }
 
 void CHMM::mip_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states,
                              double &logProb)
 {
+    std::cout << "Warning: mip_map_inference not defined in CHMM." << std::endl << std::endl;
     hidden_states.resize(hmm.getH());
     logProb = 0;
 }
@@ -104,9 +127,8 @@ void CHMM::learn_semisupervised_hardEM(const std::vector<std::vector<int>> &supe
                                        const std::vector<std::vector<int>> &supervisedHidden,
                                        const std::vector<std::vector<int>> &unsupervisedObs)
 {
-    chmmpp::learn_semisupervised_hardEM(hmm, supervisedObs, supervisedHidden, unsupervisedObs,
-                                        this->constraintOracle, this->partialOracle,
-                                        this->get_options());
+    //TODO
+    return;
 }
 
 }  // namespace chmmpp

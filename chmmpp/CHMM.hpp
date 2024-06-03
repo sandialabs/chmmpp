@@ -7,63 +7,12 @@
 
 namespace chmmpp {
 
-
-
-namespace {
-
-#if 0
-std::vector<std::vector<std::vector<int>>> _generator_stochastic(
-                    HMM& hmm, const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
-                    const std::vector<std::vector<int>> &obs, 
-                    const int& num_solutions, const int& max_iterations)
-
-{
-    std::vector<std::vector<std::vector<int>>> output;
-
-    for(size_t r = 0; r < obs.size(); ++r) {
-        std::vector<std::vector<int>> tempHiddenVec;
-        while(tempHiddenVec.size() < num_solutions) {
-            auto tempHidden = hmm.generateHidden(obs[r]);
-            if(constraintOracle[r](tempHidden)) {
-                tempHiddenVec.push_back(tempHidden);
-            }
-        }
-        output.push_back(tempHiddenVec);
-    }
-    return output;
-}
-
-std::vector<std::vector<std::vector<int>>> _generator_hardEM(
-                    const HMM& hmm, const std::vector<std::function<bool(std::vector<int>&)> >& constraintOracle,
-                    const std::vector<std::vector<int>> &obs, 
-                    const int& num_solutions, const int& max_iterations)
-
-{
-    std::vector<std::vector<std::vector<int>>> output;
-
-    for(size_t r = 0; r < obs.size(); ++r) {
-        std::vector<std::vector<int>> tempHidden;
-        std::vector<double> temp;
-        aStarMultOracle(hmm, obs[r], tempHidden, temp, constraintOracle[r], num_solutions,
-                            max_iterations);
-        output.push_back(tempHidden);
-    }
-    return output;
-}
-#endif
-
-} //namespace
-
-
-
 //
 // A base class that supports various methods for constrained inference.
 //
 class CHMM : public Options {
    public:
     HMM hmm;
-    std::function<bool(std::vector<int> &)> constraintOracle;
-    bool partialOracle = false;  // True if constraintOracle can be applied to partial sequences
     
     //Optional Variables
     std::shared_ptr<Generator_Base> generator_stochastic;
@@ -126,26 +75,6 @@ class CHMM : public Options {
     // constraints
     virtual void mip_map_inference(const std::vector<int> &observations,
                                    std::vector<int> &hidden_states, double &logProb);
-
-    #if 0
-    std::function<std::vector<std::vector<std::vector<int>>> (
-                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
-                        const std::vector<std::vector<int>>&, 
-                        const int&, const int&
-                    )> generator_stochastic = _generator_stochastic;
-
-    std::function<std::vector<std::vector<std::vector<int>>> (
-                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
-                        const std::vector<std::vector<int>>&, 
-                        const int&, const int&
-                    )> generator_hardEM = _generator_hardEM;
-
-    std::function<std::vector<std::vector<std::vector<int>>> (
-                        HMM&, const std::vector<std::function<bool(std::vector<int> &)>>&,
-                        const std::vector<std::vector<int>>&, 
-                        const int&, const int&
-                    )> generator_IP;
-    #endif
 
     //
     // learning methods

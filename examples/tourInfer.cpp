@@ -31,6 +31,8 @@ bool oracleConstraint(std::vector<int> hid)
 
 int main()
 {
+    //TODO
+    #if 0
     bool oracleConstraint(std::vector<int> hid);
 
     std::vector<std::vector<double> > A{{0.80, 0.05, 0.05, 0.05, 0.05},
@@ -111,6 +113,6 @@ int main()
         std::cout << hidGuessConstraints[t];
     }
     std::cout << "\n\n";
-
+    #endif 
     return 0;
 }

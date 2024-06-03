@@ -29,6 +29,7 @@ bool oracleConstraint(std::vector<int> hid)
 
 int main()
 {
+    #if 0
     bool oracleConstraint(std::vector<int> hid);
 
     std::vector<std::vector<double> > A{{0.80, 0.05, 0.05, 0.05, 0.05},
@@ -104,6 +105,6 @@ int main()
         }
         std::cout << "\n";
     }
-
+#endif
     return 0;
 }

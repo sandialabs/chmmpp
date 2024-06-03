@@ -18,8 +18,7 @@ namespace chmmpp {
 // the same as the code above, but we can't restrict the space if we have too many 0's
 // partial Oracle is true if we can apply the constraint to partial sequences
 void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vector<int>& hidden,
-                 double& logProb, const std::function<bool(std::vector<int>&)>& constraintOracle,
-                 bool partialOracle)
+                 double& logProb, const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle)
 {
     const int T = observations.size();
     auto H = hmm.getH();
@@ -109,8 +108,8 @@ void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vect
         openSet.pop();
         double oldGScore = gScore.at(currentSequence);
         if (t == T) {
-            if (constraintOracle(currentSequence)) {
-                logProb = oldGScore;
+            if ((*constraint_oracle)(currentSequence)) {
+                logProb = -oldGScore;
                 hidden = currentSequence;
                 return;
             }
@@ -121,14 +120,14 @@ void aStarOracle(const HMM& hmm, const std::vector<int>& observations, std::vect
                 double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                 std::vector<int> newSequence = currentSequence;
                 newSequence.push_back(h2);
-                if (partialOracle) {
-                    if (constraintOracle(newSequence)) {
-                        gScore[newSequence] = -tempGScore;
+                if (constraint_oracle->partial_oracle) {
+                    if ((*constraint_oracle)(newSequence)) {
+                        gScore[newSequence] = tempGScore;
                         openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
                     }
                 }
                 else {
-                    gScore[newSequence] = -tempGScore;
+                    gScore[newSequence] = tempGScore;
                     openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
                 }
             }

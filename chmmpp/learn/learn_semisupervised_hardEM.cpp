@@ -58,6 +58,8 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector<std::vector<int> > 
                                  const std::function<bool(std::vector<int> &)> &constraintOracle,
                                  bool partialOracle, const Options &options)
 {
+    //TODO
+    #if 0
     double gamma = 0.1;  // Does it make sense to just have a double or should it depend on the size
                          // of supervised vs. unsupervised data
     double convergence_tolerance = 1E-6;
@@ -170,6 +172,7 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector<std::vector<int> > 
 
         if (tol < convergence_tolerance) break;
     }
+    #endif
 }
 
 }  // namespace chmmpp
