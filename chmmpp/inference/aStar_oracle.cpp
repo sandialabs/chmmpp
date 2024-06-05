@@ -37,7 +37,7 @@ void process_options(const Options& options, unsigned int& max_iterations)
 
 }  // namespace
 
-void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
+void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
                      const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
                      const int numSolns, const Options& options)
@@ -45,12 +45,12 @@ void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
     unsigned int max_iterations = 0;
     process_options(options, max_iterations);
 
-    aStarMultOracle(hmm, observations, hidden_states, logProb, constraint_oracle, numSolns,
+    aStar_oracle(hmm, observations, hidden_states, logProb, constraint_oracle, numSolns,
                     max_iterations);
 }
 
 // This simpler API is used to simplify calls to aStarMultOracle from hardEM
-void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
+void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
                      const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
                      const int numSolns, unsigned int max_iterations)

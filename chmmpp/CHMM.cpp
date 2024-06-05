@@ -25,7 +25,12 @@ void CHMM::aStar(const std::vector<int> &observations, std::vector<int> &hidden_
         std::cout << "Error: To call the function aStar in CHMM, you must overload it or provide a constraint oracle." << std::endl << std::endl;
         return;
     }
-    chmmpp::aStarOracle(hmm, observations, hidden_states, logProb, constraint_oracle);
+    std::vector<std::vector<int>> hidden_states_vec;
+    std::vector<double> logProb_vec;
+    logProb_vec.push_back(logProb);
+    chmmpp::aStar_oracle(hmm, observations, hidden_states_vec, logProb_vec, constraint_oracle, 1, this->get_options());
+    hidden_states = hidden_states_vec[0];
+    logProb = logProb_vec[0];
 }
 
 void CHMM::aStarMult(const std::vector<int> &observations,
@@ -36,17 +41,7 @@ void CHMM::aStarMult(const std::vector<int> &observations,
         std::cout << "Error: To call the function aStarMult in CHMM, you must overload it or provide a constraint oracle." << std::endl << std::endl;
         return;
     }
-    if(numSolns == 1) {
-        std::vector<int> _hidden_states;
-        double _logProb;
-        aStar(observations, _hidden_states, _logProb);
-        hidden_states.clear();
-        hidden_states.push_back(_hidden_states);
-        logProb.clear();
-        logProb.push_back(_logProb);
-        return;
-    }
-    chmmpp::aStarMultOracle(hmm, observations, hidden_states, logProb, constraint_oracle, numSolns,
+    chmmpp::aStar_oracle(hmm, observations, hidden_states, logProb, constraint_oracle, numSolns,
                             this->get_options());
 }
 

@@ -30,6 +30,18 @@ void process_options(Options& options, double& convergence_tolerance, unsigned i
     }
 }
 
+void normalize(std::vector<double> &myVec) {
+    double sum = 0.;
+    for(const auto &elem: myVec) sum += elem;
+
+    if(sum != 0.) {
+        for(auto &elem: myVec) elem /= sum;
+    }
+    else {
+        for(auto &elem: myVec) elem = 1./((double) myVec.size());
+    }
+}
+
 }  // namespace
 
 void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
@@ -37,7 +49,7 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
     double convergence_tolerance = 10E-6;
     unsigned int max_iterations = 0;
     process_options(hmm.get_options(), convergence_tolerance, max_iterations);
-
+    
     auto A = hmm.getA();
     auto S = hmm.getS();
     auto E = hmm.getE();
@@ -49,6 +61,7 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
     size_t numIt = 0;
 
     while (true) {
+        ++numIt;
         std::vector<std::vector<std::vector<double> > > totalGamma;
         std::vector<std::vector<std::vector<std::vector<double> > > > totalXi;
 
@@ -72,6 +85,19 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
                 }
             }
 
+            //Normalize alpha to improve numerical underflow
+            //Have to be VERY careful with normalizing after doing this
+            for(size_t t = 0; t < T; ++t) {
+                double sum = 0.;
+                for(size_t h = 0; h < H; ++h) {
+                    sum += alpha[h][t];
+                }
+                for(size_t h = 0; h < H; ++h) {
+                    if(sum != 0) alpha[h][t] /= sum;
+                    else alpha[h][t] = 0.; //Works b/c alpha >=0. 
+                }
+            }
+
             // beta
             std::vector<std::vector<double> >
                 beta;  // beta[h][t] = P(O_{t+1} = o_{t+1} ... O_{T-1} = o_{T-1} | H_t = h theta)
@@ -89,11 +115,24 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
                 }
             }
 
+            //Normalize beta to improve numerical underflow
+            //CAREFUL with normalization!
+            for(size_t t = 0; t < T; ++t) {
+                double sum = 0.;
+                for(size_t h = 0; h < H; ++h) {
+                    sum += beta[h][t];
+                }
+                for(size_t h = 0; h < H; ++h) {
+                    if(sum != 0) beta[h][t] /= sum;
+                    else beta[h][t] = 0.; //Works b/c beta >=0. 
+                }
+            }
+
             // den = P(O | theta)
-            std::vector<double> den(T, 0);
-            for (int t = 0; t < T; ++t) {
+            std::vector<double> gamma_den(T);
+            for(size_t t = 0; t < T; ++t) { 
                 for (size_t h = 0; h < H; ++h) {
-                    den[t] += alpha[h][t] * beta[h][t];
+                    gamma_den[t] += alpha[h][t] * beta[h][t];
                 }
             }
 
@@ -106,12 +145,22 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
 
             for (size_t h = 0; h < H; ++h) {
                 for (int t = 0; t < T; ++t) {
-                    gamma[h][t] = alpha[h][t] * beta[h][t] / den[t];
+                    gamma[h][t] = alpha[h][t] * beta[h][t] / gamma_den[t];
                 }
             }
             totalGamma.push_back(gamma);
 
             // xi
+            std::vector<double> xi_den(T-1);
+            for(size_t t = 0; t < T-1; ++t) {
+                for(size_t h1 = 0; h1 < H; ++h1) {
+                    for(size_t h2 = 0; h2 < H; ++h2) {
+                       xi_den[t] += alpha[h1][t] * beta[h2][t + 1] * A[h1][h2]
+                                        * E[h2][obs[r][t + 1]];
+                    }
+                }
+            }
+
             std::vector<std::vector<std::vector<double> > >
                 xi;  // xi[i][j][t] = P(H_t = i, H_t+1 = j, O| theta)
             xi.resize(H);
@@ -126,7 +175,7 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
                 for (size_t h2 = 0; h2 < H; ++h2) {
                     for (int t = 0; t < T - 1; ++t) {
                         xi[h1][h2][t] = alpha[h1][t] * beta[h2][t + 1] * A[h1][h2]
-                                        * E[h2][obs[r][t + 1]] / den[t];
+                                        * E[h2][obs[r][t + 1]] / xi_den[t];
                     }
                 }
             }
@@ -181,6 +230,8 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
             }
         }
         hmm.setA(A);
+        std::cout << numIt << " " << tol << std::endl;
+        //hmm.print();
 
         if (tol < convergence_tolerance) break;
         if (max_iterations and (++numIt > max_iterations)) break;

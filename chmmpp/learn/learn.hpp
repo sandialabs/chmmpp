@@ -57,7 +57,7 @@ public:
         for(size_t r = 0; r < obs.size(); ++r) {
             std::vector<std::vector<int>> tempHidden;
             std::vector<double> temp;
-            aStarMultOracle(hmm, obs[r], tempHidden, temp, constraint_oracle, num_solutions,
+            aStar_oracle(hmm, obs[r], tempHidden, temp, constraint_oracle, num_solutions,
                                 max_iterations);
             output.push_back(tempHidden);
         }
