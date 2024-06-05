@@ -47,7 +47,7 @@ void normalize(std::vector<double> &myVec) {
 void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
 {
     double convergence_tolerance = 10E-6;
-    unsigned int max_iterations = 0;
+    unsigned int max_iterations = 100000;
     process_options(hmm.get_options(), convergence_tolerance, max_iterations);
     
     auto A = hmm.getA();
@@ -230,11 +230,17 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
             }
         }
         hmm.setA(A);
-        std::cout << numIt << " " << tol << std::endl;
+        //std::cout << numIt << " " << tol << std::endl;
         //hmm.print();
 
-        if (tol < convergence_tolerance) break;
-        if (max_iterations and (++numIt > max_iterations)) break;
+        if (tol < convergence_tolerance) {
+            std::cout << "Algorithm took " << numIt << " iterations.\n";
+            break;
+        }
+        if (max_iterations and (numIt >= max_iterations)) {
+            std::cout << "Algorithm took " << numIt << " iterations.\n";
+            break;
+        }
     }
 }
 

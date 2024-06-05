@@ -120,7 +120,7 @@ void run_tests(bool debug = false)
     size_t T = 25;                                // Time Horizon
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {1,10};
+    std::vector<int> numObsVec = {1,10,100};
     double perturbParam = 0.9;                         // How much the parameters are perturbed
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
@@ -175,12 +175,11 @@ void run_tests(bool debug = false)
             //Unconstrained HMM
             std::cout << "Running unconstrained learning.\n";
             chmmpp::HMM unconstrained_HMM = perturbed_HMM;
-            unconstrained_HMM.set_seed(0);
+            unconstrained_HMM.set_seed(1);
             HMM_run_times[i].push_back(
                 time(unconstrained_HMM,obsVec,
                     [](chmmpp::HMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.baum_welch(obs); })
             );
-            std::cout << "TEST" << std::endl;
             HMM_error[i].push_back(std::max( matError(unconstrained_HMM.getA(),A), 
                 std::max(vecError(unconstrained_HMM.getS(),S), matError(unconstrained_HMM.getE(), E))
             ));
