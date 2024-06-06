@@ -44,12 +44,12 @@ class Generator_MIP_NumZeros : public Generator_Base {
             for(size_t b = 0; b < num_solutions; ++b) {
                 auto unconstrained_hidden = hmm.generateHidden(obs[r]);
                 #ifdef WITH_COEK
-                    //project(hmm, obs[r], unconstrained_hidden, numZeros);
+                    project(hmm, obs[r], unconstrained_hidden, numZeros);
                 #endif
                 output[r].push_back(unconstrained_hidden);
             }
         }
-        
+
         return output;
     }
 
