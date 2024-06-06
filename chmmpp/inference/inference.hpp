@@ -3,6 +3,7 @@
 #include <functional>
 #include <vector>
 #include <chmmpp/HMM.hpp>
+#include <memory>
 
 namespace chmmpp {
 
