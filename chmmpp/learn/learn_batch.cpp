@@ -68,8 +68,6 @@ void learn_batch(HMM &hmm,
         std::vector<std::vector<double>> newProbs(obs.size()); //r,n
         for(size_t r = 0; r < obs.size(); ++r) { 
             for(size_t n = 0; n < newHidden[r].size(); ++n) {
-                std::cout << obs[r][0] << std::endl;
-                std::cout << newHidden[r][n][0] << std::endl;
                 newProbs[r].push_back(hmm.logProb(obs[r], newHidden[r][n]));
             }
         }

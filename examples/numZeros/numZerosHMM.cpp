@@ -41,16 +41,15 @@ class Generator_MIP_NumZeros : public Generator_Base {
     {
         std::vector<std::vector<std::vector<int>>> output(obs.size());
         for(size_t r = 0; r < obs.size(); ++r) {
-            output[r].resize(num_solutions);
             for(size_t b = 0; b < num_solutions; ++b) {
                 auto unconstrained_hidden = hmm.generateHidden(obs[r]);
                 #ifdef WITH_COEK
-                    project(hmm, obs[r], unconstrained_hidden, numZeros);
+                    //project(hmm, obs[r], unconstrained_hidden, numZeros);
                 #endif
                 output[r].push_back(unconstrained_hidden);
             }
         }
-
+        
         return output;
     }
 
