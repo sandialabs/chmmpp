@@ -176,7 +176,7 @@ void run_all(bool with_rejection, bool debug = false)
     nzhmm.set_option("quiet", 0);
     nzhmm.set_option("debug", 0);
     run(nzhmm, obs, [](chmmpp::numZerosHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
-        nzhmm.learn_mip(obs);
+        nzhmm.learn_MIP(obs);
     });
 #endif
 

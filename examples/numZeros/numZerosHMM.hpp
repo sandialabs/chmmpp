@@ -42,14 +42,6 @@ class numZerosHMM : public CHMM {
     void learn_numZeros(const std::vector<std::vector<int>> &observations);
     void learn_numZeros(const std::vector<int> &observations);
 
-    // SAEM using MIP to generate samples
-    void learn_mip(const std::vector<std::vector<int>> &observations);
-    void learn_mip(const std::vector<int> &observations)
-    {
-        std::vector<std::vector<int>> tmp;
-        tmp.push_back(observations);
-        learn_mip(tmp);
-    }
 };
 
 }  // namespace chmmpp

@@ -104,7 +104,7 @@ void CHMM::learn_hardEM(const std::vector<int> &obs)
 
 void CHMM::learn_MIP(const std::vector<std::vector<int>> &obs) {
     if(generator_MIP) {
-        learn_batch(obs, *generator_hardEM);
+        learn_batch(obs, *generator_MIP);
     }
     else {
         std::cout << "ERROR: In learn_MIP generator_MIP or constraint_oracle must be defined." << std::endl;
