@@ -36,6 +36,9 @@ target_link_libraries(numzeros_minfer PRIVATE chmmpp::chmmpp)
 add_executable(numzeros_learn numZeros/simpleLearn.cpp ${numZeros})
 target_link_libraries(numzeros_learn PRIVATE chmmpp::chmmpp)
 
+add_executable(numzeros_learn_test numZeros/learnTest.cpp ${numZeros})
+target_link_libraries(numzeros_learn_test PRIVATE chmmpp::chmmpp)
+
 
 #syntheticCitation
 add_executable(syntheticCitation_learn syntheticCitation/simpleLearn.cpp ${syntheticCitation})
