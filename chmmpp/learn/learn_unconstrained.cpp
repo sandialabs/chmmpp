@@ -47,7 +47,7 @@ void normalize(std::vector<double> &myVec) {
 void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
 {
     double convergence_tolerance = 10E-6;
-    unsigned int max_iterations = 1000000;
+    unsigned int max_iterations = 10000000;
     process_options(hmm.get_options(), convergence_tolerance, max_iterations);
     
     auto A = hmm.getA();
@@ -193,21 +193,19 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
         hmm.setS(S);
 
         // New E
-        for (size_t r = 0; r < R; ++r) {
-            for (size_t h = 0; h < H; ++h) {
-                for (size_t o = 0; o < O; ++o) {
-                    double num = 0.;
-                    double newDen = 0.;
-
+        for (size_t h = 0; h < H; ++h) {
+            for (size_t o = 0; o < O; ++o) {
+                double num = 0.;
+                double newDen = 0.;
+                for (size_t r = 0; r < R; ++r) {
                     for (int t = 0; t < T; ++t) {
                         if (obs[r][t] == o) {
                             num += totalGamma[r][h][t];
                         }
                         newDen += totalGamma[r][h][t];
                     }
-
-                    E[h][o] = num / newDen;
                 }
+                E[h][o] = num / newDen;
             }
         }
         hmm.setE(E);

@@ -12,7 +12,6 @@ namespace chmmpp {
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
 
-#ifdef WITH_COEK //Not sure if this is the best way to do this
 class InferenceModel : public LPModel {
    public:
     // virtual void set_options(const Options& options);
@@ -46,6 +45,5 @@ class Generator_MIP_NumZeros : public Generator_Base {
     
     Generator_MIP_NumZeros(const size_t& _num_zeros);
 };
-#endif
 
 } // namespace chmmpp

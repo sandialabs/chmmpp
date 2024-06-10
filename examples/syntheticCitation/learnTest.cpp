@@ -120,7 +120,7 @@ void run_tests(bool debug = false)
     size_t T = 25;                                // Time Horizon
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {1,10,100};
+    std::vector<int> numObsVec = {100};
     double perturbParam = 0.9;                         // How much the parameters are perturbed
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
@@ -150,11 +150,13 @@ void run_tests(bool debug = false)
 
             //Create Observations
             std::vector<std::vector<int>> obsVec(numObs);
+            std::vector<std::vector<int>> hidVec(numObs);
             for(size_t k = 0; k < numObs; ++k) {
                 std::vector<int> hid;
                 std::vector<int> obs;
                 originalCHMM.run(T,obs,hid);
                 obsVec[k] = obs;
+                hidVec[k] = hid;
             }
 
             //Create a new CHMM where we don't exactly know the parameters
@@ -171,6 +173,27 @@ void run_tests(bool debug = false)
             }
 
             chmmpp::HMM perturbed_HMM(perturbedA,perturbedS,perturbedE,0);
+
+            if(debug) {
+                std::cout << "Perturbed parameters:\n";
+                perturbed_HMM.print();
+                std::cout << "Observations:\n";
+                for(size_t i = 0; i < obsVec.size(); ++i) {
+                    for(size_t j = 0; j < obsVec[i].size(); ++j) {
+                        std::cout << obsVec[i][j];
+                    }
+                    std::cout << "\n";
+                }
+                std::cout << "\n";
+                std::cout << "Hidden:\n";
+                for(size_t i = 0; i < hidVec.size(); ++i) {
+                    for(size_t j = 0; j < hidVec[i].size(); ++j) {
+                        std::cout << hidVec[i][j];
+                    }
+                    std::cout << "\n";
+                }
+                std::cout << "\n";
+            }
             
             //Unconstrained HMM
             std::cout << "Running unconstrained learning.\n";
