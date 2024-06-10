@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <chrono>
-#include "syntheticCitationHMM.hpp"
+#include "numZerosHMM.hpp"
 
 //Output is in milliseconds
 template <typename T, typename V, typename Z>
@@ -101,23 +101,12 @@ void run_tests(bool debug = false)
 {
 
     // Initial Guess
-    std::vector<std::vector<double>> A{
-        {0.59, 0.11, 0.1, 0.1, 0.1}, 
-        {0.09, 0.61, 0.1, 0.1, 0.1},
-        {0.1, 0.1, 0.62, 0.08, 0.1}, 
-        {0.1, 0.1, 0.12, 0.58, 0.1}, 
-        {0.1, 0.1, 0.1, 0.1, 0.6}  
-    };  // Transition Matrix
-    std::vector<double> S = {0.2, 0.2, 0.2, 0.2, 0.2}; // Start probabilities
-    std::vector<std::vector<double>> E{
-        {0.6, 0.1, 0.1, 0.1, 0.1}, 
-        {0.1, 0.6, 0.1, 0.1, 0.1},
-        {0.1, 0.1, 0.6, 0.1, 0.1}, 
-        {0.1, 0.1, 0.1, 0.6, 0.1}, 
-        {0.1, 0.1, 0.1, 0.1, 0.6}  
-    };  // Emission Matrix
+    std::vector<std::vector<double>> A{{0.6, 0.4}, {0.3, 0.7}};  // Transition Matrix
+    std::vector<double> S = {0.4, 0.6};                          // Start probabilities
+    std::vector<std::vector<double>> E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
     size_t T = 25;                                // Time Horizon
+    size_t numZeros = 10;                              // Number of zeros
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
     std::vector<int> numObsVec = {1,10,100};
@@ -131,7 +120,7 @@ void run_tests(bool debug = false)
     std::vector<std::vector<double>> stochastic_error(numObsVec.size());
     std::vector<std::vector<double>> hardEM_error(numObsVec.size());
 
-    chmmpp::syntheticCitationHMM originalCHMM;
+    chmmpp::numZerosHMM originalCHMM(numZeros);
     originalCHMM.initialize(A,S,E);
     originalCHMM.set_seed(0);
 
@@ -186,7 +175,7 @@ void run_tests(bool debug = false)
 
             //CHMM -- hardEM
             std::cout << "Running hardEM batch learning.\n";
-            chmmpp::syntheticCitationHMM hardEM_CHMM;
+            chmmpp::numZerosHMM hardEM_CHMM(numZeros);
             hardEM_CHMM.initialize(chmmpp::HMM(perturbed_HMM));
             hardEM_CHMM.set_seed(0);
             hardEM_run_times[i].push_back(
@@ -199,7 +188,7 @@ void run_tests(bool debug = false)
 
             //CHMM -- stochastic
             std::cout << "Running stochastic batch learning.\n";
-            chmmpp::syntheticCitationHMM stochastic_CHMM;
+            chmmpp::numZerosHMM stochastic_CHMM(numZeros);
             stochastic_CHMM.initialize(chmmpp::HMM(perturbed_HMM));
             stochastic_CHMM.set_seed(0);
             stochastic_run_times[i].push_back(

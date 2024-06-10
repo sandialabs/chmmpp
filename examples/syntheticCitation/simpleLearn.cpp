@@ -5,7 +5,6 @@
 //
 #include <iostream>
 #include "syntheticCitationHMM.hpp"
-
 template <typename T, typename V, typename Z>
 void run(T& hmm, V& obs, const Z& fn)
 {
@@ -51,14 +50,14 @@ void run_all(bool debug = false)
     };  // Emission Matrix
 
     size_t T = 25;         // Time Horizon
-    size_t numIt = 100;   // Number of runs
+    size_t numIt = 10;   // Number of runs
 
     chmmpp::HMM hmm(A, S, E, 0);
 
     // Store the observed and hidden variables as well as the number of zeros
     std::vector<std::vector<int>> obs(numIt);
     std::vector<std::vector<int>> hid(numIt);
-
+    
     std::cout << "Num Obs:   " << T << std::endl;
     std::cout << "Num Runs:  " << numIt << std::endl;
     hmm.reset_rng();
@@ -123,9 +122,8 @@ void run_all(bool debug = false)
     std::cout << "------------------------------------------------------------------------\n";
     schmmCopy = schmm;
     schmmCopy.set_option("max_iterations", 100000000);
-    //TODO- make the number of best solutions an option
     run(schmmCopy, obs,
-        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs, 100); });
+        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs); });
     schmm.clear_options();
 
     std::cout << std::endl;

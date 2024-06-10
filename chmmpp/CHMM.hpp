@@ -2,6 +2,8 @@
 
 #include <functional>
 #include <chmmpp/HMM.hpp>
+#include <chmmpp/inference/inference.hpp>
+#include <chmmpp/learn/learn.hpp>
 
 namespace chmmpp {
 
@@ -11,8 +13,12 @@ namespace chmmpp {
 class CHMM : public Options {
    public:
     HMM hmm;
-    std::function<bool(std::vector<int> &)> constraintOracle;
-    bool partialOracle = false;  // True if constraintOracle can be applied to partial sequences
+    
+    //Optional Variables
+    std::shared_ptr<Generator_Base> generator_stochastic;
+    std::shared_ptr<Generator_Base> generator_hardEM;
+    std::shared_ptr<Generator_Base> generator_MIP; 
+    std::shared_ptr<Constraint_Oracle_Base> constraint_oracle;
 
    public:
     void initialize(const HMM &_hmm) { hmm = _hmm; }
@@ -44,6 +50,8 @@ class CHMM : public Options {
 
     virtual void print() const { hmm.print(); }
 
+    virtual void run(const int &T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
+
     //
     // inference methods
     //
@@ -72,39 +80,19 @@ class CHMM : public Options {
     // learning methods
     //
 
-    // TODO
-    //
-    //  Options
-    //      convergence_tolerance (double):     Stop learning when difference in model parameters
-    //                                          falls below this threshold (Default: 10E-6).
-    //      C (unsigned int):                   TODO
-    //
-    void learn_stochastic(const std::vector<std::vector<int>> &obs);
+    //Most general learning method called by all the others
+    void learn_batch(const std::vector<std::vector<int>> &obs, Generator_Base &generator);
+    void learn_batch(const std::vector<int> &obs, Generator_Base &generator);
 
-    // TODO
-    //
-    //  Options
-    //      convergence_tolerance (double):     Stop learning when difference in model parameters
-    //                                          falls below this threshold (Default: 10E-6).
-    //      C (unsigned int):                   TODO
-    //
+    void learn_stochastic(const std::vector<std::vector<int>> &obs);
     void learn_stochastic(const std::vector<int> &obs);
 
-    // TODO
-    //
-    //  Options
-    //      convergence_tolerance (double):     Stop learning when difference in model parameters
-    //                                          falls below this threshold (Default: 10E-6).
-    //
-    void learn_hardEM(const std::vector<std::vector<int>> &obs, const int numSolns = 1);
+    void learn_hardEM(const std::vector<std::vector<int>> &obs);
+    void learn_hardEM(const std::vector<int> &obs);
 
-    // TODO
-    //
-    //  Options
-    //      convergence_tolerance (double):     Stop learning when difference in model parameters
-    //                                          falls below this threshold (Default: 10E-6).
-    //
-    void learn_hardEM(const std::vector<int> &obs, const int numSolns = 1);
+    void learn_MIP(const std::vector<std::vector<int>> &obs);
+    void learn_MIP(const std::vector<int> &obs);
+
 
     // CLM - IN PROGRESS
     //

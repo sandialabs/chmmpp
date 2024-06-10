@@ -29,13 +29,10 @@ if (with_boost)
             inference/HMM_inference.cpp
             inference/aStar.cpp
             inference/viterbi.cpp
-            inference/aStarMultOracle.cpp
-            inference/aStarOracle.cpp
+            inference/aStar_oracle.cpp
 
-	        learn/learn_unconstrained.cpp
-	        learn/learn_stochastic.cpp
-	        learn/LearnStochastic.cpp
-	        learn/learn_hardEM.cpp
+	    learn/learn_unconstrained.cpp
+	    learn/LearnStochastic.cpp
             learn/learn_semisupervised_hardEM.cpp
             learn/learn_batch.cpp
             )

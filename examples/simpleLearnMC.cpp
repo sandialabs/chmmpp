@@ -5,6 +5,7 @@
 
 int main()
 {
+    #if 0
     std::vector<std::vector<double> > A{{0.899, 0.101}, {0.099, 0.901}};  // Transition Matrix
     std::vector<double> S = {0.501, 0.499};                               // Start probabilities
     std::vector<std::vector<double> > E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
@@ -65,6 +66,6 @@ int main()
         std::cout << "\n";
     }
     std::cout << "\n\n";*/
-
+#endif
     return 0;
 }

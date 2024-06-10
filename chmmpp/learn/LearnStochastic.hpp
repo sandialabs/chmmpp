@@ -23,7 +23,7 @@ class LearnStochastic {
     void learn(const std::vector<int> &obs, Options &options);
 
     virtual std::pair<std::vector<int>,double> generate_feasible_hidden(size_t T, const std::vector<int> &obs) = 0;
-    virtual std::vector<int> generate_random_feasible_hidden(size_t T, const std::vector<int> &obs, long int seed) = 0;
+    virtual std::vector<int> generate_random_feasible_hidden(size_t T, const std::vector<int> &obs, long int seed) = 0; 
 };
 
 }  // namespace chmmpp

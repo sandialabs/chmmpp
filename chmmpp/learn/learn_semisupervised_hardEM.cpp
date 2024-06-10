@@ -2,6 +2,24 @@
 #include "learn.hpp"
 #include "../inference/inference.hpp"
 
+namespace {
+    template <typename T>
+    void normalize(std::vector<T> &vec)
+    {
+        double sum = 0.;
+        double vecSizeInv = 1. / vec.size();
+
+        for (const auto &val : vec) sum += val;
+
+        if (sum != 0) {
+            for (auto &val : vec) val /= sum;
+        }
+        else {
+            for (auto &val : vec) val = vecSizeInv;
+        }
+    }
+}
+
 namespace chmmpp {
 
 // CLM - TODO -- I don't fully understand this part yet, I just need a parameter called gamma which
@@ -34,28 +52,14 @@ void process_options(const Options &options, double &convergence_tolerance, unsi
     }
 }
 
-template <typename T>
-void normalize(std::vector<T> &vec)
-{
-    double sum = 0.;
-    double vecSizeInv = 1. / vec.size();
-
-    for (const auto &val : vec) sum += val;
-
-    if (sum != 0) {
-        for (auto &val : vec) val /= sum;
-    }
-    else {
-        for (auto &val : vec) val = vecSizeInv;
-    }
-}
-
 void learn_semisupervised_hardEM(HMM &hmm, const std::vector<std::vector<int> > &supervisedObs,
                                  const std::vector<std::vector<int> > &supervisedHidden,
                                  const std::vector<std::vector<int> > &unsupervisedObs,
                                  const std::function<bool(std::vector<int> &)> &constraintOracle,
                                  bool partialOracle, const Options &options)
 {
+    //TODO
+    #if 0
     double gamma = 0.1;  // Does it make sense to just have a double or should it depend on the size
                          // of supervised vs. unsupervised data
     double convergence_tolerance = 1E-6;
@@ -168,6 +172,7 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector<std::vector<int> > 
 
         if (tol < convergence_tolerance) break;
     }
+    #endif
 }
 
 }  // namespace chmmpp

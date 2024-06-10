@@ -37,22 +37,22 @@ void process_options(const Options& options, unsigned int& max_iterations)
 
 }  // namespace
 
-void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
+void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
-                     const std::function<bool(std::vector<int>&)>& constraintOracle,
+                     const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
                      const int numSolns, const Options& options)
 {
     unsigned int max_iterations = 0;
     process_options(options, max_iterations);
 
-    aStarMultOracle(hmm, observations, hidden_states, logProb, constraintOracle, numSolns,
+    aStar_oracle(hmm, observations, hidden_states, logProb, constraint_oracle, numSolns,
                     max_iterations);
 }
 
 // This simpler API is used to simplify calls to aStarMultOracle from hardEM
-void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
+void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
-                     const std::function<bool(std::vector<int>&)>& constraintOracle,
+                     const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
                      const int numSolns, unsigned int max_iterations)
 {
     const int T = observations.size();
@@ -138,9 +138,9 @@ void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
         double oldGScore = gScore.at(currentSequence);
 
         if (t == T) {
-            if (constraintOracle(currentSequence)) {
+            if ((*constraint_oracle)(currentSequence)) {
                 hidden_states.push_back(currentSequence);
-                logProb.push_back(oldGScore);  // WEH - is this right?
+                logProb.push_back(-oldGScore); 
                 ++counter;
                 if (counter == numSolns) {
                     return;
@@ -153,9 +153,16 @@ void aStarMultOracle(const HMM& hmm, const std::vector<int>& observations,
                 double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
                 std::vector<int> newSequence = currentSequence;
                 newSequence.push_back(h2);
-
-                gScore[newSequence] = tempGScore;
-                openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
+                if (constraint_oracle->partial_oracle) {
+                    if ((*constraint_oracle)(newSequence)) {
+                        gScore[newSequence] = -tempGScore;
+                        openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
+                    }
+                }
+                else {
+                    gScore[newSequence] = -tempGScore;
+                    openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
+                }
             }
         }
     }

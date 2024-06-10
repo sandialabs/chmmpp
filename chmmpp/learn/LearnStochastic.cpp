@@ -5,6 +5,7 @@
 #include <coek/util/io_utils.hpp>
 #endif
 #include "chmmpp/learn/LearnStochastic.hpp"
+#include "../inference/inference.hpp" //For learn_hardEM
 
 namespace chmmpp {
 
@@ -22,6 +23,7 @@ void process_options(Options &options, double &convergence_tolerance, unsigned i
     options.clear_option("max_iterations");
     options.clear_option("quiet");
 }
+
 
 }  // namespace
 

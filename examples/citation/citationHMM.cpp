@@ -53,6 +53,8 @@ citationHMM::citationHMM(const std::vector<std::vector<std::string> > &supervise
 
     // Constraint Oracle
     // Categories appear in chunks and only at most once
+    //TODO
+    #if 0
     constraintOracle = [](std::vector<int> &hid) -> bool {
         for (int i = 2; i < hid.size(); ++i) {
             if (hid[i] != hid[i - 1]) {
@@ -68,6 +70,7 @@ citationHMM::citationHMM(const std::vector<std::vector<std::string> > &supervise
     };
 
     this->partialOracle = true;  // Only needs partial sequences
+    #endif
 }
 
 }  // namespace chmmpp
