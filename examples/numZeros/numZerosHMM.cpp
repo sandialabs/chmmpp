@@ -24,7 +24,9 @@ public:
 numZerosHMM::numZerosHMM(int _numZeros) : numZeros(_numZeros)
 {
     constraint_oracle = std::make_shared<Constraint_Oracle_NumZeros>(_numZeros);
+    #ifdef WITH_COEK
     generator_MIP = std::make_shared<Generator_MIP_NumZeros>(_numZeros);
+    #endif
 }
 
 }  // namespace chmmpp

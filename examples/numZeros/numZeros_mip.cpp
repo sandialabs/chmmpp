@@ -9,21 +9,19 @@ namespace chmmpp {
 
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
-// Inference
+// InferenceW
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
-
-//#ifdef WITH_COEK
 
 void InferenceModel::print_solution()
 {
-#ifdef WITH_COEK
+    #ifdef WITH_COEK
     std::cout << "y size=" << y.size() << std::endl;
     for (auto& it: y) {
         auto [t,a,b] = it.first;
         std::cout << "y id=" << it.second.id() << " t=" << t << " a=" << a << " b=" << b << " value=" << it.second.value() << std::endl;
         }
-#endif
+    #endif
 }
 
 void InferenceModel::initialize(const numZerosHMM& nzhmm, const std::vector<int>& observations)
@@ -49,11 +47,12 @@ void InferenceModel::initialize(const numZerosHMM& nzhmm, const std::vector<int>
 
 void InferenceModel::collect_solution(std::vector<int>& hidden_states)
 {
+    #ifdef WITH_COEK
     LPModel::collect_solution(hidden_states);
 
     // TODO - more here ?
+    #endif
 }
-//#endif
 
 void numZerosHMM::mip_map_inference(const std::vector<int>& observations,
                                     std::vector<int>& hidden_states, double& log_likelihood)
@@ -77,21 +76,24 @@ void numZerosHMM::mip_map_inference(const std::vector<int>& observations,
 // ---------------------------------------------------------------------------------
 
 
-//#ifdef WITH_COEK
+
 
 void LearningModel::print_solution()
 {
+    #ifdef WITH_COEK
     InferenceModel::print_solution();
 
     std::cout << "z size=" << z.size() << std::endl;
     for (auto& it: z) {
         auto [t,b] = it.first;
         std::cout << "z id=" << it.second.id() << " t=" << t << " b=" << b << " value=" << it.second.value() << std::endl;
-        }
+    }
+    #endif
 }
 
 void LearningModel::initialize(numZerosHMM& nzhmm, const std::vector<int>& observations, const std::vector<int>& unconstrained_hidden)
 {
+    #ifdef WITH_COEK
     nzhmm.hmm.print();
     std::cout << std::endl;
     InferenceModel::initialize(nzhmm, observations);
@@ -123,6 +125,7 @@ void LearningModel::initialize(numZerosHMM& nzhmm, const std::vector<int>& obser
             O += (unconstrained_hidden[t] - z[{t,1}]) * (unconstrained_hidden[t] - z[{t,1}]);
         model.add_objective(O).sense(model.minimize);
     }
+    #endif
 }
 
 
@@ -135,6 +138,7 @@ std::vector<std::vector<std::vector<int>>> Generator_MIP_NumZeros::operator()(
     for(size_t r = 0; r < obs.size(); ++r) {
         for(size_t b = 0; b < num_solutions; ++b) {
             auto hidden = hmm.generateHidden(obs[r]);
+            #ifdef WITH_COEK
             LearningModel model;
             numZerosHMM nzhmm(num_zeros);
             nzhmm.initialize(hmm);
@@ -142,6 +146,7 @@ std::vector<std::vector<std::vector<int>>> Generator_MIP_NumZeros::operator()(
             model.initialize(nzhmm, obs[r], hidden);
             double log_likelihood;
             model.optimize(log_likelihood, hidden);
+            #endif
 
             output[r].push_back(hidden);
         }
@@ -153,8 +158,6 @@ std::vector<std::vector<std::vector<int>>> Generator_MIP_NumZeros::operator()(
 Generator_MIP_NumZeros::Generator_MIP_NumZeros(const size_t& _num_zeros) {
     num_zeros = _num_zeros;
 }
-
-//#endif
 
 }  // namespace chmmpp
 
