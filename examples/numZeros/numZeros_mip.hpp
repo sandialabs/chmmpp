@@ -35,6 +35,17 @@ class LearningModel : public InferenceModel {
     void initialize(numZerosHMM& nzhmm, const std::vector<int>& observations, const std::vector<int>& hidden);
     void print_solution();
 };
+
+class Generator_MIP_NumZeros : public Generator_Base {
+   public:
+    size_t num_zeros;
+
+    virtual std::vector<std::vector<std::vector<int>>> operator()(
+        HMM &hmm, const std::vector<std::vector<int>>& obs
+    ) const;
+    
+    Generator_MIP_NumZeros(const size_t& _num_zeros);
+};
 //#endif
 
 } // namespace chmmpp
