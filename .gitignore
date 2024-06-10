@@ -3,3 +3,6 @@ build/
 .vscode/
 data/
 spack/
+_build/
+_spack/
+_spack_tpls/
