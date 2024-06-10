@@ -84,14 +84,21 @@ class CHMM : public Options {
     void learn_batch(const std::vector<std::vector<int>> &obs, Generator_Base &generator);
     void learn_batch(const std::vector<int> &obs, Generator_Base &generator);
 
-    void learn_stochastic(const std::vector<std::vector<int>> &obs);
-    void learn_stochastic(const std::vector<int> &obs);
+    void learn_stochastic_constraint_oracle(const std::vector<std::vector<int>> &obs);
+    void learn_stochastic_constraint_oracle(const std::vector<int> &obs);
 
-    void learn_hardEM(const std::vector<std::vector<int>> &obs);
-    void learn_hardEM(const std::vector<int> &obs);
+    void learn_stochastic_generator(const std::vector<std::vector<int>> &obs);
+    void learn_stochastic_generator(const std::vector<int> &obs);
 
-    void learn_MIP(const std::vector<std::vector<int>> &obs);
-    void learn_MIP(const std::vector<int> &obs);
+    void learn_hardEM_constraint_oracle(const std::vector<std::vector<int>> &obs);
+    void learn_hardEM_constraint_oracle(const std::vector<int> &obs);
+
+    void learn_hardEM_generator(const std::vector<std::vector<int>> &obs);
+    void learn_hardEM_generator(const std::vector<int> &obs);
+
+    //Can't be done with a constraint oracle, but we call it _generator to be consistent in notation
+    void learn_MIP_generator(const std::vector<std::vector<int>> &obs); 
+    void learn_MIP_generator(const std::vector<int> &obs);
 
 
     // CLM - IN PROGRESS

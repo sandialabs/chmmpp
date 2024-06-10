@@ -141,7 +141,7 @@ void run_all(bool with_rejection, bool debug = false)
     std::cout << "------------------------------------------------------------------------\n";
     nzhmm.initialize(original_hmm);
     run(nzhmm, obs, [](chmmpp::CHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
-        nzhmm.learn_stochastic(obs);
+        nzhmm.learn_stochastic_constraint_oracle(obs);
     });
     
     std::cout << "------------------------------------------------------------------------\n";
@@ -150,7 +150,7 @@ void run_all(bool with_rejection, bool debug = false)
     nzhmm.initialize(original_hmm);
     nzhmm.set_option("max_iterations", 1000);
     run(nzhmm, obs, [](chmmpp::CHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
-        nzhmm.learn_hardEM(obs);
+        nzhmm.learn_hardEM_constraint_oracle(obs);
     });
 
     // NZHMM Tests
@@ -176,7 +176,7 @@ void run_all(bool with_rejection, bool debug = false)
     nzhmm.set_option("quiet", 0);
     nzhmm.set_option("debug", 0);
     run(nzhmm, obs, [](chmmpp::numZerosHMM& nzhmm, const std::vector<std::vector<int>>& obs) {
-        nzhmm.learn_MIP(obs);
+        nzhmm.learn_MIP_generator(obs);
     });
 #endif
 

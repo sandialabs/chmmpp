@@ -191,7 +191,7 @@ void run_tests(bool debug = false)
             hardEM_CHMM.set_seed(0);
             hardEM_run_times[i].push_back(
                 time(hardEM_CHMM,obsVec,
-                    [](chmmpp::CHMM& chmm, const std::vector<std::vector<int>>& obs) { chmm.learn_hardEM(obs); })
+                    [](chmmpp::CHMM& chmm, const std::vector<std::vector<int>>& obs) { chmm.learn_hardEM_constraint_oracle(obs); })
             );
             hardEM_error[i].push_back(std::max( matError(hardEM_CHMM.hmm.getA(),A),
                 std::max(vecError(hardEM_CHMM.hmm.getS(),S), matError(hardEM_CHMM.hmm.getE(), E))
@@ -204,7 +204,7 @@ void run_tests(bool debug = false)
             stochastic_CHMM.set_seed(0);
             stochastic_run_times[i].push_back(
                 time(stochastic_CHMM,obsVec,
-                    [](chmmpp::CHMM& chmm, const std::vector<std::vector<int>>& obs) { chmm.learn_stochastic(obs); })
+                    [](chmmpp::CHMM& chmm, const std::vector<std::vector<int>>& obs) { chmm.learn_stochastic_constraint_oracle(obs); })
             );
             stochastic_error[i].push_back(std::max( matError(stochastic_CHMM.hmm.getA(),A),
                 std::max(vecError(stochastic_CHMM.hmm.getS(),S), matError(stochastic_CHMM.hmm.getE(), E))

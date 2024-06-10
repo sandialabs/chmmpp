@@ -113,7 +113,7 @@ void run_all(bool debug = false)
     schmmCopy.set_option("C", 1000);
     //TODO This is seg faulting right 
     run(schmmCopy, obs, [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) {
-        hmm.learn_stochastic(obs);
+        hmm.learn_stochastic_constraint_oracle(obs);
     });
 
 
@@ -123,7 +123,7 @@ void run_all(bool debug = false)
     schmmCopy = schmm;
     schmmCopy.set_option("max_iterations", 100000000);
     run(schmmCopy, obs,
-        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM(obs); });
+        [](chmmpp::CHMM& hmm, const std::vector<std::vector<int>>& obs) { hmm.learn_hardEM_constraint_oracle(obs); });
     schmm.clear_options();
 
     std::cout << std::endl;

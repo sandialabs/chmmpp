@@ -64,45 +64,69 @@ void CHMM::learn_batch(const std::vector<int> &obs, Generator_Base &generator)
     learn_batch(obsVec, generator);
 }
 
-void CHMM::learn_stochastic(const std::vector<std::vector<int>> &obs) {
-    if(generator_stochastic) {
-        learn_batch(obs, *generator_stochastic);
-    }
-    else if(constraint_oracle) {
+void CHMM::learn_stochastic_constraint_oracle(const std::vector<std::vector<int>> &obs) {
+    if(constraint_oracle) {
         Generator_Stochastic _generator_stochastic(constraint_oracle);
         learn_batch(obs,_generator_stochastic);
     }
     else {
-        std::cout << "ERROR: In learn_stochastic either generator_stochastic or constraint_oracle must be defined." << std::endl;
+        std::cout << "ERROR: In learn_stochastic_constraint_oracle constraint_oracle must be defined." << std::endl;
     }
 }
-void CHMM::learn_stochastic(const std::vector<int> &obs)
+void CHMM::learn_stochastic_constraint_oracle(const std::vector<int> &obs)
 {
     std::vector<std::vector<int>> obsVec;
     obsVec.push_back(obs);
-    learn_stochastic(obsVec);
+    learn_stochastic_constraint_oracle(obsVec);
 }
 
-void CHMM::learn_hardEM(const std::vector<std::vector<int>> &obs) {
-    if(generator_hardEM) {
-        learn_batch(obs, *generator_hardEM);
+void CHMM::learn_stochastic_generator(const std::vector<std::vector<int>> &obs) {
+    if(generator_stochastic) {
+        learn_batch(obs, *generator_stochastic);
     }
-    else if(constraint_oracle) {
+    else {
+        std::cout << "ERROR: In learn_stochastic_generator generator_stochastic." << std::endl;
+    }
+}
+void CHMM::learn_stochastic_generator(const std::vector<int> &obs)
+{
+    std::vector<std::vector<int>> obsVec;
+    obsVec.push_back(obs);
+    learn_stochastic_generator(obsVec);
+}
+
+void CHMM::learn_hardEM_constraint_oracle(const std::vector<std::vector<int>> &obs) {
+    if(constraint_oracle) {
         Generator_HardEM _generator_hardEM(constraint_oracle);
         learn_batch(obs,_generator_hardEM);
     }
     else {
-        std::cout << "ERROR: In learn_hardEM either generator_hardEM or constraint_oracle must be defined." << std::endl;
+        std::cout << "ERROR: In learn_hardEM constraint_oracle must be defined." << std::endl;
     }
 }
-void CHMM::learn_hardEM(const std::vector<int> &obs)
+void CHMM::learn_hardEM_constraint_oracle(const std::vector<int> &obs)
 {
     std::vector<std::vector<int>> obsVec;
     obsVec.push_back(obs);
-    learn_hardEM(obsVec);
+    learn_hardEM_constraint_oracle(obsVec);
 }
 
-void CHMM::learn_MIP(const std::vector<std::vector<int>> &obs) {
+void CHMM::learn_hardEM_generator(const std::vector<std::vector<int>> &obs) {
+    if(generator_stochastic) {
+        learn_batch(obs, *generator_stochastic);
+    }
+    else {
+        std::cout << "ERROR: In learn_stochastic generator_stochastic must be defined." << std::endl;
+    }
+}
+void CHMM::learn_hardEM_generator(const std::vector<int> &obs)
+{
+    std::vector<std::vector<int>> obsVec;
+    obsVec.push_back(obs);
+    learn_stochastic_generator(obsVec);
+}
+
+void CHMM::learn_MIP_generator(const std::vector<std::vector<int>> &obs) {
     if(generator_MIP) {
         learn_batch(obs, *generator_MIP);
     }
@@ -110,11 +134,11 @@ void CHMM::learn_MIP(const std::vector<std::vector<int>> &obs) {
         std::cout << "ERROR: In learn_MIP generator_MIP or constraint_oracle must be defined." << std::endl;
     }
 }
-void CHMM::learn_MIP(const std::vector<int> &obs)
+void CHMM::learn_MIP_generator(const std::vector<int> &obs)
 {
     std::vector<std::vector<int>> obsVec;
     obsVec.push_back(obs);
-    learn_MIP(obsVec);
+    learn_MIP_generator(obsVec);
 }
 
 
