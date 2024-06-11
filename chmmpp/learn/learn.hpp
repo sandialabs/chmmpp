@@ -4,6 +4,7 @@
 #include <vector>
 #include <chmmpp/HMM.hpp>
 #include <chmmpp/inference/inference.hpp>
+#include <chmmpp/Constraint_Oracle.hpp>
 
 namespace chmmpp {
 
