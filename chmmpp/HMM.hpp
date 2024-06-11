@@ -11,8 +11,8 @@ namespace chmmpp {
 // Emission Probabilities (E) as well as the number of hidden states (H) and observed states (O)
 class HMM : public Options {
    protected:
-    size_t H;                                     // Number of hidden states
-    size_t O;                                     // Number of observed states
+    size_t H = 0;                                 // Number of hidden states
+    size_t O = 0;                                 // Number of observed states
     std::vector<std::vector<double> > A;          // Transition matrix, size HxH
     std::vector<double> S;                        // Start probs, size H
     std::vector<std::vector<double> > E;          // Emission probs, size HxO
@@ -51,6 +51,7 @@ class HMM : public Options {
     double getSEntry(size_t h) const;
     double getEEntry(size_t h, size_t o) const;
 
+    // Setter methods that do not do error checks
     void setA(std::vector<std::vector<double> > newA);
     void setS(std::vector<double> newS);
     void setE(std::vector<std::vector<double> > newE);
@@ -60,6 +61,9 @@ class HMM : public Options {
     void printO() const;
     void print() const;
 
+    // TODO - Rename this and the next method.
+    //          These are both doing forward simulations, but the latter method is conditioning the transition probabilities
+    //          on the observed states.
     void run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
 
     // Similar to run, but we take into account the observed states
@@ -67,28 +71,39 @@ class HMM : public Options {
 
     double logProb(const std::vector<int> &obs, const std::vector<int> &hidden_states) const;
 
+    // TODO - Consistent naming for inference methods:
+    //          #_inference();
+
     //
-    // Inference with the Viterbi algorithm
+    // Infer the hidden states using the Viterbi algorithm
     //
     void viterbi(const std::vector<int> &observations, std::vector<int> &hidden_states,
                  double &logprob);
 
     //
-    // Inference with the A* algorithm
+    // Infer the hidden states using the A* algorithm
     //
     void aStar(const std::vector<int> &observations, std::vector<int> &hidden_states,
                double &logprob);
+
     //
     // Inference with a linear programming solver
     //
     // Options
-    //      solver_name (string):   Name of the linear programming solver (Default: gurobi).
-    //      keep_data (int):        If 1, then keep data used to generate the LP model (Default: 0).
-    //      y_binary (int):         If 1, then use binary flow variables in the LP model (Default:
-    //      0). debug (int):            If 1, then print debugging information (Default: 0).
+    //      solver_name (string):
+    //          Name of the linear programming solver (Default: gurobi).
+    //      keep_data (int):
+    //          If 1, then keep data used to generate the LP model (Default: 0).
+    //      y_binary (int):
+    //          If 1, then use binary flow variables in the LP model (Default: 0).
+    //      debug (int):
+    //          If 1, then print debugging information (Default: 0).
     //
     void lp_map_inference(const std::vector<int> &observations, std::vector<int> &hidden_states,
                           double &logprob);
+
+    // TODO - Consistent learning for learning methods:
+    //          #_learning();
 
     // Estimate the HMM parameters using the values of hidden states
     void estimate_hmm(const std::vector<int> &obs, const std::vector<int> &hid);

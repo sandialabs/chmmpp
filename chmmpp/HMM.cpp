@@ -46,6 +46,10 @@ void HMM::initialize(const std::vector<std::vector<double>>& inputA,
                      const std::vector<std::vector<double>>& inputE)
 {
     H = inputA.size();
+    if (H > 0)
+        O = inputE[0].size();
+    else
+        O = 0;
 
     if (H > 0) {
         // Check if sizes are correct
@@ -61,8 +65,6 @@ void HMM::initialize(const std::vector<std::vector<double>>& inputA,
                 throw std::exception();
             }
         }
-
-        O = inputE[0].size();
 
         for (size_t h = 0; h < H; ++h) {
             if (inputE[h].size() != O) {
@@ -258,7 +260,6 @@ double HMM::getSEntry(size_t h) const { return S[h]; }
 
 double HMM::getEEntry(size_t h, size_t o) const { return E[h][o]; }
 
-// CLM - Do we want to check these to make sure they are valid?
 void HMM::setA(std::vector<std::vector<double>> newA) { A = newA; }
 
 void HMM::setS(std::vector<double> newS) { S = newS; }

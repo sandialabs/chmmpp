@@ -57,6 +57,11 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
     else {
         for (auto& e : E) y[e] = model.add(coek::variable().bounds(0, 1));
     }
+    for (auto& ff : FF) {
+        auto it = y.find(ff);
+        if (it == y.end())
+            y[ff] = model.add(coek::variable().bounds(0, 1));
+    }
 
     // flow constraints
     for (auto t : coek::range(Tmax)) {
@@ -107,6 +112,8 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
         FF.clear();
         G.clear();
     }
+    if (debug)
+        model.print_equations();
 }
 
 void LPModel::set_options(const Options& options)
