@@ -177,7 +177,6 @@ void learn_batch(HMM &hmm,
             std::cout << "Algorithm took " << numIt << " iterations." << std::endl;
             break;
         }
-       
     }
 }
 

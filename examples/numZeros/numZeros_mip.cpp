@@ -94,8 +94,6 @@ void LearningModel::print_solution()
 void LearningModel::initialize(numZerosHMM& nzhmm, const std::vector<int>& observations, const std::vector<int>& unconstrained_hidden)
 {
     #ifdef WITH_COEK
-    nzhmm.hmm.print();
-    std::cout << std::endl;
     InferenceModel::initialize(nzhmm, observations);
 
     // Deactivate the old objective
@@ -137,18 +135,21 @@ std::vector<std::vector<std::vector<int>>> Generator_MIP_NumZeros::operator()(
     std::vector<std::vector<std::vector<int>>> output(obs.size());
     for(size_t r = 0; r < obs.size(); ++r) {
         for(size_t b = 0; b < num_solutions; ++b) {
+            
             auto hidden = hmm.generateHidden(obs[r]);
             #ifdef WITH_COEK
-            LearningModel model;
-            numZerosHMM nzhmm(num_zeros);
-            nzhmm.initialize(hmm);
-            model.set_options(nzhmm.get_options());
-            model.initialize(nzhmm, obs[r], hidden);
-            double log_likelihood;
-            model.optimize(log_likelihood, hidden);
+                LearningModel model;
+                numZerosHMM nzhmm(num_zeros);
+                nzhmm.initialize(hmm);
+                model.set_options(nzhmm.get_options());
+                model.initialize(nzhmm, obs[r], hidden);
+                double log_likelihood;
+                model.optimize(log_likelihood, hidden);
+                
             #endif
 
             output[r].push_back(hidden);
+
         }
     }
 
