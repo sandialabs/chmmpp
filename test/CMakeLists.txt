@@ -16,6 +16,7 @@ endif()
 SET(sources
     test_foo.cpp
     test_hmm.cpp
+    test_chmm.cpp
     )
 
 set(chmmpp_test_libraries)

@@ -107,7 +107,39 @@ TEST_CASE("hmm1", "[hmm]")
         double log_likelihood=0.0;
         hmm.set_option("debug",false);
         hmm.lp_map_inference(obs, hidden, log_likelihood);
-        REQUIRE(log_likelihood == 0.0);
+        REQUIRE(log_likelihood == 0.);
+    }
+
+    SECTION("estimate_hmm") {
+        chmmpp::HMM hmm(A,S,E); //A,S,E don't matter here just their sizes.
+        std::vector<int> hid{0,0,0,1,1};
+        std::vector<int> obs{0,1,0,1,0};
+        hmm.estimate_hmm(obs,hid);
+        std::vector<std::vector<double>> _A = {{2./3.,1./3.},{0.,1.}};
+        std::vector<double> _S = {1.,0.};
+        std::vector<std::vector<double>> _E = {{2./3.,1./3.},{1./2.,1./2.}};
+        REQUIRE(hmm.getA() == _A);
+        REQUIRE(hmm.getS() == _S);
+        REQUIRE(hmm.getE() == _E);
+    }
+
+    //TODO make more than one test for this
+    SECTION("baum_welch single observation") {
+        chmmpp::HMM hmm(A,S,E);
+        std::vector<int> obs = {1,0,1,0,1};
+        hmm.baum_welch(obs);
+        REQUIRE(hmm.getA() == A);
+        REQUIRE(hmm.getS() == S);
+        REQUIRE(hmm.getE() == E);
+    }
+
+    SECTION("baum_welch multiple observation") {
+        chmmpp::HMM hmm(A,S,E);
+        std::vector<std::vector<int>> obs = {{1},{1,0,1,0,1},{1,0}};
+        hmm.baum_welch(obs);
+        REQUIRE(hmm.getA() == A);
+        REQUIRE(hmm.getS() == S);
+        REQUIRE(hmm.getE() == E);
     }
 
 }
