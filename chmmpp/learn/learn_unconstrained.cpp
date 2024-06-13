@@ -56,7 +56,6 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
     auto H = hmm.getH();
     auto O = hmm.getO();
 
-    int T = obs[0].size();
     size_t R = obs.size();
     size_t numIt = 0;
 
@@ -66,6 +65,7 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
         std::vector<std::vector<std::vector<std::vector<double> > > > totalXi;
 
         for (size_t r = 0; r < R; ++r) {
+            size_t T = obs[r].size();
             // alpha
             std::vector<std::vector<double> >
                 alpha;  // alpha[h][t] = P(O_0 = obs[0], ... ,O_t = obs[t], H_t = h | theta)
@@ -198,7 +198,7 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
                 double num = 0.;
                 double newDen = 0.;
                 for (size_t r = 0; r < R; ++r) {
-                    for (int t = 0; t < T; ++t) {
+                    for (int t = 0; t < obs[r].size(); ++t) {
                         if (obs[r][t] == o) {
                             num += totalGamma[r][h][t];
                         }
@@ -218,7 +218,7 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
                 double num = 0.;
                 double newDen = 0.;
                 for (size_t r = 0; r < R; ++r) {
-                    for (int t = 0; t < T - 1; ++t) {
+                    for (int t = 0; t < obs[r].size() - 1; ++t) {
                         num += totalXi[r][h1][h2][t];
                         newDen += totalGamma[r][h1][t];
                     }
