@@ -247,7 +247,7 @@ TEST_CASE("hmm2", "[hmm]")
         double log_likelihood=0.0;
         hmm.aStar(obs, hidden, log_likelihood);
         REQUIRE(log_likelihood <= 0);
-        REQUIRE(log_likelihood == 0.0);
+        REQUIRE(exp(log_likelihood) == 0.25*0.25);
         REQUIRE(hidden == hidden_);
     }
 

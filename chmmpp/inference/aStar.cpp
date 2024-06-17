@@ -85,7 +85,7 @@ void aStar(const HMM& hmm, const std::vector<int>& observations, std::vector<int
         double oldGScore = gScore[seq];
 
         if (t == T) {
-            logProb = -oldGScore;
+            logProb = oldGScore;
             hidden_states = seq;
             return;
         }

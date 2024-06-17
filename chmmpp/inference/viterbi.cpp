@@ -75,6 +75,7 @@ void viterbi(const HMM& hmm, const std::vector<int>& observations, std::vector<i
 
     for (size_t t = 0; t < T - 1; ++t) hidden_states[t + 1] = next[t][hidden_states[t]];
 
+    logProb = -logProb;
     return;
 }
 
