@@ -120,7 +120,7 @@ void run_tests(bool debug = false)
     size_t T = 25;                                // Time Horizon
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {100};
+    std::vector<int> numObsVec = {10};
     double perturbParam = 0.9;                         // How much the parameters are perturbed
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
@@ -130,6 +130,10 @@ void run_tests(bool debug = false)
     std::vector<std::vector<double>> HMM_error(numObsVec.size());
     std::vector<std::vector<double>> stochastic_error(numObsVec.size());
     std::vector<std::vector<double>> hardEM_error(numObsVec.size());
+
+    std::vector<std::vector<double>> HMM_log_likelihood(numObsVec.size());
+    std::vector<std::vector<double>> stochastic_log_likelihood(numObsVec.size());
+    std::vector<std::vector<double>> hardEM_log_likelihood(numObsVec.size());
 
     chmmpp::syntheticCitationHMM originalCHMM;
     originalCHMM.initialize(A,S,E);
@@ -141,9 +145,14 @@ void run_tests(bool debug = false)
         HMM_run_times.push_back({});
         stochastic_run_times.push_back({});
         hardEM_run_times.push_back({});
+
         HMM_error.push_back({});
         stochastic_error.push_back({});
         hardEM_error.push_back({});
+
+        HMM_log_likelihood.push_back({});
+        stochastic_log_likelihood.push_back({});
+        hardEM_log_likelihood.push_back({});
 
         for(size_t j = 0; j < testSize; ++j) {
             std::cout << numObs << " observations and iteration " << j << " out of " << testSize << "\n";
@@ -206,6 +215,9 @@ void run_tests(bool debug = false)
             HMM_error[i].push_back(std::max( matError(unconstrained_HMM.getA(),A), 
                 std::max(vecError(unconstrained_HMM.getS(),S), matError(unconstrained_HMM.getE(), E))
             ));
+            chmmpp::syntheticCitationHMM unconstrained_CHMM;
+            unconstrained_CHMM.initialize(unconstrained_HMM);
+            HMM_log_likelihood[i].push_back(unconstrained_CHMM.log_likelihood_estimate(obsVec));           
 
             //CHMM -- hardEM
             std::cout << "Running hardEM batch learning.\n";
@@ -219,6 +231,7 @@ void run_tests(bool debug = false)
             hardEM_error[i].push_back(std::max( matError(hardEM_CHMM.hmm.getA(),A),
                 std::max(vecError(hardEM_CHMM.hmm.getS(),S), matError(hardEM_CHMM.hmm.getE(), E))
             ));
+            hardEM_log_likelihood[i].push_back(hardEM_CHMM.log_likelihood_estimate(obsVec));
 
             //CHMM -- stochastic
             std::cout << "Running stochastic batch learning.\n";
@@ -232,6 +245,7 @@ void run_tests(bool debug = false)
             stochastic_error[i].push_back(std::max( matError(stochastic_CHMM.hmm.getA(),A),
                 std::max(vecError(stochastic_CHMM.hmm.getS(),S), matError(stochastic_CHMM.hmm.getE(), E))
             ));
+            stochastic_log_likelihood[i].push_back(stochastic_CHMM.log_likelihood_estimate(obsVec));
             std::cout << "\n"; 
         }
     }
@@ -244,17 +258,23 @@ void run_tests(bool debug = false)
         std::cout << "Average HMM error: " << mean(HMM_error[i]) << "\n";
         std::cout << "HMM error standard deviation: " << stdDev(HMM_error[i]) << "\n";
         std::cout << "Average HMM running time: " << mean(HMM_run_times[i]) << "\n";
-        std::cout << "HMM running time standard deviation: " << stdDev(HMM_run_times[i]) << "\n\n";
+        std::cout << "HMM running time standard deviation: " << stdDev(HMM_run_times[i]) << "\n";
+        std::cout << "Average HMM log likelihood: " << mean(HMM_log_likelihood[i]) << "\n";
+        std::cout << "HMM log likelihood standard deviation: " << stdDev(HMM_log_likelihood[i]) << "\n\n";
         
         std::cout << "Average stochastic error: " << mean(stochastic_error[i]) << "\n";
         std::cout << "stochastic error standard deviation: " << stdDev(stochastic_error[i]) << "\n";
         std::cout << "Average stochastic running time: " << mean(stochastic_run_times[i]) << "\n";
-        std::cout << "stochastic running time standard deviation: " << stdDev(stochastic_run_times[i]) << "\n\n";
+        std::cout << "stochastic running time standard deviation: " << stdDev(stochastic_run_times[i]) << "\n";
+        std::cout << "Average stochastic log likelihood: " << mean(stochastic_log_likelihood[i]) << "\n";
+        std::cout << "stochastic log likelihood standard deviation: " << stdDev(stochastic_log_likelihood[i]) << "\n\n";
 
         std::cout << "Average hardEM error: " << mean(hardEM_error[i]) << "\n";
         std::cout << "hardEM error standard deviation: " << stdDev(hardEM_error[i]) << "\n";
         std::cout << "Average hardEM running time: " << mean(hardEM_run_times[i]) << "\n";
-        std::cout << "hardEM running time standard deviation: " << stdDev(hardEM_run_times[i]) << "\n\n\n";
+        std::cout << "hardEM running time standard deviation: " << stdDev(hardEM_run_times[i]) << "\n";
+        std::cout << "Average hardEM log likelihood: " << mean(hardEM_log_likelihood[i]) << "\n";
+        std::cout << "hardEM log likelihood standard deviation: " << stdDev(hardEM_log_likelihood[i]) << "\n\n\n";
     }
 
 }

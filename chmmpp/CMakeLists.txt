@@ -12,6 +12,7 @@ SET(sources
     CHMM.cpp
     inference/lp_map.cpp
     learn/estimate_hmm.cpp
+    learn/log_likelihood_estimate.cpp
     )
 
 if (with_coek)

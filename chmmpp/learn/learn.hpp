@@ -87,4 +87,10 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector<std::vector<int> > 
                                  const std::vector<std::vector<int> > &unsupervisedObs,
                                  const std::function<bool(std::vector<int> &)> &constraintOracle,
                                  bool partialOracle, const Options &options);
+                                
+double log_likelihood_estimate(HMM &hmm,
+                           Constraint_Oracle_Base &constraint_oracle,
+                           const std::vector<std::vector<int>> &obs, 
+                           const Options& options);
+
 }  // namespace chmmpp

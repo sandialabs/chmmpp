@@ -103,6 +103,13 @@ class CHMM : public Options {
     void learn_MIP_generator(const std::vector<int> &obs);
 
 
+    //
+    // likelihood estimate
+    //
+
+    double log_likelihood_estimate(const std::vector<std::vector<int>> &obs);
+    double log_likelihood_estimate(const std::vector<int> &obs);
+
     // CLM - IN PROGRESS
     //
     //   Options
