@@ -142,13 +142,13 @@ void CHMM::learn_MIP_generator(const std::vector<int> &obs)
 }
 
 double CHMM::log_likelihood_estimate(const std::vector<std::vector<int>> &obs){
-    if(constraint_oracle) {
+    //if(constraint_oracle) {
         chmmpp::log_likelihood_estimate(hmm, constraint_oracle, obs, this->get_options());
-    }
-    else {
-        std::cout << "ERROR: In log_likelihood_estimate, constraint_oracle must be defined." << std::endl;
-        return -1;
-    }
+    //}
+    //else {
+    //    std::cout << "ERROR: In log_likelihood_estimate, constraint_oracle must be defined." << std::endl;
+    //    return -1;
+    //}
 }
 double CHMM::log_likelihood_estimate(const std::vector<int> &obs) {
     std::vector<std::vector<int>> obsVec;
