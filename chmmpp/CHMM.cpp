@@ -141,6 +141,17 @@ void CHMM::learn_MIP_generator(const std::vector<int> &obs)
     learn_MIP_generator(obsVec);
 }
 
+void CHMM::learn_unconstrained(const std::vector<std::vector<int>> &obs) {
+    Generator_Unconstrained _generator_unconstrained;
+    learn_batch(obs,_generator_unconstrained);
+}
+    
+void CHMM::learn_unconstrained(const std::vector<int> &obs) {
+    std::vector<std::vector<int>> obsVec;
+    obsVec.push_back(obs);
+    learn_unconstrained(obsVec);
+}
+
 double CHMM::log_likelihood_estimate(const std::vector<std::vector<int>> &obs){
     if(constraint_oracle) {
         return chmmpp::log_likelihood_estimate(hmm, constraint_oracle, obs, this->get_options());

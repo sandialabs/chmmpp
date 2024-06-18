@@ -102,6 +102,10 @@ class CHMM : public Options {
     void learn_MIP_generator(const std::vector<std::vector<int>> &obs); 
     void learn_MIP_generator(const std::vector<int> &obs);
 
+    //Note that these are based on the SAEM algorithm, they aren't the same as Baum-Welch
+    //Should we change the name? They're consistent with the other ones though...
+    void learn_unconstrained(const std::vector<std::vector<int>> &obs);
+    void learn_unconstrained(const std::vector<int> &obs);
 
     //
     // likelihood estimate

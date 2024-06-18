@@ -9,7 +9,7 @@ namespace chmmpp {
 
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
-// InferenceW
+// Inference
 // ---------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------
 
@@ -145,11 +145,9 @@ std::vector<std::vector<std::vector<int>>> Generator_MIP_NumZeros::operator()(
                 model.initialize(nzhmm, obs[r], hidden);
                 double log_likelihood;
                 model.optimize(log_likelihood, hidden);
-                
             #endif
 
             output[r].push_back(hidden);
-
         }
     }
 

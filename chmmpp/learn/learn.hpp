@@ -70,6 +70,26 @@ public:
     }
 };
 
+class Generator_Unconstrained : public Generator_Base {
+public:
+
+    virtual std::vector<std::vector<std::vector<int>>> operator()(
+        HMM &hmm, const std::vector<std::vector<int>>& obs
+    ) const
+    {
+        std::vector<std::vector<std::vector<int>>> output;
+
+        for(size_t r = 0; r < obs.size(); ++r) {
+            std::vector<std::vector<int>> tempHiddenVec;
+            while(tempHiddenVec.size() < num_solutions) {
+                tempHiddenVec.push_back(hmm.generateHidden(obs[r]));
+            }
+            output.push_back(tempHiddenVec);
+        }
+        return output;
+    }
+};
+
 
 void estimate_hmm(HMM &hmm, const std::vector<std::vector<int> > &obs,
                   const std::vector<std::vector<int> > &hid);
