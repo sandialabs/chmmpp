@@ -336,6 +336,8 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
     }
     if(hiddenStates.size() == 0) {
         std::cout << "AHHHHH" << std::endl;
+        std::cout << prob << std::endl;
+        std::cout << startProb << std::endl;
     }
 
     // Initial Observed State
