@@ -109,16 +109,23 @@ void run_tests(bool debug = false)
     size_t numZeros = 10;                              // Number of zeros
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {1,10,100};
+    std::vector<int> numObsVec = {1};
     double perturbParam = 0.9;                         // How much the parameters are perturbed
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
     std::vector<std::vector<size_t>> stochastic_run_times(numObsVec.size());
     std::vector<std::vector<size_t>> hardEM_run_times(numObsVec.size());
+    std::vector<std::vector<size_t>> MIP_run_times(numObsVec.size());
 
     std::vector<std::vector<double>> HMM_error(numObsVec.size());
     std::vector<std::vector<double>> stochastic_error(numObsVec.size());
     std::vector<std::vector<double>> hardEM_error(numObsVec.size());
+    std::vector<std::vector<double>> MIP_error(numObsVec.size());
+
+    std::vector<std::vector<double>> HMM_log_likelihood(numObsVec.size());
+    std::vector<std::vector<double>> stochastic_log_likelihood(numObsVec.size());
+    std::vector<std::vector<double>> hardEM_log_likelihood(numObsVec.size());
+    std::vector<std::vector<double>> MIP_log_likelihood(numObsVec.size());
 
     chmmpp::numZerosHMM originalCHMM(numZeros);
     originalCHMM.initialize(A,S,E);
@@ -139,11 +146,13 @@ void run_tests(bool debug = false)
 
             //Create Observations
             std::vector<std::vector<int>> obsVec(numObs);
+            std::vector<std::vector<int>> hidVec(numObs);
             for(size_t k = 0; k < numObs; ++k) {
                 std::vector<int> hid;
                 std::vector<int> obs;
                 originalCHMM.run(T,obs,hid);
                 obsVec[k] = obs;
+                hidVec[k] = hid;
             }
 
             //Create a new CHMM where we don't exactly know the parameters
@@ -160,6 +169,27 @@ void run_tests(bool debug = false)
             }
 
             chmmpp::HMM perturbed_HMM(perturbedA,perturbedS,perturbedE,0);
+
+            if(debug) {
+                std::cout << "Perturbed parameters:\n";
+                perturbed_HMM.print();
+                std::cout << "Observations:\n";
+                for(size_t i = 0; i < obsVec.size(); ++i) {
+                    for(size_t j = 0; j < obsVec[i].size(); ++j) {
+                        std::cout << obsVec[i][j];
+                    }
+                    std::cout << "\n";
+                }
+                std::cout << "\n";
+                std::cout << "Hidden:\n";
+                for(size_t i = 0; i < hidVec.size(); ++i) {
+                    for(size_t j = 0; j < hidVec[i].size(); ++j) {
+                        std::cout << hidVec[i][j];
+                    }
+                    std::cout << "\n";
+                }
+                std::cout << "\n";
+            }
             
             //Unconstrained HMM
             std::cout << "Running unconstrained learning.\n";
@@ -172,6 +202,9 @@ void run_tests(bool debug = false)
             HMM_error[i].push_back(std::max( matError(unconstrained_HMM.getA(),A), 
                 std::max(vecError(unconstrained_HMM.getS(),S), matError(unconstrained_HMM.getE(), E))
             ));
+            chmmpp::numZerosHMM unconstrained_CHMM(numZeros);
+            unconstrained_CHMM.initialize(unconstrained_HMM);
+            HMM_log_likelihood[i].push_back(unconstrained_CHMM.log_likelihood_estimate(obsVec));           
 
             //CHMM -- hardEM
             std::cout << "Running hardEM batch learning.\n";
@@ -185,6 +218,7 @@ void run_tests(bool debug = false)
             hardEM_error[i].push_back(std::max( matError(hardEM_CHMM.hmm.getA(),A),
                 std::max(vecError(hardEM_CHMM.hmm.getS(),S), matError(hardEM_CHMM.hmm.getE(), E))
             ));
+            hardEM_log_likelihood[i].push_back(hardEM_CHMM.log_likelihood_estimate(obsVec));
 
             //CHMM -- stochastic
             std::cout << "Running stochastic batch learning.\n";
@@ -198,29 +232,57 @@ void run_tests(bool debug = false)
             stochastic_error[i].push_back(std::max( matError(stochastic_CHMM.hmm.getA(),A),
                 std::max(vecError(stochastic_CHMM.hmm.getS(),S), matError(stochastic_CHMM.hmm.getE(), E))
             ));
-            std::cout << "\n"; 
+            stochastic_log_likelihood[i].push_back(stochastic_CHMM.log_likelihood_estimate(obsVec));
+
+            //CHMM -- MIP
+            std::cout << "Running MIP batch learning.\n";
+            chmmpp::numZerosHMM MIP_CHMM(numZeros);
+            MIP_CHMM.initialize(chmmpp::HMM(perturbed_HMM));
+            MIP_CHMM.set_seed(0);
+            MIP_run_times[i].push_back(
+                time(MIP_CHMM,obsVec,
+                    [](chmmpp::CHMM& chmm, const std::vector<std::vector<int>>& obs) { chmm.learn_MIP_generator(obs); })
+            );
+            MIP_error[i].push_back(std::max( matError(MIP_CHMM.hmm.getA(),A),
+                std::max(vecError(MIP_CHMM.hmm.getS(),S), matError(MIP_CHMM.hmm.getE(), E))
+            ));
+            MIP_log_likelihood[i].push_back(MIP_CHMM.log_likelihood_estimate(obsVec));
+            std::cout << "\n";       
         }
     }
 
     for(size_t i = 0; i < numObsVec.size(); ++i) {
-        auto numObs = numObsVec[i];
+       auto numObs = numObsVec[i];
         std::cout << "Printing statistics with " << numObs << " observations.\n";
         std::cout << "-------------------------------------------------------\n\n";
 
         std::cout << "Average HMM error: " << mean(HMM_error[i]) << "\n";
         std::cout << "HMM error standard deviation: " << stdDev(HMM_error[i]) << "\n";
         std::cout << "Average HMM running time: " << mean(HMM_run_times[i]) << "\n";
-        std::cout << "HMM running time standard deviation: " << stdDev(HMM_run_times[i]) << "\n\n";
+        std::cout << "HMM running time standard deviation: " << stdDev(HMM_run_times[i]) << "\n";
+        std::cout << "Average HMM log likelihood: " << mean(HMM_log_likelihood[i]) << "\n";
+        std::cout << "HMM log likelihood standard deviation: " << stdDev(HMM_log_likelihood[i]) << "\n\n";
         
         std::cout << "Average stochastic error: " << mean(stochastic_error[i]) << "\n";
         std::cout << "stochastic error standard deviation: " << stdDev(stochastic_error[i]) << "\n";
         std::cout << "Average stochastic running time: " << mean(stochastic_run_times[i]) << "\n";
-        std::cout << "stochastic running time standard deviation: " << stdDev(stochastic_run_times[i]) << "\n\n";
+        std::cout << "stochastic running time standard deviation: " << stdDev(stochastic_run_times[i]) << "\n";
+        std::cout << "Average stochastic log likelihood: " << mean(stochastic_log_likelihood[i]) << "\n";
+        std::cout << "stochastic log likelihood standard deviation: " << stdDev(stochastic_log_likelihood[i]) << "\n\n";
 
         std::cout << "Average hardEM error: " << mean(hardEM_error[i]) << "\n";
         std::cout << "hardEM error standard deviation: " << stdDev(hardEM_error[i]) << "\n";
         std::cout << "Average hardEM running time: " << mean(hardEM_run_times[i]) << "\n";
-        std::cout << "hardEM running time standard deviation: " << stdDev(hardEM_run_times[i]) << "\n\n\n";
+        std::cout << "hardEM running time standard deviation: " << stdDev(hardEM_run_times[i]) << "\n";
+        std::cout << "Average hardEM log likelihood: " << mean(hardEM_log_likelihood[i]) << "\n";
+        std::cout << "hardEM log likelihood standard deviation: " << stdDev(hardEM_log_likelihood[i]) << "\n\n";
+
+        std::cout << "Average MIP error: " << mean(MIP_error[i]) << "\n";
+        std::cout << "MIP error standard deviation: " << stdDev(MIP_error[i]) << "\n";
+        std::cout << "Average MIP running time: " << mean(MIP_run_times[i]) << "\n";
+        std::cout << "MIP running time standard deviation: " << stdDev(MIP_run_times[i]) << "\n";
+        std::cout << "Average MIP log likelihood: " << mean(MIP_log_likelihood[i]) << "\n";
+        std::cout << "MIP log likelihood standard deviation: " << stdDev(MIP_log_likelihood[i]) << "\n\n";
     }
 
 }
