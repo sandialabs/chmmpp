@@ -109,7 +109,7 @@ void run_tests(bool debug = false)
     size_t numZeros = 10;                              // Number of zeros
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {100};
+    std::vector<int> numObsVec = {1};
     double perturbParam = 0.9;                         // How much the parameters are perturbed
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
@@ -205,9 +205,9 @@ void run_tests(bool debug = false)
             HMM_error[i].push_back(std::max( matError(unconstrained_HMM.getA(),trueA), 
                 std::max(vecError(unconstrained_HMM.getS(),trueS), matError(unconstrained_HMM.getE(), trueE))
             ));
-            chmmpp::numZerosHMM unconstrained_CHMM(numZeros);
-            unconstrained_CHMM.initialize(unconstrained_HMM);
-            HMM_log_likelihood[i].push_back(unconstrained_CHMM.log_likelihood_estimate(obsVec));           
+            chmmpp::numZerosHMM temp_CHMM(numZeros);
+            temp_CHMM.initialize(unconstrained_HMM);
+            HMM_log_likelihood[i].push_back(temp_CHMM.log_likelihood_estimate(obsVec));           
 
             //CHMM -- unconstrained
             std::cout << "Running unconstrained batch learning.\n";
