@@ -8,7 +8,7 @@ namespace chmmpp {
 
 
 double log_likelihood_estimate(HMM &hmm,
-                           std::shared_ptr<Constraint_Oracle_Base> &constraint_oracle,
+                           const std::shared_ptr<Constraint_Oracle_Base> &constraint_oracle,
                            const std::vector<std::vector<int>> &obs, 
                            const Options& options) 
 {

@@ -334,6 +334,9 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
             break;
         }
     }
+    if(hiddenStates.size() == 0) {
+        std::cout << "AHHHHH" << std::endl;
+    }
 
     // Initial Observed State
     double obsProb = getRandom();
