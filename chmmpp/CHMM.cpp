@@ -147,6 +147,7 @@ double CHMM::log_likelihood_estimate(const std::vector<std::vector<int>> &obs){
     }
     else {
         std::cout << "ERROR: In log_likelihood_estimate, constraint_oracle must be defined." << std::endl;
+        return -1;
     }
 }
 double CHMM::log_likelihood_estimate(const std::vector<int> &obs) {
