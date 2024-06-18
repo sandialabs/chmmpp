@@ -338,6 +338,8 @@ void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenS
         std::cout << "AHHHHH" << std::endl;
         std::cout << prob << std::endl;
         std::cout << startProb << std::endl;
+        std::cout << S[0] << std::endl;
+        std::cout << S[1] << std::endl;
     }
 
     // Initial Observed State
