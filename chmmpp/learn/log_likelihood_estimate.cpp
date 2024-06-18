@@ -13,7 +13,7 @@ double log_likelihood_estimate(HMM &hmm,
                            const Options& options) 
 {
     //TODO Make into options
-    size_t num_it = 1000000;
+    size_t num_it = 100000;
     size_t T = obs[0].size();
     for(size_t r = 1; r < obs.size(); ++r) {
         if(obs[r].size() != T) {

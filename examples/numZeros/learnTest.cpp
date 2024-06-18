@@ -109,7 +109,7 @@ void run_tests(bool debug = false)
     size_t numZeros = 10;                              // Number of zeros
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {1,10,100,1000};
+    std::vector<int> numObsVec = {1};
     double perturbParam = 0.9;                         // How much the parameters are perturbed
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
