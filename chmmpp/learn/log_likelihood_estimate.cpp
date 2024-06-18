@@ -8,7 +8,7 @@ namespace chmmpp {
 
 
 double log_likelihood_estimate(HMM &hmm,
-                           Constraint_Oracle_Base &constraint_oracle,
+                           std::shared_ptr<Constraint_Oracle_Base> &constraint_oracle,
                            const std::vector<std::vector<int>> &obs, 
                            const Options& options) 
 {
@@ -30,7 +30,7 @@ double log_likelihood_estimate(HMM &hmm,
         std::vector<int> tempObs;
         hmm.run(T, tempObs, hid); 
         ++n;
-        if(constraint_oracle(hid)) {
+        if((*constraint_oracle)(hid)) {
             for(size_t r = 0; r < obs.size(); ++r) {
                 probs[r] += exp(hmm.logProb(obs[r], hid));
             }
