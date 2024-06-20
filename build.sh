@@ -97,6 +97,7 @@ else
     #
     spack env create dev
     spack env activate dev
+    spack compiler find
     if [[ "$coek_dev" -eq 0 ]]; then
         spack add coek@dev ${with_gurobi}
     fi
