@@ -5,8 +5,9 @@
 
 namespace {
 void normalizeEps(std::vector<double> &myVec) {
-    double eps = 10E-7;
     double sum = 0.;
+    double eps = 1E-7;
+
     for(const auto &elem: myVec) sum += elem;
 
     if(sum != 0.) {
@@ -18,7 +19,14 @@ void normalizeEps(std::vector<double> &myVec) {
 }
 
 void normalize(std::vector<double> &myVec) {
+    double eps = 1E-7;
     double sum = 0.;
+    for(auto &elem: myVec) { //We can't have 0 probabilities in S for the MIP because otherwise we may project into infeasible solutions
+        if(elem == 0) {
+            elem = eps;
+        }
+    }
+
     for(const auto &elem: myVec) sum += elem;
 
     if(sum != 0.) {
@@ -41,10 +49,10 @@ void learn_batch(HMM &hmm,
 {
     //TODO Make into options
     const double convergence_tolerance = 10E-6;
-    const unsigned int max_iteration = 1000000;
+    const unsigned int max_iteration = 100000;
     const unsigned int max_iteration_generator = 0;
-    const int num_solutions = 100; //Assumes constant number of solutions each time
-    const double convergeFactor = -1.;
+    //TODO this doesn't work right now const int num_solutions = 100; //Assumes constant number of solutions each time 
+    const double convergeFactor = -2./3.;
 
     std::vector<std::vector<std::vector<std::vector<double>>>> gamma;
     std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> xi; 
@@ -125,7 +133,6 @@ void learn_batch(HMM &hmm,
                 newE[h][o] *=1. - pow(numIt, convergeFactor);  
             }
         }   
-
 
         for(size_t r = 0; r < R; ++r) {
             for(size_t h = 0; h < H; ++h) {

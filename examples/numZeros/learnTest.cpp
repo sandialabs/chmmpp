@@ -109,7 +109,7 @@ void run_tests(bool debug = false)
     size_t numZeros = 10;                              // Number of zeros
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {1};
+    std::vector<int> numObsVec = {10};
     double perturbParam = 0.9;                         // How much the parameters are perturbed
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
@@ -252,7 +252,7 @@ void run_tests(bool debug = false)
             stochastic_log_likelihood[i].push_back(stochastic_CHMM.log_likelihood_estimate(obsVec));
 
             //CHMM -- MIP
-            std::cout << "Running MIP batch learning.\n";
+            /*std::cout << "Running MIP batch learning.\n";
             chmmpp::numZerosHMM MIP_CHMM(numZeros);
             MIP_CHMM.initialize(chmmpp::HMM(perturbed_HMM));
             MIP_CHMM.set_seed(0);
@@ -264,7 +264,7 @@ void run_tests(bool debug = false)
                 std::max(vecError(MIP_CHMM.hmm.getS(),S), matError(MIP_CHMM.hmm.getE(), E))
             ));
             MIP_log_likelihood[i].push_back(MIP_CHMM.log_likelihood_estimate(obsVec));
-            std::cout << "\n";       
+            std::cout << "\n";  */
         }
     }
 
@@ -301,12 +301,12 @@ void run_tests(bool debug = false)
         std::cout << "Average hardEM log likelihood: " << mean(hardEM_log_likelihood[i]) << "\n";
         std::cout << "hardEM log likelihood standard deviation: " << stdDev(hardEM_log_likelihood[i]) << "\n\n";
 
-        std::cout << "Average MIP error: " << mean(MIP_error[i]) << "\n";
+        /*std::cout << "Average MIP error: " << mean(MIP_error[i]) << "\n";
         std::cout << "MIP error standard deviation: " << stdDev(MIP_error[i]) << "\n";
         std::cout << "Average MIP running time: " << mean(MIP_run_times[i]) << "\n";
         std::cout << "MIP running time standard deviation: " << stdDev(MIP_run_times[i]) << "\n";
         std::cout << "Average MIP log likelihood: " << mean(MIP_log_likelihood[i]) << "\n";
-        std::cout << "MIP log likelihood standard deviation: " << stdDev(MIP_log_likelihood[i]) << "\n\n";
+        std::cout << "MIP log likelihood standard deviation: " << stdDev(MIP_log_likelihood[i]) << "\n\n";*/
     }
 
 }
