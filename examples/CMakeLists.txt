@@ -16,6 +16,7 @@ set(numZeros
 
 set(syntheticCitation
     syntheticCitation/syntheticCitationHMM.cpp
+    syntheticCitation/syntheticCitation_mip.cpp
 )
 
 set(citation

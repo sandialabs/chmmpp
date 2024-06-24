@@ -228,8 +228,6 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
             }
         }
         hmm.setA(A);
-        //std::cout << numIt << " " << tol << std::endl;
-        //hmm.print();
 
         if (tol < convergence_tolerance) {
             std::cout << "Algorithm took " << numIt << " iterations.\n";

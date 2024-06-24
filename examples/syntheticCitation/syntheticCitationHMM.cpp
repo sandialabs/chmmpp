@@ -1,4 +1,5 @@
 #include "syntheticCitationHMM.hpp"
+#include "syntheticCitation_mip.hpp"
 
 namespace chmmpp {
 
@@ -25,6 +26,9 @@ public:
 syntheticCitationHMM::syntheticCitationHMM() 
 {
     constraint_oracle = std::make_shared<Constraint_Oracle_Synthetic_Citation>();
+    #ifdef WITH_COEK
+    generator_MIP = std::make_shared<Generator_MIP_SyntheticCitation>();
+    #endif
 }
 
 }  // namespace chmmpp

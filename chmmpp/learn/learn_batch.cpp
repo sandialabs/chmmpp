@@ -49,7 +49,7 @@ void learn_batch(HMM &hmm,
 {
     //TODO Make into options
     const double convergence_tolerance = 10E-6;
-    const unsigned int max_iteration = 100000;
+    const unsigned int max_iteration = 1000000;
     const unsigned int max_iteration_generator = 0;
     //TODO this doesn't work right now const int num_solutions = 100; //Assumes constant number of solutions each time 
     const double convergeFactor = -2./3.;
