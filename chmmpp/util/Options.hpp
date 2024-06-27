@@ -12,12 +12,13 @@ namespace chmmpp {
 //
 class Options {
    public:
-    std::map<std::string, std::variant<std::string, int, double, unsigned int>> options;
+    std::map<std::string, std::variant<std::string, int, double, unsigned int>> option_data;
 
-    void clear_options() { options.clear(); }
+    size_t num_options() { return option_data.size(); }
+    void clear_options() { option_data.clear(); }
 
     void clear_option(const std::string& name)
-        { options.erase(name); }
+        { option_data.erase(name); }
 
     Options& get_options() { return *this; }
 
@@ -26,14 +27,14 @@ class Options {
     template <typename T>
     void set_option(const std::string& name, const T& value)
     {
-        options[name] = value;
+        option_data[name] = value;
     }
 
     template <typename T>
     void get_option(const std::string& name, T& value) const
     {
-        auto it = options.find(name);
-        if (it == options.end()) return;
+        auto it = option_data.find(name);
+        if (it == option_data.end()) return;
         if (std::holds_alternative<T>(it->second)) {
             value = std::get<T>(it->second);
             return;
@@ -48,8 +49,8 @@ class Options {
 template <>
 inline void Options::get_option(const std::string& name, unsigned int& value) const
 {
-auto it = options.find(name);
-if (it == options.end()) return;
+auto it = option_data.find(name);
+if (it == option_data.end()) return;
 
 if (std::holds_alternative<unsigned int>(it->second)) {
     value = std::get<unsigned int>(it->second);

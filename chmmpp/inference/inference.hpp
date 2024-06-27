@@ -27,10 +27,10 @@ void viterbi(const HMM &hmm, const std::vector<int> &observations, std::vector<i
 void aStar_oracle(const HMM &hmm, const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
                      const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
-                     const int numSolns, const Options &options);
+                     unsigned int numSolns, const Options &options);
 void aStar_oracle(const HMM &hmm, const std::vector<int> &observations,
                      std::vector<std::vector<int>> &hidden_states, std::vector<double> &logProb,
                      const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
-                     const int numSolns, unsigned int max_iterations);
+                     unsigned int numSolns, unsigned int max_iterations);
 
 }  // namespace chmmpp

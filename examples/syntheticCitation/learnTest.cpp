@@ -158,7 +158,7 @@ void run_tests(bool debug = false)
             for(size_t k = 0; k < numObs; ++k) {
                 std::vector<int> hid;
                 std::vector<int> obs;
-                originalCHMM.run(T,obs,hid);
+                originalCHMM.run(obs,hid);
                 obsVec[k] = obs;
                 hidVec[k] = hid;
             }

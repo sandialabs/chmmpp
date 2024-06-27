@@ -28,7 +28,7 @@ double log_likelihood_estimate(HMM &hmm,
     while(n < num_it) {
         std::vector<int> hid;
         std::vector<int> tempObs;
-        hmm.run(T, tempObs, hid); 
+        hmm.run(tempObs, hid); 
         ++n;
         if((*constraint_oracle)(hid)) {
             for(size_t r = 0; r < obs.size(); ++r) {

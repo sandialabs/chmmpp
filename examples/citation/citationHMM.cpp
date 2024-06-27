@@ -13,7 +13,7 @@ citationHMM::citationHMM(const std::vector<std::vector<std::string> > &supervise
     wordMap.clear();
     categoryMap.clear();
 
-    int counter = 1;
+    unsigned int counter = 1;
     for (const auto &line : supervisedWords) {
         for (const auto &word : line) {
             if (wordMap.count(word) == 0) {
@@ -34,8 +34,8 @@ citationHMM::citationHMM(const std::vector<std::vector<std::string> > &supervise
     }
 
     // Set HMM
-    int O = wordMap.size() + 1;  // Allows for UNKNOWN state
-    int H = categoryMap.size();
+    size_t O = wordMap.size() + 1;  // Allows for UNKNOWN state
+    size_t H = categoryMap.size();
 
     std::vector<std::vector<double> > _A(H);
     std::vector<double> _S(H, 1. / H);

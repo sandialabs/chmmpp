@@ -27,7 +27,7 @@ endif()
 if (with_boost)
     find_package(Boost REQUIRED)
     list(APPEND sources 
-            inference/HMM_inference.cpp
+            #inference/HMM_inference.cpp
             inference/aStar.cpp
             inference/viterbi.cpp
             inference/aStar_oracle.cpp

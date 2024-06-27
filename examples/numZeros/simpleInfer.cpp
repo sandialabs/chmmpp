@@ -65,7 +65,7 @@ int main()
     std::vector<int> hid;
 
     // Generate sequence of hidden states and observables
-    hmm.run(T, obs, hid);
+    hmm.run(obs, hid);
     auto numZeros = count(hid.begin(), hid.end(), 0);
     if (inference_numZeros == 0) inference_numZeros = numZeros;
 

@@ -8,8 +8,8 @@ namespace chmmpp {
 // We assume that we may have unknown words (wordMap[UNKNOWN] = 0), but not unknown categories
 class citationHMM : public CHMM {
    public:
-    std::unordered_map<std::string, int> categoryMap;
-    std::unordered_map<std::string, int> wordMap;
+    std::unordered_map<std::string, unsigned int> categoryMap;
+    std::unordered_map<std::string, unsigned int> wordMap;
 
    public:
     citationHMM(const std::vector<std::vector<std::string>> &supervisedWords,

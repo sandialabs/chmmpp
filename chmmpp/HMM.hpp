@@ -64,12 +64,12 @@ class HMM : public Options {
     // TODO - Rename this and the next method.
     //          These are both doing forward simulations, but the latter method is conditioning the transition probabilities
     //          on the observed states.
-    void run(int T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
+    void run(std::vector<int> &observedStates, std::vector<int> &hiddenStates);
 
     // Similar to run, but we take into account the observed states
     std::vector<int> generateHidden(const std::vector<int> &observedStates);
 
-    double logProb(const std::vector<int> &obs, const std::vector<int> &hidden_states) const;
+    double logProb(const std::vector<int>& obs, const std::vector<int>& hidden_states) const;
 
     // TODO - Consistent naming for inference methods:
     //          #_inference();

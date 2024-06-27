@@ -7,7 +7,7 @@ namespace {
 
 void process_options(Options& options, double& convergence_tolerance, unsigned int& max_iterations)
 {
-    for (auto& it : options.options) {
+    for (auto& it : options.option_data) {
         if (it.first == "convergence_tolerance") {
             if (std::holds_alternative<double>(it.second))
                 convergence_tolerance = std::get<double>(it.second);

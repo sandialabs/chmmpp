@@ -17,6 +17,7 @@ SET(sources
     test_foo.cpp
     test_hmm.cpp
     test_chmm.cpp
+    test_options.cpp
     )
 
 set(chmmpp_test_libraries)

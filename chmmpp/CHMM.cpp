@@ -4,14 +4,14 @@
 namespace chmmpp {
 
 //TODO - add max_iterations
-void CHMM::run(const int &T, std::vector<int> &observedStates, std::vector<int> &hiddenStates)
+void CHMM::run(std::vector<int> &observedStates, std::vector<int> &hiddenStates)
 {
     if(!constraint_oracle) {
         std::cout << "Error: To call the function run in CHMM, you must overload it or provide a constraint oracle." << std::endl << std::endl;
         return;
     }
     while(true) {
-        hmm.run(T,observedStates,hiddenStates);
+        hmm.run(observedStates,hiddenStates);
         if((*constraint_oracle)(hiddenStates)) {
             break;
         }

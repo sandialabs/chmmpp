@@ -10,8 +10,8 @@ namespace chmmpp {
 
 class Generator_Base {
 public:
-    int num_solutions = 1;
-    int max_iterations = 1000000; //TODO implement
+    unsigned int num_solutions = 1;
+    unsigned int max_iterations = 1000000; //TODO implement
     virtual std::vector<std::vector<std::vector<int>>> operator() (
         HMM &hmm, const std::vector<std::vector<int>>& obs
     ) const = 0; //[obs.size()][num_solutions][t]

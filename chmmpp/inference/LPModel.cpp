@@ -118,39 +118,39 @@ void LPModel::initialize(const HMM& hmm, const std::vector<int>& observations)
 
 void LPModel::set_options(const Options& options)
 {
-    for (auto& it : options.options) {
-        if (it.first == "solver") {
-            if (std::holds_alternative<std::string>(it.second))
-                solver_name = std::get<std::string>(it.second);
+    for (auto& [key,value] : options.option_data) {
+        if (key == "solver") {
+            if (std::holds_alternative<std::string>(value))
+                solver_name = std::get<std::string>(value);
             else
                 std::cerr << "WARNING: 'solver' option must be a string" << std::endl;
         }
-        else if (it.first == "keep_data") {
-            if (std::holds_alternative<int>(it.second))
-                keep_data = std::get<int>(it.second) != 0;
-            else if (std::holds_alternative<unsigned int>(it.second))
-                keep_data = std::get<unsigned int>(it.second) != 0;
+        else if (key == "keep_data") {
+            if (std::holds_alternative<int>(value))
+                keep_data = std::get<int>(value) != 0;
+            else if (std::holds_alternative<unsigned int>(value))
+                keep_data = std::get<unsigned int>(value) != 0;
             else
                 std::cerr << "WARNING: 'keep_data' option must be an integer" << std::endl;
         }
-        else if (it.first == "y_binary") {
-            if (std::holds_alternative<int>(it.second))
-                y_binary = std::get<int>(it.second) != 0;
-            else if (std::holds_alternative<unsigned int>(it.second))
-                y_binary = std::get<unsigned int>(it.second) != 0;
+        else if (key == "y_binary") {
+            if (std::holds_alternative<int>(value))
+                y_binary = std::get<int>(value) != 0;
+            else if (std::holds_alternative<unsigned int>(value))
+                y_binary = std::get<unsigned int>(value) != 0;
             else
                 std::cerr << "WARNING: 'y_binary' option must be an integer" << std::endl;
         }
-        else if (it.first == "debug") {
-            if (std::holds_alternative<int>(it.second))
-                debug = std::get<int>(it.second) != 0;
-            else if (std::holds_alternative<unsigned int>(it.second))
-                debug = std::get<unsigned int>(it.second) != 0;
+        else if (key == "debug") {
+            if (std::holds_alternative<int>(value))
+                debug = std::get<int>(value) != 0;
+            else if (std::holds_alternative<unsigned int>(value))
+                debug = std::get<unsigned int>(value) != 0;
             else
                 std::cerr << "WARNING: 'debug' option must be an integer" << std::endl;
         }
         else
-            solver_options.set_option(it.first, it.second);
+            solver_options.set_option(key, value);
     }
 }
 
@@ -173,17 +173,17 @@ void LPModel::optimize(double& log_likelihood, std::vector<int>& hidden_states)
             solver.set_option("output_flag", false);
         }
     }
-    for (auto& it : solver_options.options) {
-        if (std::holds_alternative<int>(it.second))
-            solver.set_option(it.first, std::get<int>(it.second));
-        else if (std::holds_alternative<unsigned int>(it.second)) {
-            int tmp = std::get<unsigned int>(it.second);
-            solver.set_option(it.first, tmp);
+    for (auto& [key,value] : solver_options.option_data) {
+        if (std::holds_alternative<int>(value))
+            solver.set_option(key, std::get<int>(value));
+        else if (std::holds_alternative<unsigned int>(value)) {
+            int tmp = std::get<unsigned int>(value);
+            solver.set_option(key, tmp);
         }
-        else if (std::holds_alternative<double>(it.second))
-            solver.set_option(it.first, std::get<double>(it.second));
-        else if (std::holds_alternative<std::string>(it.second))
-            solver.set_option(it.first, std::get<std::string>(it.second));
+        else if (std::holds_alternative<double>(value))
+            solver.set_option(key, std::get<double>(value));
+        else if (std::holds_alternative<std::string>(value))
+            solver.set_option(key, std::get<std::string>(value));
     }
 
     auto res = solver.solve(model);

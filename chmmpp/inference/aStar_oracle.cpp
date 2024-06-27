@@ -15,7 +15,7 @@ namespace {
 
 void process_options(const Options& options, unsigned int& max_iterations)
 {
-    for (const auto& it : options.options) {
+    for (const auto& it : options.option_data) {
         if (it.first == "max_iterations") {
             if (std::holds_alternative<int>(it.second)) {
                 int tmp = std::get<int>(it.second);
@@ -40,7 +40,7 @@ void process_options(const Options& options, unsigned int& max_iterations)
 void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
                      const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
-                     const int numSolns, const Options& options)
+                     unsigned int numSolns, const Options& options)
 {
     unsigned int max_iterations = 0;
     process_options(options, max_iterations);
@@ -53,9 +53,9 @@ void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
 void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
                      std::vector<std::vector<int>>& hidden_states, std::vector<double>& logProb,
                      const std::shared_ptr<Constraint_Oracle_Base>& constraint_oracle,
-                     const int numSolns, unsigned int max_iterations)
+                     unsigned int numSolns, unsigned int max_iterations)
 {
-    const int T = observations.size();
+    int T = observations.size();
     auto H = hmm.getH();
     auto O = hmm.getO();
     const auto& A = hmm.getA();
@@ -121,8 +121,8 @@ void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
         gScore[tempVec] = tempGScore;
     }
 
-    int counter = 0;
-    int iterationCounter = 0;
+    unsigned int counter = 0;
+    unsigned int iterationCounter = 0;
 
     while (!openSet.empty()) {
         if (max_iterations and (iterationCounter++ >= max_iterations)) {

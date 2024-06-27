@@ -153,6 +153,7 @@ void HMM::reset_rng()
 #ifdef WITH_COEK
 namespace {
 
+// GCOVR_EXCL_START
 // WEH - I omitted this method from the HMM class to avoid conditional imports
 //       of coek logic in the HMM header.
 void initialize_from_dataportal(HMM& hmm, coek::DataPortal& dp)
@@ -239,6 +240,7 @@ void HMM::initialize_from_string(const std::string& json_string)
     throw std::runtime_error("Must build with coek to initialize HMM objects from a string.");
 #endif
 }
+// GCOVR_EXCL_STOP
 
 //----------------------------------
 //-----Access private variables-----
@@ -271,6 +273,7 @@ void HMM::setE(std::vector<std::vector<double>> newE) { E = newE; }
 //-----Print the HMM-----
 //-----------------------
 
+// GCOVR_EXCL_START
 void HMM::printS() const
 {
     std::cout << "Start vector:\n";
@@ -313,6 +316,7 @@ void HMM::print() const
     printA();
     printO();
 }
+// GCOVR_EXCL_STOP
 
 //---------------------
 //-----Run the HMM-----
@@ -320,8 +324,10 @@ void HMM::print() const
 
 // This generates the observed states and hidden states running the HMM for T time steps
 // Not const b/c of the random stuff
-void HMM::run(int T, std::vector<int>& observedStates, std::vector<int>& hiddenStates)
+void HMM::run(std::vector<int>& observedStates, std::vector<int>& hiddenStates)
 {
+    int T = observedStates.size();
+
     observedStates.clear();
     hiddenStates.clear();
 

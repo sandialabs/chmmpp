@@ -63,7 +63,7 @@ void run_all(bool debug = false)
     hmm.reset_rng();
     for (size_t i = 0; i < numIt; ++i) {
         while(true) {
-            hmm.run(T, obs[i], hid[i]);
+            hmm.run(obs[i], hid[i]);
             if(valid(hid[i])) {
                 break;
             }

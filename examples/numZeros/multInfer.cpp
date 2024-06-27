@@ -50,7 +50,7 @@ int main()
     std::vector<int> obs;
     std::vector<int> hid;
 
-    hmm.run(T, obs, hid);
+    hmm.run(obs, hid);
     auto numZeros = count(hid.begin(), hid.end(), 0);
     std::cout << "Num Zeros in randomly generated data: " << numZeros << std::endl << std::endl;
 

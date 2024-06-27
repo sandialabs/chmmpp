@@ -35,6 +35,7 @@ class CHMM : public Options {
     long int get_seed() {return hmm.get_seed(); }
     void reset_rng() { hmm.reset_rng(); }
 
+    // GCOVR_EXCL_START
     virtual void initialize_from_file(const std::string &json_filename)
     {
         hmm.initialize_from_file(json_filename);
@@ -44,15 +45,18 @@ class CHMM : public Options {
     {
         hmm.initialize_from_string(json_string);
     }
+    // GCOVR_EXCL_STOP
 
-    virtual double logProb(const std::vector<int> obs, const std::vector<int> guess) const
+    virtual double logProb(const std::vector<int>& obs, const std::vector<int>& hidden_states) const
     {
-        return hmm.logProb(obs, guess);
+        return hmm.logProb(obs, hidden_states);
     }
 
+    // GCOVR_EXCL_START
     virtual void print() const { hmm.print(); }
+    // GCOVR_EXCL_STOP
 
-    virtual void run(const int &T, std::vector<int> &observedStates, std::vector<int> &hiddenStates);
+    virtual void run(std::vector<int> &observedStates, std::vector<int> &hiddenStates);
 
     //
     // inference methods

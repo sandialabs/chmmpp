@@ -27,7 +27,7 @@ namespace chmmpp {
 void process_options(const Options &options, double &convergence_tolerance, unsigned int &C,
                      double &gamma)
 {
-    for (const auto &it : options.options) {
+    for (const auto &it : options.option_data) {
         if (it.first == "C") {
             if (std::holds_alternative<int>(it.second)) {
                 int tmp = std::get<int>(it.second);

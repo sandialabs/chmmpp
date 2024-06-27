@@ -81,7 +81,7 @@ void run_all(bool with_rejection, bool debug = false)
         if (with_rejection) {
             // Iterate until we generate a sample with numZeros zeros
             while (not feasible) {
-                hmm.run(T, obs[i], hid[i]);
+                hmm.run(obs[i], hid[i]);
                 feasible = count(hid[i].begin(), hid[i].end(), 0) == numZeros;
                 nsamples++;
             }
@@ -89,7 +89,7 @@ void run_all(bool with_rejection, bool debug = false)
         else {
             // Generate sequence of hidden states and observables
             // Don't worry if the observations match numZeros
-            hmm.run(T, obs[i], hid[i]);
+            hmm.run(obs[i], hid[i]);
             feasible = count(hid[i].begin(), hid[i].end(), 0) == numZeros;
             nsamples++;
         }

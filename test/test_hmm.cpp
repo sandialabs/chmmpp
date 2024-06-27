@@ -157,10 +157,19 @@ TEST_CASE("hmm1", "[hmm]")
         chmmpp::HMM hmm(A,S,E);
         std::vector<int> obs(5);
         std::vector<int> hidden(5);
-        hmm.run(5, obs, hidden);
+        hmm.run(obs, hidden);
         std::vector<int> obs_ = {1,0,1,0,1};
         std::vector<int> hidden_ = {0,1,0,1,0};
         REQUIRE(obs == obs_);
+        REQUIRE(hidden == hidden_);
+    }
+
+    SECTION("generate_hidden")
+    {
+        chmmpp::HMM hmm(A,S,E);
+        std::vector<int> obs = {1,0,1,0,1};
+        auto hidden = hmm.generateHidden(obs);
+        std::vector<int> hidden_ = {0,1,0,1,0};
         REQUIRE(hidden == hidden_);
     }
 
@@ -303,10 +312,20 @@ TEST_CASE("hmm2", "[hmm]")
         hmm.set_seed(123456789);
         std::vector<int> obs(5);
         std::vector<int> hidden(5);
-        hmm.run(5, obs, hidden);
+        hmm.run(obs, hidden);
         std::vector<int> obs_ = {1,0,1,1,1};
         std::vector<int> hidden_ = {0,1,0,1,0};
         REQUIRE(obs == obs_);
+        REQUIRE(hidden == hidden_);
+    }
+
+    SECTION("generate_hidden")
+    {
+        chmmpp::HMM hmm(A,S,E);
+        hmm.set_seed(123456789);
+        std::vector<int> obs = {1,0,1,1,1};
+        auto hidden = hmm.generateHidden(obs);
+        std::vector<int> hidden_ = {0,1,0,1,0};
         REQUIRE(hidden == hidden_);
     }
 

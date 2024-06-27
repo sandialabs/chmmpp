@@ -17,7 +17,7 @@ void citationHMM::learn_citation_semisupervised_hard(
     std::vector<std::vector<int> > supervisedHidden;
     std::vector<std::vector<int> > unsupervisedObs;
 
-    int index = 0;
+    size_t index = 0;
     for (const auto &line : supervisedWords) {
         supervisedObs.push_back({});
         for (const auto &word : line) {

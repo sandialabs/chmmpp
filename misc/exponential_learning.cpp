@@ -2,7 +2,7 @@
 #include <chmmpp/chmmpp.hpp>
 
 int main() {
-    int r = 200;
+    unsigned int r = 200;
     auto eps = (1./4.);
 
     std::vector<std::vector<double>> A{{0.5, 0.5}, {0.5, 0.5}};  // Transition Matrix
