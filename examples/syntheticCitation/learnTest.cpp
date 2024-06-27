@@ -205,8 +205,8 @@ void run_tests(bool debug = false)
             std::vector<std::vector<int>> obsVec(numObs);
             std::vector<std::vector<int>> hidVec(numObs);
             for(size_t k = 0; k < numObs; ++k) {
-                std::vector<int> hid;
-                std::vector<int> obs;
+                std::vector<int> hid(T);
+                std::vector<int> obs(T);
                 originalCHMM.run(obs,hid);
                 obsVec[k] = obs;
                 hidVec[k] = hid;
@@ -216,8 +216,8 @@ void run_tests(bool debug = false)
             std::vector<std::vector<int>> obsVec_validation(num_valid);
             std::vector<std::vector<int>> hidVec_validation(num_valid);
             for(size_t k = 0; k < num_valid; ++k) {
-                std::vector<int> hid;
-                std::vector<int> obs;
+                std::vector<int> hid(T);
+                std::vector<int> obs(T);
                 originalCHMM.run(obs,hid);
                 obsVec_validation[k] = obs;
                 hidVec_validation[k] = hid;
@@ -267,7 +267,7 @@ void run_tests(bool debug = false)
             auto trueE = trueHMM.getE();
             
             //Unconstrained HMM
-            std::cout << "Running unconstrained learning.\n";
+            std::cout << "Running unconstrained learning\n";
             chmmpp::HMM unconstrained_HMM = perturbed_HMM;
             unconstrained_HMM.set_seed(1);
             HMM_run_times[i].push_back(
@@ -452,7 +452,7 @@ void run_tests(bool debug = false)
 int main()
 {
 
-    run_tests(false);
+    run_tests(true);
 
     return 0;
 }
