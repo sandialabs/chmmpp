@@ -41,7 +41,7 @@ catch_discover_tests(runner)
 add_custom_target(test COMMAND ${CMAKE_CTEST_COMMAND})
 
 if (gcovr_FOUND)
-    add_custom_target(test_gcovr COMMAND ${GCOVR_EXECUTABLE} -e ../../examples -e ../../\_spack -r ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/..)
+    add_custom_target(test_gcovr COMMAND ${GCOVR_EXECUTABLE} -d -e ../../examples -e ../../\_spack -r ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/..)
 endif()
 
 
