@@ -120,8 +120,8 @@ void LearningModel::initialize(numZerosHMM& nzhmm, const std::vector<int>& obser
 
         auto O = coek::expression();
         for (auto t : coek::range(Tmax))
-            O += (unconstrained_hidden[t] - z[{t,1}]) * (unconstrained_hidden[t] - z[{t,1}]);
-        model.add_objective(O).sense(model.minimize);
+            O += z[{t,unconstrained_hidden[t]}]; 
+        model.add_objective(O).sense(model.maximize);
     }
     #endif
 }

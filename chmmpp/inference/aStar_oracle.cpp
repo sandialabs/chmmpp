@@ -2,6 +2,7 @@
 
 #include <queue>
 #include <iostream>
+#include <iomanip>
 #include "inference.hpp"
 #include "../util/vectorhash.hpp"
 
@@ -126,9 +127,9 @@ void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
 
     while (!openSet.empty()) {
         if (max_iterations and (iterationCounter++ >= max_iterations)) {
+            std::cout << "aStar Oracle exited early because we reach the max number of iterations." << std::endl;
             break;
         }
-
         auto tempPair = openSet.top();
         openSet.pop();
 
@@ -147,7 +148,6 @@ void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
                 }
             }
         }
-
         else {
             for (size_t h2 = 0; h2 < H; ++h2) {
                 double tempGScore = oldGScore + logA[h1][h2] + logE[h2][observations[t]];
@@ -166,6 +166,8 @@ void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
             }
         }
     }
+
+    std::cout << "ERROR: Inference finished without outputting the correct number of solutions." << std::endl;
 }
 
 }  // namespace chmmpp

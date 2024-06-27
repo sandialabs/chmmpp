@@ -803,7 +803,7 @@ void HMM_inference::learn(const std::vector<int> &obs, const int numZeros, const
                     num += xi[h1][h2][t];
                     newDen += gamma[h1][t];
                 }
-                tol = std::max(std::abs(A[h1][h2] - num / newDen), tol);
+                tol = std::max(std::fabs(A[h1][h2] - num / newDen), tol);
                 A[h1][h2] = num / newDen;
             }
         }
@@ -1074,7 +1074,7 @@ void HMM_inference::learn(const std::vector<std::vector<int> > &obs,
                         newDen += totalGamma[r][h1][t];
                     }
                 }
-                tol = std::max(std::abs(A[h1][h2] - num / newDen), tol);
+                tol = std::max(std::fabs(A[h1][h2] - num / newDen), tol);
                 A[h1][h2] = num / newDen;
             }
         }
@@ -1206,7 +1206,7 @@ void HMM_inference::learn(const std::vector<int> &obs, const double eps)
                     num += xi[h1][h2][t];
                     newDen += gamma[h1][t];
                 }
-                tol = std::max(std::abs(A[h1][h2] - num / newDen), tol);
+                tol = std::max(std::fabs(A[h1][h2] - num / newDen), tol);
                 A[h1][h2] = num / newDen;
             }
         }
@@ -1353,7 +1353,7 @@ void HMM_inference::learn(const std::vector<std::vector<int> > &obs, const doubl
                         newDen += totalGamma[r][h1][t];
                     }
                 }
-                tol = std::max(std::abs(A[h1][h2] - num / newDen), tol);
+                tol = std::max(std::fabs(A[h1][h2] - num / newDen), tol);
                 A[h1][h2] = num / newDen;
             }
         }
@@ -1551,7 +1551,7 @@ void HMM_inference::learn(
                 else {
                     newA[h1][h2] = newA[h1][h2] / ASum;
                 }
-                tol = std::max(std::abs(A[h1][h2] - newA[h1][h2]), tol);
+                tol = std::max(std::fabs(A[h1][h2] - newA[h1][h2]), tol);
                 A[h1][h2] = newA[h1][h2];
             }
         }
@@ -1671,7 +1671,7 @@ void HMM_inference::learnHard(
                 sum += ACounter[h1][h2];
             }
             for (size_t h2 = 0; h2 < H; ++h2) {
-                tol = std::max(std::abs(A[h1][h2] - ((double)ACounter[h1][h2]) / sum), tol);
+                tol = std::max(std::fabs(A[h1][h2] - ((double)ACounter[h1][h2]) / sum), tol);
                 A[h1][h2] = ((double)ACounter[h1][h2]) / sum;
             }
             sum = 0;

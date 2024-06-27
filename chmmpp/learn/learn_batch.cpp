@@ -22,7 +22,7 @@ void normalize(std::vector<double> &myVec) {
     double eps = 1E-7;
     double sum = 0.;
     for(auto &elem: myVec) { //We can't have 0 probabilities in S for the MIP because otherwise we may project into infeasible solutions
-        if(elem == 0) {
+        if(std::fabs(elem) < eps) {
             elem = eps;
         }
     }
@@ -71,7 +71,17 @@ void learn_batch(HMM &hmm,
 
     while(true) {
         ++numIt;//==gamma.size();
-        auto newHidden = generator(hmm, obs); //r,n, t
+        auto newHidden = generator(hmm, obs); //r,n,t
+
+        /*for(size_t r = 0; r < obs.size(); ++r) {
+            for(size_t n = 0; n < newHidden[r].size(); ++n) {
+                for(size_t t = 0; t < newHidden[r][n].size(); ++t) {
+                    std::cout << newHidden[r][n][t];
+                }
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+        }*/
 
         std::vector<std::vector<double>> newProbs(obs.size()); //r,n
         for(size_t r = 0; r < obs.size(); ++r) { 
@@ -172,7 +182,7 @@ void learn_batch(HMM &hmm,
         double diff = 0.;
         for(size_t h = 0; h < H; ++h) {
             for(size_t g = 0; g < H; ++g) {
-                diff = std::max(diff, std::abs(hmm.getAEntry(h,g) - normalizedA[h][g]));
+                diff = std::max(diff, std::fabs(hmm.getAEntry(h,g) - normalizedA[h][g]));
             }
         }
 
@@ -181,6 +191,24 @@ void learn_batch(HMM &hmm,
         hmm.setS(normalizedS);
 
         if((diff < convergence_tolerance) || (numIt > max_iteration)) {
+            //Make all the 0 transitions epsilon transitions
+            //If this isn't the case a bunch of stuff breaks later because we can learn infeasible models
+            auto A = hmm.getA();
+            auto E = hmm.getE();
+            auto S = hmm.getS();
+
+            for(auto& vec: A) {
+                normalize(vec);
+            }
+            for(auto& vec: E) {
+                normalize(vec);
+            }
+            normalize(S);
+
+            hmm.setA(A);
+            hmm.setS(S);
+            hmm.setE(E);
+
             std::cout << "Algorithm took " << numIt << " iterations." << std::endl;
             break;
         }

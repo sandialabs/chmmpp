@@ -21,13 +21,16 @@ void CHMM::run(std::vector<int> &observedStates, std::vector<int> &hiddenStates)
 void CHMM::aStar(const std::vector<int> &observations, std::vector<int> &hidden_states,
                  double &logProb)
 {
+    
     if(!constraint_oracle) {
         std::cout << "Error: To call the function aStar in CHMM, you must overload it or provide a constraint oracle." << std::endl << std::endl;
         return;
     }
+
     std::vector<std::vector<int>> hidden_states_vec;
     std::vector<double> logProb_vec;
     logProb_vec.push_back(logProb);
+
     chmmpp::aStar_oracle(hmm, observations, hidden_states_vec, logProb_vec, constraint_oracle, 1, this->get_options());
     hidden_states = hidden_states_vec[0];
     logProb = logProb_vec[0];

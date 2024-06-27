@@ -266,7 +266,7 @@ void local_learn_numZeros(HMM &hmm, const std::vector<std::vector<int>> &obs,
                         newDen += totalGamma[r][h1][t];
                     }
                 }
-                tol = std::max(std::abs(A[h1][h2] - num / newDen), tol);
+                tol = std::max(std::fabs(A[h1][h2] - num / newDen), tol);
                 A[h1][h2] = num / newDen;
             }
         }

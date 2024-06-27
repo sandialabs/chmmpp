@@ -205,7 +205,7 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs,
                 else {
                     newA[h1][h2] = newA[h1][h2] / ASum;
                 }
-                tol = std::max(std::abs(A[h1][h2] - newA[h1][h2]), tol);
+                tol = std::max(std::fabs(A[h1][h2] - newA[h1][h2]), tol);
                 A[h1][h2] = newA[h1][h2];
             }
         }
@@ -457,7 +457,7 @@ void LearnStochastic::learn1(const std::vector<std::vector<int>>& observations,
                 else {
                     newA[h1][h2] = newA[h1][h2] / ASum;
                 }
-                tol = std::max(std::abs(A[h1][h2] - newA[h1][h2]), tol);
+                tol = std::max(std::fabs(A[h1][h2] - newA[h1][h2]), tol);
                 A[h1][h2] = newA[h1][h2];
             }
         }

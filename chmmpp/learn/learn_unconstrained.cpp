@@ -31,7 +31,14 @@ void process_options(Options& options, double& convergence_tolerance, unsigned i
 }
 
 void normalize(std::vector<double> &myVec) {
+    double eps = 1E-7;
     double sum = 0.;
+    for(auto &elem: myVec) { //We can't have 0 probabilities in S for the MIP because otherwise we may project into infeasible solutions
+        if(std::fabs(elem) < eps) {
+            elem = eps;
+        }
+    }
+
     for(const auto &elem: myVec) sum += elem;
 
     if(sum != 0.) {
@@ -223,17 +230,53 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
                         newDen += totalGamma[r][h1][t];
                     }
                 }
-                tol = std::max(std::abs(A[h1][h2] - num / newDen), tol);
+                tol = std::max(std::fabs(A[h1][h2] - num / newDen), tol);
                 A[h1][h2] = num / newDen;
             }
         }
         hmm.setA(A);
 
         if (tol < convergence_tolerance) {
+            //Make all the 0 transitions epsilon transitions
+            //If this isn't the case a bunch of stuff breaks later because we can learn infeasible models
+            auto A = hmm.getA();
+            auto E = hmm.getE();
+            auto S = hmm.getS();
+
+            for(auto& vec: A) {
+                normalize(vec);
+            }
+            for(auto& vec: E) {
+                normalize(vec);
+            }
+            normalize(S);
+
+            hmm.setA(A);
+            hmm.setS(S);
+            hmm.setE(E); 
+            
             std::cout << "Algorithm took " << numIt << " iterations.\n";
             break;
         }
         if (max_iterations and (numIt >= max_iterations)) {
+            //Make all the 0 transitions epsilon transitions
+            //If this isn't the case a bunch of stuff breaks later because we can learn infeasible models
+            auto A = hmm.getA();
+            auto E = hmm.getE();
+            auto S = hmm.getS();
+
+            for(auto& vec: A) {
+                normalize(vec);
+            }
+            for(auto& vec: E) {
+                normalize(vec);
+            }
+            normalize(S);
+
+            hmm.setA(A);
+            hmm.setS(S);
+            hmm.setE(E); 
+
             std::cout << "Algorithm took " << numIt << " iterations.\n";
             break;
         }

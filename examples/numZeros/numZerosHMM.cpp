@@ -18,6 +18,7 @@ public:
 
     Constraint_Oracle_NumZeros(int _numZeros) {
         numZeros = _numZeros;
+        this->partial_oracle = false;
     }
 };
 

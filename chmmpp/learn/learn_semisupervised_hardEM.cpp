@@ -162,7 +162,7 @@ void learn_semisupervised_hardEM(HMM &hmm, const std::vector<std::vector<int> > 
         double tol = -1.;
         for (int h1 = 0; h1 < H; ++h1) {
             for (int h2 = 0; h2 < H; ++h2) {
-                tol = std::max(std::abs(hmm.getAEntry(h1, h2) - ACounter[h1][h2]), tol);
+                tol = std::max(std::fabs(hmm.getAEntry(h1, h2) - ACounter[h1][h2]), tol);
             }
         }
 
