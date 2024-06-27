@@ -206,7 +206,7 @@ void run_tests(bool debug = false)
             for(size_t k = 0; k < num_valid; ++k) {
                 std::vector<int> hid;
                 std::vector<int> obs;
-                originalCHMM.run(T,obs,hid);
+                originalCHMM.run(obs,hid);
                 obsVec_validation[k] = obs;
                 hidVec_validation[k] = hid;
             }
