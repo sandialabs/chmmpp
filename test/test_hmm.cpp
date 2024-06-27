@@ -2,6 +2,100 @@
 #include <chmmpp/HMM.hpp>
 #include <cmath>
 
+TEST_CASE("hmm_errors", "[hmm]")
+{
+    SECTION("empty_E")
+    {
+    std::vector<std::vector<double>> A = {{0,1},{1,0}};
+    std::vector<double> S = {1,0};
+    std::vector<std::vector<double>> E = {};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+    SECTION("inconsistent_A_size")
+    {
+    std::vector<std::vector<double>> A = {{0,1,0},{1,0}};
+    std::vector<double> S = {1,0};
+    std::vector<std::vector<double>> E = {{0,1},{1,0}};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+    SECTION("inconsistent_E_size")
+    {
+    std::vector<std::vector<double>> A = {{0,1},{1,0}};
+    std::vector<double> S = {1,0};
+    std::vector<std::vector<double>> E = {{0,1,0},{1,0}};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+    SECTION("negative_A_value")
+    {
+    std::vector<std::vector<double>> A = {{0,-1},{1,0}};
+    std::vector<double> S = {1,0};
+    std::vector<std::vector<double>> E = {{0,1},{1,0}};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+    SECTION("rows_of_A_sum_to_one")
+    {
+    std::vector<std::vector<double>> A = {{0,0.5},{1,0}};
+    std::vector<double> S = {1,0};
+    std::vector<std::vector<double>> E = {{0,1},{1,0}};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+    SECTION("negative_S_value")
+    {
+    std::vector<std::vector<double>> A = {{0,1},{1,0}};
+    std::vector<double> S = {-1,0};
+    std::vector<std::vector<double>> E = {{0,1},{1,0}};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+    SECTION("negative_E_value")
+    {
+    std::vector<std::vector<double>> A = {{0,1},{1,0}};
+    std::vector<double> S = {1,0};
+    std::vector<std::vector<double>> E = {{0,-1},{1,0}};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+    SECTION("rows_of_E_sum_to_one")
+    {
+    std::vector<std::vector<double>> A = {{0,1},{1,0}};
+    std::vector<double> S = {1,0};
+    std::vector<std::vector<double>> E = {{0,0.5},{1,0}};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+    SECTION("S_sum_to_one")
+    {
+    std::vector<std::vector<double>> A = {{0,1},{1,0}};
+    std::vector<double> S = {0.5,0};
+    std::vector<std::vector<double>> E = {{0,1.0},{1,0}};
+
+    chmmpp::HMM hmm;
+    REQUIRE_THROWS(hmm.initialize(A,S,E));
+    }
+
+}
+
 TEST_CASE("hmm1", "[hmm]")
 {
     std::vector<std::vector<double>> A = {{0,1},{1,0}};

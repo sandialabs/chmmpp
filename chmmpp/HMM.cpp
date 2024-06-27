@@ -46,7 +46,7 @@ void HMM::initialize(const std::vector<std::vector<double>>& inputA,
                      const std::vector<std::vector<double>>& inputE)
 {
     H = inputA.size();
-    if (H > 0)
+    if (inputE.size() > 0)
         O = inputE[0].size();
     else
         O = 0;
@@ -87,7 +87,7 @@ void HMM::initialize(const std::vector<std::vector<double>>& inputA,
                 sum += inputA[h1][h2];
             }
 
-            if (std::abs(sum - 1.) > 10E-6) {
+            if (std::fabs(sum - 1.) > 10E-6) {
                 std::cout << "Error in constructor for HMM, the rows of A must sum to 1."
                           << std::endl;
                 throw std::exception();
@@ -103,9 +103,10 @@ void HMM::initialize(const std::vector<std::vector<double>>& inputA,
             }
             sum += inputS[h];
         }
-        if (std::abs(sum - 1.) > 10E-6) {
+        if (std::fabs(sum - 1.) > 10E-6) {
             std::cout << "Error in constructor for HMM, the entries of S must sum to 1."
                       << std::endl;
+            throw std::exception();
         }
 
         for (size_t h = 0; h < H; ++h) {
@@ -120,7 +121,7 @@ void HMM::initialize(const std::vector<std::vector<double>>& inputA,
                 sum += inputE[h][o];
             }
 
-            if (std::abs(sum - 1.) > 10E-6) {
+            if (std::fabs(sum - 1.) > 10E-6) {
                 std::cout << "Error in constructor for HMM, the rows of E must sum to 1."
                           << std::endl;
                 throw std::exception();
