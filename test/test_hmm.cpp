@@ -1,6 +1,9 @@
+#include <cmath>
 #include "catch2/catch_test_macros.hpp"
 #include <chmmpp/HMM.hpp>
-#include <cmath>
+#include <chmmpp/util/math.hpp>
+
+#define REQUIRE_MESSAGE(cond, msg) do { INFO(msg); REQUIRE(cond); } while((void)0, 0)
 
 TEST_CASE("hmm_errors", "[hmm]")
 {
@@ -102,6 +105,8 @@ TEST_CASE("hmm1", "[hmm]")
     std::vector<double> S = {1,0};
     std::vector<std::vector<double>> E = {{0,1},{1,0}};
 
+    // API tests
+
     SECTION("seed")
     {
         chmmpp::HMM hmm;
@@ -152,6 +157,19 @@ TEST_CASE("hmm1", "[hmm]")
         REQUIRE(hmm.getEEntry(1,1) == 0);
     }
 
+    SECTION("randomize")
+    {
+        chmmpp::HMM hmm(2,2);
+        hmm.set_seed(123456789);
+        hmm.randomize();
+        auto A = hmm.getA();
+        auto E = hmm.getE();
+        auto S = hmm.getS();
+        hmm.initialize(A,S,E);
+    }
+
+    // Model operation tests
+
     SECTION("run")
     {
         chmmpp::HMM hmm(A,S,E);
@@ -181,6 +199,8 @@ TEST_CASE("hmm1", "[hmm]")
         double log_likelihood = hmm.logProb(obs, hidden);
         REQUIRE(log_likelihood == 0.0);
     }
+
+    // Inference tests
 
     SECTION("viterbi")
     {
@@ -216,7 +236,7 @@ TEST_CASE("hmm1", "[hmm]")
     }
 
     SECTION("estimate_hmm") {
-        chmmpp::HMM hmm(A,S,E); //A,S,E don't matter here just their sizes.
+        chmmpp::HMM hmm(2,2);
         std::vector<int> hid{0,0,0,1,1};
         std::vector<int> obs{0,1,0,1,0};
         hmm.estimate_hmm(obs,hid);
@@ -228,25 +248,39 @@ TEST_CASE("hmm1", "[hmm]")
         REQUIRE(hmm.getE() == _E);
     }
 
-    //TODO these tests don't really work anymore
-    //With the current way of running things, we never allow 0 percent probabilities, just small probabilities.
-    /*SECTION("baum_welch single observation") {
-        chmmpp::HMM hmm(A,S,E);
+    SECTION("baum_welch single observation") {
+        chmmpp::HMM test(A,S,E);
+        test.print();
+        chmmpp::HMM hmm(2,2);
         std::vector<int> obs = {1,0,1,0,1};
+        hmm.set_seed(123456789);
+        hmm.randomize();
         hmm.baum_welch(obs);
-        REQUIRE(hmm.getA() == A);
-        REQUIRE(hmm.getS() == S);
-        REQUIRE(hmm.getE() == E);
+        hmm.print();
+        auto [flagA,strA] = chmmpp::compare(hmm.getA(), A, 1e-7);
+        REQUIRE_MESSAGE(flagA,strA);
+        auto [flagS,strS] = chmmpp::compare(hmm.getS(), S, 1e-7);
+        REQUIRE_MESSAGE(flagS,strS);
+        auto [flagE,strE] = chmmpp::compare(hmm.getE(), E, 1e-7);
+        REQUIRE_MESSAGE(flagE,strE);
     }
 
     SECTION("baum_welch multiple observation") {
-        chmmpp::HMM hmm(A,S,E);
+        chmmpp::HMM test(A,S,E);
+        test.print();
+        chmmpp::HMM hmm(2,2);
         std::vector<std::vector<int>> obs = {{1},{1,0,1,0,1},{1,0}};
+        hmm.set_seed(123456789);
+        hmm.randomize();
         hmm.baum_welch(obs);
-        REQUIRE(hmm.getA() == A);
-        REQUIRE(hmm.getS() == S);
-        REQUIRE(hmm.getE() == E);
-    }*/
+        hmm.print();
+        auto [flagA,strA] = chmmpp::compare(hmm.getA(), A, 1e-7);
+        REQUIRE_MESSAGE(flagA,strA);
+        auto [flagS,strS] = chmmpp::compare(hmm.getS(), S, 1e-7);
+        REQUIRE_MESSAGE(flagS,strS);
+        auto [flagE,strE] = chmmpp::compare(hmm.getE(), E, 1e-7);
+        REQUIRE_MESSAGE(flagE,strE);
+    }
 
 }
 
@@ -256,6 +290,8 @@ TEST_CASE("hmm2", "[hmm]")
     std::vector<std::vector<double>> A = {{0,1},{1,0}};
     std::vector<double> S = {1,0};
     std::vector<std::vector<double>> E = {{0,1},{0.25,0.75}};
+
+    // API tests
 
     SECTION("seed")
     {
@@ -306,6 +342,19 @@ TEST_CASE("hmm2", "[hmm]")
         REQUIRE(hmm.getEEntry(1,0) == 0.25);
         REQUIRE(hmm.getEEntry(1,1) == 0.75);
     }
+
+    SECTION("randomize")
+    {
+        chmmpp::HMM hmm(2,2);
+        hmm.set_seed(123456789);
+        hmm.randomize();
+        auto A = hmm.getA();
+        auto E = hmm.getE();
+        auto S = hmm.getS();
+        hmm.initialize(A,S,E);
+    }
+
+    // Model operation tests
 
     SECTION("run")
     {

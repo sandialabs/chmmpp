@@ -23,6 +23,8 @@ class HMM : public Options {
    public:
     HMM(long int seed = time(NULL));
 
+    HMM(size_t H, size_t O, long int seed = time(NULL));
+
     HMM(const std::vector<std::vector<double> > &inputA, const std::vector<double> &inputS,
         const std::vector<std::vector<double> > &inputE, long int seed = time(NULL));
 
@@ -36,6 +38,7 @@ class HMM : public Options {
     void reset_rng();
 
     double getRandom();
+    void randomize();
 
     void initialize_from_file(const std::string &json_filename);
 
@@ -44,9 +47,9 @@ class HMM : public Options {
     // Get Private Variables
     size_t getH() const;
     size_t getO() const;
-    std::vector<std::vector<double> > getA() const;
-    std::vector<double> getS() const;
-    std::vector<std::vector<double> > getE() const;
+    const std::vector<std::vector<double> >& getA() const;
+    const std::vector<double>& getS() const;
+    const std::vector<std::vector<double> >& getE() const;
     double getAEntry(size_t h1, size_t h2) const;
     double getSEntry(size_t h) const;
     double getEEntry(size_t h, size_t o) const;

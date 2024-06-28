@@ -5,12 +5,16 @@ namespace chmmpp {
 
 namespace {
 
-void process_options(Options& options, double& convergence_tolerance, unsigned int& max_iterations)
+void process_options(Options& options, double& convergence_tolerance, unsigned int& max_iterations, unsigned int& quiet)
 {
     for (auto& it : options.option_data) {
         if (it.first == "convergence_tolerance") {
             if (std::holds_alternative<double>(it.second))
                 convergence_tolerance = std::get<double>(it.second);
+        }
+        else if (it.first == "quiet") {
+            if (std::holds_alternative<unsigned int>(it.second))
+                quiet = std::get<unsigned int>(it.second);
         }
         else if (it.first == "max_iterations") {
             if (std::holds_alternative<int>(it.second)) {
@@ -51,11 +55,32 @@ void normalize(std::vector<double> &myVec) {
 
 }  // namespace
 
+//
+// TODO - Move normalization operations into the HMM class.
+//
+// WEH - This is only done at the end.  Hence, it would make sense to have this operation be done
+//          within the HMM class when setting the data there. If this is only being done to resolve
+//          issues within the MIP, then maybe we should only do the normalization before the MIP
+//          operations???
+//
+
+//
+// TODO - Simplify memory operations
+//
+// WEH - This code does lots of unnecessary memory operations, which will really slow it down.
+//          The HMM data is repeated set into the HMM.  Then, there is a final get/set to
+//          normalize the matrices.  But I think the code could be simplified to only set
+//          the HMM data at the end of this function.
+//       Similarly, the totalGamma and totalXi data objects are iteratively constructed with push_back
+//          operations that are redundant from iteration to iteration.  I think we can setup this memory
+//          once and then over-write it in each iteration.
+//
 void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
 {
     double convergence_tolerance = 10E-6;
     unsigned int max_iterations = 10000000;
-    process_options(hmm.get_options(), convergence_tolerance, max_iterations);
+    unsigned int quiet=0;
+    process_options(hmm.get_options(), convergence_tolerance, max_iterations, quiet);
     
     auto A = hmm.getA();
     auto S = hmm.getS();
@@ -66,6 +91,8 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
     size_t R = obs.size();
     size_t numIt = 0;
 
+    if (not quiet)
+        std::cout << "learn_unconstrained" << std::endl;
     while (true) {
         ++numIt;
         std::vector<std::vector<std::vector<double> > > totalGamma;
@@ -236,6 +263,11 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
         }
         hmm.setA(A);
 
+        if (not quiet) {
+            std::cout << "  Tolerance: " << tol << std::endl;
+            std::cout << "  Iteration: " << numIt << std::endl;
+        }
+
         if (tol < convergence_tolerance) {
             //Make all the 0 transitions epsilon transitions
             //If this isn't the case a bunch of stuff breaks later because we can learn infeasible models
@@ -255,7 +287,8 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
             hmm.setS(S);
             hmm.setE(E); 
             
-            std::cout << "Algorithm took " << numIt << " iterations.\n";
+            if (not quiet)
+                std::cout << "Terminated due to convergence tolerance: " << tol << " < " << convergence_tolerance << std::endl;
             break;
         }
         if (max_iterations and (numIt >= max_iterations)) {
@@ -277,7 +310,8 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
             hmm.setS(S);
             hmm.setE(E); 
 
-            std::cout << "Algorithm took " << numIt << " iterations.\n";
+            if (not quiet)
+                std::cout << "Terminated due to iteration limit: " << numIt << std::endl;
             break;
         }
     }

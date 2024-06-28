@@ -27,6 +27,19 @@ double HMM::getRandom() { return dist(generator); }
 
 HMM::HMM(long int _seed) { set_seed(_seed); }
 
+HMM::HMM(size_t H, size_t O, long int _seed)
+{
+std::vector<std::vector<double>> inputA(H);
+for (size_t i=0; i<H; i++)
+    inputA[i].resize(H, 1./((double)H));
+std::vector<double> inputS(H, 1./((double)H));
+std::vector<std::vector<double>> inputE(H);
+for (size_t i=0; i<H; i++)
+    inputE[i].resize(O, 1./((double)O));
+
+initialize(inputA, inputS, inputE);
+}
+
 HMM::HMM(const std::vector<std::vector<double>>& inputA, const std::vector<double>& inputS,
          const std::vector<std::vector<double>>& inputE, long int _seed)
 {
@@ -129,9 +142,9 @@ void HMM::initialize(const std::vector<std::vector<double>>& inputA,
         }
     }
 
-    A = inputA;
-    S = inputS;
-    E = inputE;
+    setA(inputA);
+    setS(inputS);
+    setE(inputE);
 }
 
 void HMM::set_seed(long int _seed)
@@ -148,6 +161,36 @@ void HMM::reset_rng()
     generator.seed(seed);
     std::uniform_real_distribution<double> myDist(0., 1.);
     dist = myDist;
+}
+
+namespace {
+void normalize(std::vector<double>& v)
+{
+double sum=1e-7;
+for (auto val : v)
+    sum += val;
+for (auto& val: v)
+    val = val/sum;
+}
+}
+
+void HMM::randomize()
+{
+std::normal_distribution<double> ndist;
+
+for (auto& vec : A) {
+    for (auto& val: vec)
+        val = std::fabs(ndist(generator));
+    normalize(vec);
+    }
+for (auto& vec : E) {
+    for (auto& val: vec)
+        val = std::fabs(ndist(generator));
+    normalize(vec);
+    }
+for (auto& val: S)
+    val = std::fabs(ndist(generator));
+normalize(S);
 }
 
 #ifdef WITH_COEK
@@ -250,11 +293,11 @@ size_t HMM::getH() const { return H; }
 
 size_t HMM::getO() const { return O; }
 
-std::vector<std::vector<double>> HMM::getA() const { return A; }
+const std::vector<std::vector<double>>& HMM::getA() const { return A; }
 
-std::vector<double> HMM::getS() const { return S; }
+const std::vector<double>& HMM::getS() const { return S; }
 
-std::vector<std::vector<double>> HMM::getE() const { return E; }
+const std::vector<std::vector<double>>& HMM::getE() const { return E; }
 
 // Range not checked for speed
 double HMM::getAEntry(size_t h1, size_t h2) const { return A[h1][h2]; }
