@@ -255,7 +255,7 @@ void run_tests(bool debug = false)
             auto trueE = trueHMM.getE();
             
             //Unconstrained HMM
-            std::cout << "Running unconstrained learning." << std::endl;
+            std::cout << "Running unconstrained learning.\n";
             chmmpp::HMM unconstrained_HMM = perturbed_HMM;
             unconstrained_HMM.set_seed(1);
             HMM_run_times[i].push_back(
