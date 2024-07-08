@@ -6,3 +6,4 @@ spack/
 _build/
 _spack/
 _spack_tpls/
+_data/

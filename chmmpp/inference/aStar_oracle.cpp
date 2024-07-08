@@ -141,7 +141,7 @@ void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
         if (t == T) {
             if ((*constraint_oracle)(currentSequence)) {
                 hidden_states.push_back(currentSequence);
-                logProb.push_back(-oldGScore); 
+                logProb.push_back(oldGScore); 
                 ++counter;
                 if (counter == numSolns) {
                     return;
@@ -155,12 +155,12 @@ void aStar_oracle(const HMM& hmm, const std::vector<int>& observations,
                 newSequence.push_back(h2);
                 if (constraint_oracle->partial_oracle) {
                     if ((*constraint_oracle)(newSequence)) {
-                        gScore[newSequence] = -tempGScore;
+                        gScore[newSequence] = tempGScore;
                         openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
                     }
                 }
                 else {
-                    gScore[newSequence] = -tempGScore;
+                    gScore[newSequence] = tempGScore;
                     openSet.push(std::make_pair(tempGScore + v[t][h2], newSequence));
                 }
             }

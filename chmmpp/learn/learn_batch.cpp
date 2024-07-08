@@ -52,7 +52,7 @@ void learn_batch(HMM &hmm,
     const unsigned int max_iteration = 1000000;
     const unsigned int max_iteration_generator = 0;
     //TODO this doesn't work right now const int num_solutions = 100; //Assumes constant number of solutions each time 
-    const double convergeFactor = -2./3.;
+    const double convergeFactor = -1.;
 
     std::vector<std::vector<std::vector<std::vector<double>>>> gamma;
     std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> xi; 
@@ -72,6 +72,7 @@ void learn_batch(HMM &hmm,
     while(true) {
         ++numIt;//==gamma.size();
         auto newHidden = generator(hmm, obs); //r,n,t
+        //std::cout << "TEST " << obs.size() << " " << obs[0].size() << std::endl;
 
         /*for(size_t r = 0; r < obs.size(); ++r) {
             for(size_t n = 0; n < newHidden[r].size(); ++n) {
@@ -137,10 +138,10 @@ void learn_batch(HMM &hmm,
         for(size_t h = 0; h < H; ++h) {
             newS[h] *= 1. - pow(numIt, convergeFactor); 
             for(size_t g = 0; g < H; ++g) {
-                newA[h][g] *= 1. - pow(numIt, convergeFactor); 
+                newA[h][g] *= (1. - pow(numIt, convergeFactor)); 
             }
             for(size_t o = 0; o < O; ++o) {
-                newE[h][o] *=1. - pow(numIt, convergeFactor);  
+                newE[h][o] *= (1. - pow(numIt, convergeFactor));  
             }
         }   
 

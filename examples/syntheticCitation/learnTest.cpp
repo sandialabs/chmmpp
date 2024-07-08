@@ -122,6 +122,14 @@ double validation_error(chmmpp::syntheticCitationHMM& szhmm, const std::vector<s
     for(size_t n = 0; n < obsVec.size(); ++n) {
         double temp;
         szhmm.aStar(obsVec[n],hidVecGuess[n],temp);
+        for(size_t t = 0; t < hidVecGuess[n].size(); ++t) {
+            std::cout << hidVecGuess[n][t];
+        }
+        std::cout << std::endl;
+        for(size_t t = 0; t < obsVec[n].size(); ++t) {
+            std::cout << obsVec[n][t];
+        }
+        std::cout << std::endl << std::endl;
     }
 
     do {
@@ -142,7 +150,7 @@ double validation_error(chmmpp::syntheticCitationHMM& szhmm, const std::vector<s
 void run_tests(bool debug = false)
 {
 
-    // Initial Guess
+    /*// Initial Guess
     std::vector<std::vector<double>> A{
         {0.59, 0.11, 0.1, 0.1, 0.1}, 
         {0.09, 0.61, 0.1, 0.1, 0.1},
@@ -157,12 +165,29 @@ void run_tests(bool debug = false)
         {0.1, 0.1, 0.6, 0.1, 0.1}, 
         {0.1, 0.1, 0.1, 0.6, 0.1}, 
         {0.1, 0.1, 0.1, 0.1, 0.6}  
+    };  // Emission Matrix*/
+
+    // Initial Guess
+    std::vector<std::vector<double>> A{
+        {0.79, 0.06, 0.05, 0.05, 0.05}, 
+        {0.04, 0.81, 0.05, 0.05, 0.05},
+        {0.05, 0.05, 0.82, 0.03, 0.05}, 
+        {0.05, 0.05, 0.07, 0.78, 0.05}, 
+        {0.05, 0.05, 0.05, 0.05, 0.8}  
+    };  // Transition Matrix
+    std::vector<double> S = {0.2, 0.2, 0.2, 0.2, 0.2}; // Start probabilities
+    std::vector<std::vector<double>> E{
+        {0.96, 0.01, 0.01, 0.01, 0.01}, 
+        {0.01, 0.96, 0.01, 0.01, 0.01},
+        {0.01, 0.01, 0.96, 0.01, 0.01}, 
+        {0.01, 0.01, 0.01, 0.96, 0.01}, 
+        {0.01, 0.01, 0.01, 0.01, 0.96}  
     };  // Emission Matrix
 
     size_t T = 25;                                // Time Horizon
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {1};
+    std::vector<int> numObsVec = {500,10,20,30,40,50};
     size_t num_valid = 40;                         // Number of sets of observations for validation
                                                   // Chose to give 1000 time steps
     double perturbParam = 0.9;                         // How much the parameters are perturbed
@@ -267,7 +292,7 @@ void run_tests(bool debug = false)
             auto trueE = trueHMM.getE();
             
             //Unconstrained HMM
-            std::cout << "Running unconstrained learning\n";
+            /*std::cout << "Running unconstrained learning\n";
             chmmpp::HMM unconstrained_HMM = perturbed_HMM;
             unconstrained_HMM.set_seed(1);
             HMM_run_times[i].push_back(
@@ -280,7 +305,7 @@ void run_tests(bool debug = false)
             chmmpp::syntheticCitationHMM temp_CHMM;
             temp_CHMM.initialize(unconstrained_HMM);
             HMM_log_likelihood[i].push_back(temp_CHMM.log_likelihood_estimate(obsVec));
-            HMM_validation_error[i].push_back(validation_error(temp_CHMM,obsVec_validation,hidVec_validation));           
+            HMM_validation_error[i].push_back(validation_error(temp_CHMM,obsVec_validation,hidVec_validation));        
 
             //CHMM -- unconstrained
             std::cout << "Running unconstrained batch learning.\n";
@@ -295,7 +320,7 @@ void run_tests(bool debug = false)
                 std::max(vecError(unconstrained_CHMM.hmm.getS(),trueS), matError(unconstrained_CHMM.hmm.getE(), trueE))
             ));
             unconstrained_log_likelihood[i].push_back(unconstrained_CHMM.log_likelihood_estimate(obsVec));
-            unconstrained_validation_error[i].push_back(validation_error(unconstrained_CHMM,obsVec_validation,hidVec_validation));           
+            unconstrained_validation_error[i].push_back(validation_error(unconstrained_CHMM,obsVec_validation,hidVec_validation));          
 
             //CHMM -- hardEM
             std::cout << "Running hardEM batch learning.\n";
@@ -310,7 +335,9 @@ void run_tests(bool debug = false)
                 std::max(vecError(hardEM_CHMM.hmm.getS(),S), matError(hardEM_CHMM.hmm.getE(), E))
             ));
             hardEM_log_likelihood[i].push_back(hardEM_CHMM.log_likelihood_estimate(obsVec));
-            hardEM_validation_error[i].push_back(validation_error(hardEM_CHMM,obsVec_validation,hidVec_validation));           
+            hardEM_validation_error[i].push_back(validation_error(hardEM_CHMM,obsVec_validation,hidVec_validation)); */      
+            
+
 
             //CHMM -- stochastic
             std::cout << "Running stochastic batch learning.\n";
@@ -325,7 +352,9 @@ void run_tests(bool debug = false)
                 std::max(vecError(stochastic_CHMM.hmm.getS(),S), matError(stochastic_CHMM.hmm.getE(), E))
             ));
             stochastic_log_likelihood[i].push_back(stochastic_CHMM.log_likelihood_estimate(obsVec));
-            stochastic_validation_error[i].push_back(validation_error(stochastic_CHMM,obsVec_validation,hidVec_validation));           
+            stochastic_validation_error[i].push_back(validation_error(stochastic_CHMM,obsVec_validation,hidVec_validation));  
+            stochastic_CHMM.hmm.print();
+            throw std::exception();
 
             //CHMM -- MIP
             /*std::cout << "Running MIP batch learning.\n";
@@ -344,12 +373,9 @@ void run_tests(bool debug = false)
 
             std::cout << "\n";
         }
-    }
 
-    for(size_t i = 0; i < numObsVec.size(); ++i) {
-        std::ofstream outputFile("syntheticCitation_learn_comparison_"+std::to_string(numObsVec[i])+".txt");
+        std::ofstream outputFile("../../_data/syntheticCitation_learn_comparison_"+std::to_string(numObsVec[i])+".csv");
 
-        auto numObs = numObsVec[i];
         std::cout << "Printing statistics with " << numObs << " observations.\n";
         std::cout << "-------------------------------------------------------\n\n";
 
@@ -398,45 +424,41 @@ void run_tests(bool debug = false)
         std::cout << "Average MIP validation error: " << mean(MIP_validation_error[i]) << "\n";
         std::cout << "MIP validation error standard deviation: " << stdDev(MIP_validation_error[i]) << "\n\n\n";*/
         
+        outputFile << mean(HMM_error[i]) << ",";
+        outputFile << stdDev(HMM_error[i]) << ",";
+        outputFile << mean(HMM_run_times[i]) << ",";
+        outputFile << stdDev(HMM_run_times[i]) << ",";
+        outputFile << mean(HMM_log_likelihood[i]) << ",";
+        outputFile << stdDev(HMM_log_likelihood[i]) << ",";
+        outputFile << mean(HMM_validation_error[i]) << ",";
+        outputFile << stdDev(HMM_validation_error[i]) << "\n";
 
-        outputFile << "Statistics with " << numObs << " observations.\n";
-        outputFile << "-------------------------------------------------------\n\n";
+        outputFile << mean(unconstrained_error[i]) << ",";
+        outputFile << stdDev(unconstrained_error[i]) << ",";
+        outputFile << mean(unconstrained_run_times[i]) << ",";
+        outputFile << stdDev(unconstrained_run_times[i]) << ",";
+        outputFile << mean(unconstrained_log_likelihood[i]) << ",";
+        outputFile << stdDev(unconstrained_log_likelihood[i]) << ",";
+        outputFile << mean(unconstrained_validation_error[i]) << ",";
+        outputFile << stdDev(unconstrained_validation_error[i]) << "\n";
 
-        outputFile << "Average HMM error: " << mean(HMM_error[i]) << "\n";
-        outputFile << "HMM error standard deviation: " << stdDev(HMM_error[i]) << "\n";
-        outputFile << "Average HMM running time: " << mean(HMM_run_times[i]) << "\n";
-        outputFile << "HMM running time standard deviation: " << stdDev(HMM_run_times[i]) << "\n";
-        outputFile << "Average HMM log likelihood: " << mean(HMM_log_likelihood[i]) << "\n";
-        outputFile << "HMM log likelihood standard deviation: " << stdDev(HMM_log_likelihood[i]) << "\n";
-        outputFile << "Average HMM validation error: " << mean(HMM_validation_error[i]) << "\n";
-        outputFile << "HMM validation error standard deviation: " << stdDev(HMM_validation_error[i]) << "\n\n";
+        outputFile << mean(stochastic_error[i]) << ",";
+        outputFile << stdDev(stochastic_error[i]) << ",";
+        outputFile << mean(stochastic_run_times[i]) << ",";
+        outputFile << stdDev(stochastic_run_times[i]) << ",";
+        outputFile << mean(stochastic_log_likelihood[i]) << ",";
+        outputFile << stdDev(stochastic_log_likelihood[i]) << ",";
+        outputFile << mean(stochastic_validation_error[i]) << ",";
+        outputFile << stdDev(stochastic_validation_error[i]) << "\n";
 
-        outputFile << "Average unconstrained error: " << mean(unconstrained_error[i]) << "\n";
-        outputFile << "unconstrained error standard deviation: " << stdDev(unconstrained_error[i]) << "\n";
-        outputFile << "Average unconstrained running time: " << mean(unconstrained_run_times[i]) << "\n";
-        outputFile << "unconstrained running time standard deviation: " << stdDev(unconstrained_run_times[i]) << "\n";
-        outputFile << "Average unconstrained log likelihood: " << mean(unconstrained_log_likelihood[i]) << "\n";
-        outputFile << "unconstrained log likelihood standard deviation: " << stdDev(unconstrained_log_likelihood[i]) << "\n";
-        outputFile << "Average unconstrained validation error: " << mean(unconstrained_validation_error[i]) << "\n";
-        outputFile << "unconstrained validation error standard deviation: " << stdDev(unconstrained_validation_error[i]) << "\n\n";
-
-        outputFile << "Average stochastic error: " << mean(stochastic_error[i]) << "\n";
-        outputFile << "stochastic error standard deviation: " << stdDev(stochastic_error[i]) << "\n";
-        outputFile << "Average stochastic running time: " << mean(stochastic_run_times[i]) << "\n";
-        outputFile << "stochastic running time standard deviation: " << stdDev(stochastic_run_times[i]) << "\n";
-        outputFile << "Average stochastic log likelihood: " << mean(stochastic_log_likelihood[i]) << "\n";
-        outputFile << "stochastic log likelihood standard deviation: " << stdDev(stochastic_log_likelihood[i]) << "\n";
-        outputFile << "Average stochastic validation error: " << mean(stochastic_validation_error[i]) << "\n";
-        outputFile << "stochastic validation error standard deviation: " << stdDev(stochastic_validation_error[i]) << "\n\n";
-
-        outputFile << "Average hardEM error: " << mean(hardEM_error[i]) << "\n";
-        outputFile << "hardEM error standard deviation: " << stdDev(hardEM_error[i]) << "\n";
-        outputFile << "Average hardEM running time: " << mean(hardEM_run_times[i]) << "\n";
-        outputFile << "hardEM running time standard deviation: " << stdDev(hardEM_run_times[i]) << "\n";
-        outputFile << "Average hardEM log likelihood: " << mean(hardEM_log_likelihood[i]) << "\n";
-        outputFile << "hardEM log likelihood standard deviation: " << stdDev(hardEM_log_likelihood[i]) << "\n";
-        outputFile << "Average hardEM validation error: " << mean(hardEM_validation_error[i]) << "\n";
-        outputFile << "hardEM validation error standard deviation: " << stdDev(hardEM_validation_error[i]) << "\n\n\n";
+        outputFile << mean(hardEM_error[i]) << ",";
+        outputFile << stdDev(hardEM_error[i]) << ",";
+        outputFile << mean(hardEM_run_times[i]) << ",";
+        outputFile << stdDev(hardEM_run_times[i]) << ",";
+        outputFile << mean(hardEM_log_likelihood[i]) << ",";
+        outputFile << stdDev(hardEM_log_likelihood[i]) << ",";
+        outputFile << mean(hardEM_validation_error[i]) << ",";
+        outputFile << stdDev(hardEM_validation_error[i]) << "\n";
     
         /*outputFile << "Average MIP error: " << mean(MIP_error[i]) << "\n";
         outputFile << "MIP error standard deviation: " << stdDev(MIP_error[i]) << "\n";

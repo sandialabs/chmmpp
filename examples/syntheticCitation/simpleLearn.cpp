@@ -49,6 +49,8 @@ void run_all(bool debug = false)
         {0.1, 0.1, 0.1, 0.1, 0.6}  
     };  // Emission Matrix
 
+
+
     size_t T = 25;         // Time Horizon
     size_t numIt = 10;   // Number of runs
 
