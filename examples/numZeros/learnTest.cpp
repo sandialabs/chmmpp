@@ -146,14 +146,14 @@ void run_tests(bool debug = false)
     std::vector<double> S = {0.4, 0.6};                          // Start probabilities
     std::vector<std::vector<double>> E{{0.699, 0.301}, {0.299, 0.701}};  // Emission Matrix
 
-    size_t T = 30;                                // Time Horizon
-    size_t numZeros = 28;                              // Number of zeros
-    size_t testSize = 100;                        // Number of iterations for average and stddev
+    size_t T = 25;                                // Time Horizon
+    size_t numZeros = 5;                              // Number of zeros
+    size_t testSize = 10;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
     std::vector<int> numObsVec = {10};
-    size_t num_valid = 10;                         // Number of sets of observations for validation
+    size_t num_valid = 1;                         // Number of sets of observations for validation
                                                   // Chose to give 1000 time steps
-    double perturbParam = 0.75;                   // How much the parameters are perturbed
+    double perturbParam = 0.9;                   // How much the parameters are perturbed
 
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
@@ -276,12 +276,13 @@ void run_tests(bool debug = false)
             ));
             chmmpp::numZerosHMM temp_CHMM(numZeros);
             temp_CHMM.initialize(unconstrained_HMM);
-            HMM_log_likelihood[i].push_back(temp_CHMM.log_likelihood_estimate(obsVec));    
-            //HMM_validation_error[i].push_back(validation_error(temp_CHMM,obsVec_validation,hidVec_validation));           
+            HMM_log_likelihood[i].push_back(temp_CHMM.log_likelihood_estimate(obsVec)); 
+            temp_CHMM.print();   
+            HMM_validation_error[i].push_back(validation_error(temp_CHMM,obsVec_validation,hidVec_validation));           
        
 
             //CHMM -- unconstrained
-            std::cout << "Running unconstrained batch learning." << std::endl;
+            /*std::cout << "Running unconstrained batch learning." << std::endl;
             chmmpp::numZerosHMM unconstrained_CHMM(numZeros);
             unconstrained_CHMM.initialize(chmmpp::HMM(perturbed_HMM));
             unconstrained_CHMM.set_seed(0);
@@ -293,10 +294,10 @@ void run_tests(bool debug = false)
                 std::max(vecError(unconstrained_CHMM.hmm.getS(),trueS), matError(unconstrained_CHMM.hmm.getE(), trueE))
             ));
             unconstrained_log_likelihood[i].push_back(unconstrained_CHMM.log_likelihood_estimate(obsVec));
-            //unconstrained_validation_error[i].push_back(validation_error(unconstrained_CHMM,obsVec_validation,hidVec_validation));  
+            unconstrained_validation_error[i].push_back(validation_error(unconstrained_CHMM,obsVec_validation,hidVec_validation));*/ 
 
             //CHMM -- hardEM
-            std::cout << "Running hardEM batch learning." << std::endl;
+            /*std::cout << "Running hardEM batch learning." << std::endl;
             chmmpp::numZerosHMM hardEM_CHMM(numZeros);
             hardEM_CHMM.initialize(chmmpp::HMM(perturbed_HMM));
             hardEM_CHMM.set_seed(0);
@@ -308,8 +309,8 @@ void run_tests(bool debug = false)
                 std::max(vecError(hardEM_CHMM.hmm.getS(),trueS), matError(hardEM_CHMM.hmm.getE(), trueE))
             ));
             hardEM_log_likelihood[i].push_back(hardEM_CHMM.log_likelihood_estimate(obsVec));
-            //hardEM_validation_error[i].push_back(validation_error(hardEM_CHMM,obsVec_validation,hidVec_validation));  
-            
+            hardEM_validation_error[i].push_back(validation_error(hardEM_CHMM,obsVec_validation,hidVec_validation));*/
+
             //CHMM -- stochastic
             std::cout << "Running stochastic batch learning." << std::endl;
             chmmpp::numZerosHMM stochastic_CHMM(numZeros);
@@ -323,10 +324,12 @@ void run_tests(bool debug = false)
                 std::max(vecError(stochastic_CHMM.hmm.getS(),trueS), matError(stochastic_CHMM.hmm.getE(), trueE))
             ));
             stochastic_log_likelihood[i].push_back(stochastic_CHMM.log_likelihood_estimate(obsVec));
-            //stochastic_validation_error[i].push_back(validation_error(stochastic_CHMM,obsVec_validation,hidVec_validation));
+            stochastic_CHMM.print();
+            std::cout << std::endl;
+            stochastic_validation_error[i].push_back(validation_error(stochastic_CHMM,obsVec_validation,hidVec_validation));
 
             //CHMM -- MIP
-            std::cout << "Running MIP batch learning." << std::endl;
+            /*std::cout << "Running MIP batch learning." << std::endl;
             chmmpp::numZerosHMM MIP_CHMM(numZeros);
             MIP_CHMM.initialize(chmmpp::HMM(perturbed_HMM));
             MIP_CHMM.set_seed(0);
@@ -339,7 +342,7 @@ void run_tests(bool debug = false)
             ));
             MIP_log_likelihood[i].push_back(MIP_CHMM.log_likelihood_estimate(obsVec));
             //MIP_validation_error[i].push_back(validation_error(MIP_CHMM,obsVec_validation,hidVec_validation));
-            std::cout << "\n\n"; 
+            std::cout << "\n\n";*/
         }
 
         std::ofstream outputFile("../../_data/numZeros_learn_comparison_"+std::to_string(numObsVec[i])+".csv");
@@ -385,14 +388,14 @@ void run_tests(bool debug = false)
         std::cout << "Average hardEM validation error: " << mean(hardEM_validation_error[i]) << "\n";
         std::cout << "hardEM validation error standard deviation: " << stdDev(hardEM_validation_error[i]) << "\n\n";
         
-        std::cout << "Average MIP error: " << mean(MIP_error[i]) << "\n";
+        /*std::cout << "Average MIP error: " << mean(MIP_error[i]) << "\n";
         std::cout << "MIP error standard deviation: " << stdDev(MIP_error[i]) << "\n";
         std::cout << "Average MIP running time: " << mean(MIP_run_times[i]) << "\n";
         std::cout << "MIP running time standard deviation: " << stdDev(MIP_run_times[i]) << "\n";
         std::cout << "Average MIP log likelihood: " << mean(MIP_log_likelihood[i]) << "\n";
         std::cout << "MIP log likelihood standard deviation: " << stdDev(MIP_log_likelihood[i]) << "\n";
         std::cout << "Average MIP validation error: " << mean(MIP_validation_error[i]) << "\n";
-        std::cout << "MIP validation error standard deviation: " << stdDev(MIP_validation_error[i]) << "\n\n\n";
+        std::cout << "MIP validation error standard deviation: " << stdDev(MIP_validation_error[i]) << "\n\n\n";*/
         
         outputFile << (double)density_num / ((double) density_den) << "\n\n";
 
@@ -432,14 +435,14 @@ void run_tests(bool debug = false)
         outputFile << mean(hardEM_validation_error[i]) << ",";
         outputFile << stdDev(hardEM_validation_error[i]) << "\n";
     
-        outputFile << mean(MIP_run_times[i]) << "\n";
+        /*outputFile << mean(MIP_run_times[i]) << "\n";
         outputFile << stdDev(MIP_run_times[i]) << "\n"; 
         outputFile << mean(MIP_error[i]) << "\n";
         outputFile << stdDev(MIP_error[i]) << "\n";
         outputFile << mean(MIP_log_likelihood[i]) << "\n";
         outputFile << stdDev(MIP_log_likelihood[i]) << "\n";
         outputFile << mean(MIP_validation_error[i]) << "\n";
-        outputFile << stdDev(MIP_validation_error[i]) << "\n\n\n";
+        outputFile << stdDev(MIP_validation_error[i]) << "\n\n\n";*/
     }
 }
 

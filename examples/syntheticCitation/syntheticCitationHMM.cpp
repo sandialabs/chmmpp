@@ -1,5 +1,6 @@
 #include "syntheticCitationHMM.hpp"
 #include "syntheticCitation_mip.hpp"
+#include <unordered_set>
 
 namespace chmmpp {
 

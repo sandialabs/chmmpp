@@ -93,8 +93,6 @@ void InferenceModel::collect_solution(std::vector<int>& hidden_states)
 // ---------------------------------------------------------------------------------
 
 
-
-
 void LearningModel::print_solution()
 {
     #ifdef WITH_COEK

@@ -148,8 +148,8 @@ double validation_error(chmmpp::syntheticCitationHMM& szhmm, const std::vector<s
 } 
 
 void run_tests(bool debug = false) {
-    // Initial Guess
-    /* std::vector<std::vector<double>> A{
+    // Initial Guess 
+    std::vector<std::vector<double>> A{
         {0.59, 0.11, 0.1, 0.1, 0.1}, 
         {0.09, 0.61, 0.1, 0.1, 0.1},
         {0.1, 0.1, 0.62, 0.08, 0.1}, 
@@ -163,10 +163,10 @@ void run_tests(bool debug = false) {
         {0.05, 0.05, 0.8, 0.05, 0.05}, 
         {0.05, 0.05, 0.05, 0.8, 0.05}, 
         {0.05, 0.05, 0.05, 0.05, 0.8}  
-    }; // Emission Matrix*/
+    }; // Emission Matrix
 
     // Initial Guess
-    std::vector<std::vector<double>> A{
+    /*std::vector<std::vector<double>> A{
         {0.79, 0.06, 0.05, 0.05, 0.05}, 
         {0.04, 0.81, 0.05, 0.05, 0.05},
         {0.05, 0.05, 0.82, 0.03, 0.05}, 
@@ -175,20 +175,20 @@ void run_tests(bool debug = false) {
     };  // Transition Matrix
     std::vector<double> S = {0.2, 0.2, 0.2, 0.2, 0.2}; // Start probabilities
     std::vector<std::vector<double>> E{
-        {0.8, 0.05, 0.05, 0.05, 0.05}, 
-        {0.05, 0.8, 0.05, 0.05, 0.05},
-        {0.05, 0.05, 0.8, 0.05, 0.05}, 
-        {0.05, 0.05, 0.05, 0.8, 0.05}, 
-        {0.05, 0.05, 0.05, 0.05, 0.8}  
-    };  // Emission Matrix
+        {0.6, 0.1, 0.1, 0.1, 0.1}, 
+        {0.1, 0.6, 0.1, 0.1, 0.1},
+        {0.1, 0.1, 0.6, 0.1, 0.1}, 
+        {0.1, 0.1, 0.1, 0.6, 0.1}, 
+        {0.1, 0.1, 0.1, 0.1, 0.6}  
+    };*/  // Emission Matrix
 
     size_t T = 25;                                // Time Horizon
     size_t testSize = 100;                        // Number of iterations for average and stddev
     //std::vector<int> numObsVec = {1,10,100,1000}; // Number of observations
-    std::vector<int> numObsVec = {10};
+    std::vector<int> numObsVec = {50};
     size_t num_valid = 40;                         // Number of sets of observations for validation
                                                   // Chose to give 1000 time steps
-    double perturbParam = 0.9;                         // How much the parameters are perturbed
+    double perturbParam = 0.8;                         // How much the parameters are perturbed
 
     std::vector<std::vector<size_t>> HMM_run_times(numObsVec.size());
     std::vector<std::vector<size_t>> unconstrained_run_times(numObsVec.size());
@@ -320,7 +320,6 @@ void run_tests(bool debug = false) {
             unconstrained_log_likelihood[i].push_back(unconstrained_CHMM.log_likelihood_estimate(obsVec));
             unconstrained_validation_error[i].push_back(validation_error(unconstrained_CHMM,obsVec_validation,hidVec_validation));
             
-    
             //CHMM -- hardEM
             std::cout << "Running hardEM batch learning.\n";
             chmmpp::syntheticCitationHMM hardEM_CHMM;
@@ -351,10 +350,11 @@ void run_tests(bool debug = false) {
             ));
             stochastic_log_likelihood[i].push_back(stochastic_CHMM.log_likelihood_estimate(obsVec));
             stochastic_validation_error[i].push_back(validation_error(stochastic_CHMM,obsVec_validation,hidVec_validation));  
+            stochastic_CHMM.print();
 
 
             //CHMM -- MIP
-            std::cout << "Running MIP batch learning.\n";
+            /*std::cout << "Running MIP batch learning.\n";
             chmmpp::syntheticCitationHMM MIP_CHMM;
             MIP_CHMM.initialize(chmmpp::HMM(perturbed_HMM));
             MIP_CHMM.set_seed(0);
@@ -366,7 +366,7 @@ void run_tests(bool debug = false) {
                 std::max(vecError(MIP_CHMM.hmm.getS(),S), matError(MIP_CHMM.hmm.getE(), E))
             ));
             MIP_log_likelihood[i].push_back(MIP_CHMM.log_likelihood_estimate(obsVec));
-            MIP_validation_error[i].push_back(validation_error(MIP_CHMM,obsVec_validation,hidVec_validation));         
+            MIP_validation_error[i].push_back(validation_error(MIP_CHMM,obsVec_validation,hidVec_validation)); */       
 
             std::cout << "\n";
         }
@@ -410,16 +410,16 @@ void run_tests(bool debug = false) {
         std::cout << "Average hardEM log likelihood: " << mean(hardEM_log_likelihood[i]) << "\n";
         std::cout << "hardEM log likelihood standard deviation: " << stdDev(hardEM_log_likelihood[i]) << "\n";
         std::cout << "Average hardEM validation error: " << mean(hardEM_validation_error[i]) << "\n";
-        std::cout << "hardEM validation error standard deviation: " << stdDev(hardEM_validation_error[i]) << "\n\n";
+        std::cout << "hardEM validation error standard deviation: " << stdDev(hardEM_validation_error[i]) << "\n\n\n";
 
-        std::cout << "Average MIP running time: " << mean(MIP_run_times[i]) << "\n";
+        /*std::cout << "Average MIP running time: " << mean(MIP_run_times[i]) << "\n";
         std::cout << "MIP running time standard deviation: " << stdDev(MIP_run_times[i]) << "\n"; 
         std::cout << "Average MIP error: " << mean(MIP_error[i]) << "\n";
         std::cout << "MIP error standard deviation: " << stdDev(MIP_error[i]) << "\n";
         std::cout << "Average MIP log likelihood: " << mean(MIP_log_likelihood[i]) << "\n";
         std::cout << "MIP log likelihood standard deviation: " << stdDev(MIP_log_likelihood[i]) << "\n";
         std::cout << "Average MIP validation error: " << mean(MIP_validation_error[i]) << "\n";
-        std::cout << "MIP validation error standard deviation: " << stdDev(MIP_validation_error[i]) << "\n\n\n";
+        std::cout << "MIP validation error standard deviation: " << stdDev(MIP_validation_error[i]) << "\n\n\n";*/
 
         outputFile << mean(HMM_run_times[i]) << ",";
         outputFile << stdDev(HMM_run_times[i]) << ",";
@@ -455,16 +455,16 @@ void run_tests(bool debug = false) {
         outputFile << mean(hardEM_log_likelihood[i]) << ",";
         outputFile << stdDev(hardEM_log_likelihood[i]) << ",";
         outputFile << mean(hardEM_validation_error[i]) << ",";
-        outputFile << stdDev(hardEM_validation_error[i]) << "\n";
+        outputFile << stdDev(hardEM_validation_error[i]) << "\n\n";
     
-        outputFile << mean(MIP_run_times[i]) << ",";
+        /*outputFile << mean(MIP_run_times[i]) << ",";
         outputFile << stdDev(MIP_run_times[i]) << ",";
         outputFile << mean(MIP_error[i]) << ",";
         outputFile << stdDev(MIP_error[i]) << ",";
         outputFile << mean(MIP_log_likelihood[i]) << ",";
         outputFile << stdDev(MIP_log_likelihood[i]) << ",";
         outputFile << mean(MIP_validation_error[i]) << ",";
-        outputFile << stdDev(MIP_validation_error[i]) << "\n";
+        outputFile << stdDev(MIP_validation_error[i]) << "\n";*/
     }
 }
 
