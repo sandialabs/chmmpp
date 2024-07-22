@@ -16,9 +16,18 @@ public:
         return (count == numZeros);
     }
 
+    bool partial_oracle(std::vector<int> hid) {
+        size_t count = 0;
+        for(const auto& val: hid) {
+            if(!val) {
+                ++count;
+            }
+        }
+        return (count > numZeros);
+    }
+
     Constraint_Oracle_NumZeros(int _numZeros) {
         numZeros = _numZeros;
-        this->partial_oracle = false;
     }
 };
 

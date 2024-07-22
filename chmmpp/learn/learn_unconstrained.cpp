@@ -264,8 +264,8 @@ void learn_unconstrained(HMM& hmm, const std::vector<std::vector<int> >& obs)
         hmm.setA(A);
 
         if (not quiet) {
-            std::cout << "  Tolerance: " << tol << std::endl;
-            std::cout << "  Iteration: " << numIt << std::endl;
+            //std::cout << "  Tolerance: " << tol << std::endl;
+            //std::cout << "  Iteration: " << numIt << std::endl;
         }
 
         if (tol < convergence_tolerance) {

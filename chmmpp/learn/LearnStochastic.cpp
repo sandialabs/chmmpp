@@ -501,7 +501,7 @@ void LearnStochastic::learn(const std::vector<std::vector<int> > &obs, Options &
 {
     double convergence_tolerance = 10E-6;
     unsigned int C = 10E4;
-    unsigned int max_iterations = 1000;
+    unsigned int max_iterations = 100000000;
     unsigned int select = 0;
     unsigned int quiet = 1;
     process_options(options, convergence_tolerance, C, select, max_iterations, quiet);

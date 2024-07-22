@@ -19,7 +19,7 @@ void normalizeEps(std::vector<double> &myVec) {
 }
 
 void normalize(std::vector<double> &myVec) {
-    double eps = 1E-7;
+    double eps = 1E-100;
     double sum = 0.;
     for(auto &elem: myVec) { //We can't have 0 probabilities in S for the MIP because otherwise we may project into infeasible solutions
         if(std::fabs(elem) < eps) {
@@ -48,11 +48,11 @@ void learn_batch(HMM &hmm,
                 const Options& options) 
 {
     //TODO Make into options
-    const double convergence_tolerance = 10E-6;
+    const double convergence_tolerance = 1.E-6;
     const unsigned int max_iteration = 1000000;
     const unsigned int max_iteration_generator = 0;
     //TODO this doesn't work right now const int num_solutions = 100; //Assumes constant number of solutions each time 
-    const double convergeFactor = -1.;
+    const double convergeFactor = -1.; //Should be in [-1,-0.5)
 
     std::vector<std::vector<std::vector<std::vector<double>>>> gamma;
     std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> xi; 
@@ -63,18 +63,17 @@ void learn_batch(HMM &hmm,
 
     int numIt = 0;
 
-    std::vector<std::vector<double>> newA(H);
-    std::vector<std::vector<double>> newE(H);
-    std::vector<double> newS(H,0.);
-    for(auto &vec: newA) vec.resize(H,0.);
-    for(auto &vec: newE) vec.resize(O,0.);
+    std::vector<std::vector<double>> AStar(H);
+    std::vector<std::vector<double>> EStar(H);
+    std::vector<double> SStar(H,0.);
+    for(auto &vec: AStar) vec.resize(H,0.);
+    for(auto &vec: EStar) vec.resize(O,0.);
 
     while(true) {
         ++numIt;//==gamma.size();
         auto newHidden = generator(hmm, obs); //r,n,t
-        //std::cout << "TEST " << obs.size() << " " << obs[0].size() << std::endl;
 
-        /*for(size_t r = 0; r < obs.size(); ++r) {
+        /*for(size_t r = 0; r < newHidden.size(); ++r) {
             for(size_t n = 0; n < newHidden[r].size(); ++n) {
                 for(size_t t = 0; t < newHidden[r][n].size(); ++t) {
                     std::cout << newHidden[r][n][t];
@@ -84,95 +83,46 @@ void learn_batch(HMM &hmm,
             std::cout << std::endl;
         }*/
 
-        std::vector<std::vector<double>> newProbs(obs.size()); //r,n
+        const double xi = pow(numIt, convergeFactor);
+
+        std::vector<std::vector<long double>> p(obs.size()); //r,n
         for(size_t r = 0; r < obs.size(); ++r) { 
             for(size_t n = 0; n < newHidden[r].size(); ++n) {
-                newProbs[r].push_back(hmm.logProb(obs[r], newHidden[r][n]));
+                p[r].push_back(1);
             }
         }
 
-        //Generate xi and gamma
-        std::vector<std::vector<std::vector<double>>> gamma(R); //r, t, h
-        std::vector<std::vector<std::vector<std::vector<double>>>> xi(R); //r, t, h, g
-
-        for(size_t r = 0 ; r < R; ++r) {
-            gamma[r].resize(obs[r].size());
-            for(size_t t = 0; t < obs[r].size(); ++t) {
-                gamma[r][t].resize(H,0.);
-            }
-        }
-
-        for(size_t r = 0 ; r < R; ++r) {
-            xi[r].resize(obs[r].size()-1);
-            for(size_t t = 0; t < obs[r].size()-1; ++t) {
-                xi[r][t].resize(H);
-                for(size_t h = 0; h < H; ++h) {
-                    xi[r][t][h].resize(H,0.);
-                }
-            }
-        }
-        
-        for(size_t r = 0; r < R; ++r) {
-            for(size_t n = 0; n < newHidden[r].size(); ++n) {
-                for(size_t t = 0; t < obs[r].size(); ++t) {
-                    gamma[r][t][newHidden[r][n][t]] += newProbs[r][n];
-                    if(t < obs[r].size()-1) {
-                        xi[r][t][newHidden[r][n][t]][newHidden[r][n][t+1]] += newProbs[r][n];
-                    }
-                }
-            }
-        }
-
-        for(size_t r = 0; r < R; ++r) {
-            for(size_t t = 0; t < obs[r].size(); ++t) {
-                normalizeEps(gamma[r][t]);
-                for(size_t h = 0; h < H; ++h) {
-                    if(t < obs[r].size() - 1) {
-                        normalizeEps(xi[r][t][h]);
-                    }
-                }
-            }
-        }
-
-        //Translate into A,E,S
         for(size_t h = 0; h < H; ++h) {
-            newS[h] *= 1. - pow(numIt, convergeFactor); 
-            for(size_t g = 0; g < H; ++g) {
-                newA[h][g] *= (1. - pow(numIt, convergeFactor)); 
-            }
-            for(size_t o = 0; o < O; ++o) {
-                newE[h][o] *= (1. - pow(numIt, convergeFactor));  
-            }
-        }   
+            SStar[h] *= (1.-xi);
+            for(size_t h2 = 0; h2 < H; ++h2) AStar[h][h2] *= (1-xi);
+            for(size_t o = 0; o < O; ++o) EStar[h][o] *= (1-xi);
+        }
 
-        for(size_t r = 0; r < R; ++r) {
-            for(size_t h = 0; h < H; ++h) {
-                //newS[h] += pow(numIt, 1.)*(gamma[r][0][h] - newS[h]);
-                newS[h] += pow(numIt, convergeFactor)*gamma[r][0][h];
+        for(size_t r = 0; r < newHidden.size(); ++r) {
+            for(size_t n = 0; n < newHidden[r].size(); ++n) {
+                SStar[newHidden[r][n][0]] += p[r][n]*xi;
             }
+        }
 
-            for(size_t t = 0; t < obs[r].size(); ++t) {
-                for(size_t h = 0; h < H; ++h) {
-                    if(t < (obs[r].size() - 1)) {
-                        for(size_t g = 0; g < H; ++g) {
-                            //newA[h][g] += pow(numIt, 1.)*(xi[r][t][h][g] - newA[h][g]);
-                            newA[h][g] += pow(numIt, convergeFactor)*xi[r][t][h][g];
-                        }
-                    }
-
-                    for(size_t o = 0; o < O; ++o) {
-                        if(obs[r][t] == o) {
-                            //newE[h][o] += pow(numIt, 1.)*(gamma[r][t][h] - newE[h][o]);
-                            newE[h][o] += pow(numIt, convergeFactor)*gamma[r][t][h];
-                        }
-                    }
+        for(size_t r = 0; r < newHidden.size(); ++r) {
+            for(size_t n = 0; n < newHidden[r].size(); ++n) {
+                for(size_t t = 0; t < newHidden[r][n].size()-1; ++t) {
+                    AStar[newHidden[r][n][t]][newHidden[r][n][t+1]] += p[r][n]*xi;
                 }
             }
         }
 
-        auto normalizedA = newA;
-        auto normalizedE = newE;
-        auto normalizedS = newS;
+        for(size_t r = 0; r < newHidden.size(); ++r) {
+            for(size_t n = 0; n < newHidden[r].size(); ++n) {
+                for(size_t t = 0; t < newHidden[r][n].size(); ++t) {
+                    ++EStar[newHidden[r][n][t]][obs[r][t]] += p[r][n]*xi;
+                }
+            }
+        }
+
+        auto normalizedA = AStar;
+        auto normalizedE = EStar;
+        auto normalizedS = SStar;
 
         normalize(normalizedS);
         for(size_t h = 0; h < H; ++h) {
@@ -190,6 +140,8 @@ void learn_batch(HMM &hmm,
         hmm.setA(normalizedA);
         hmm.setE(normalizedE);
         hmm.setS(normalizedS);
+
+        //std::cout << std::scientific << numIt << " " << diff << std::endl;
 
         if((diff < convergence_tolerance) || (numIt > max_iteration)) {
             //Make all the 0 transitions epsilon transitions

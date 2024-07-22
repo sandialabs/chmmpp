@@ -294,7 +294,7 @@ void numZerosHMM::learn_numZeros(const std::vector<std::vector<int>> &obs)
     clear_option("convergence_tolerance");
     
 
-    unsigned int max_iterations = 1000;
+    unsigned int max_iterations = 100000000;
     get_option("max_iterations", max_iterations);
     clear_option("max_iterations");
 
